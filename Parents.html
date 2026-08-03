@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kanyadet School — Parent Portal</title>
+<link rel="icon" type="image/x-icon" href="./images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+/* ══════════════════════════════════════════
+   CSS VARIABLES — same palette as the Results Portal
+══════════════════════════════════════════ */
+:root {
+  --blue:#2980b9; --blue-dk:#1a5276; --blue-lt:#5dade2; --blue-glow:rgba(41,128,185,.35);
+  --orange:#e67e22; --orange-dk:#d35400; --gold:#f39c12;
+  --green:#27ae60; --green-dk:#1d8a4e; --red:#e74c3c; --red-dk:#c0392b;
+  --purple:#8e44ad; --teal:#16a085;
+  --radius-xl:24px; --radius-lg:18px; --radius-md:12px; --radius-sm:8px;
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+  --sidebar-w:250px;
+}
+[data-theme="dark"] {
+  --bg:#090f1a; --bg2:#0c1525; --surface:#111d2e; --surface2:#162438;
+  --surface3:#1c2e44; --border:rgba(41,128,185,.18); --border-strong:rgba(41,128,185,.4);
+  --text:#ddeeff; --text2:#7aaec9; --text3:#4a7a9b; --topbar:rgba(9,15,26,.9);
+  --sidebar-bg:#0a1422; --card-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+[data-theme="light"] {
+  --bg:linear-gradient(135deg,#eef0f2 0%,#f4f0e6 45%,#fbecc3 100%);
+  --bg2:#f7edd0; --surface:#ffffff; --surface2:#fdfaf2;
+  --surface3:#f8eed6; --border:rgba(211,164,55,.2); --border-strong:rgba(211,164,55,.45);
+  --text:#0c1e33; --text2:#5a5342; --text3:#a89b7a; --topbar:rgba(250,244,225,.88);
+  --sidebar-bg:#faf6ea; --card-shadow:0 4px 20px rgba(211,164,55,.14);
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+.mono{font-family:'JetBrains Mono',monospace;}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 8% 10%,rgba(41,128,185,.12) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 45% at 92% 90%,rgba(22,160,133,.08) 0%,transparent 60%);
+}
+[data-theme="light"] body::before{
+  opacity:.6;
+  background:radial-gradient(ellipse 55% 45% at 90% 88%,rgba(243,156,18,.18) 0%,transparent 65%),
+    radial-gradient(ellipse 45% 40% at 10% 8%,rgba(211,164,55,.08) 0%,transparent 60%);
+}
+button,input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ══════════════════════════════════════════
+   BOOT LOADER
+══════════════════════════════════════════ */
+#tp-loader{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .4s ease;}
+#tp-loader .tp-load-badge{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 10px 30px var(--blue-glow);animation:tpPulse 1.6s ease-in-out infinite;}
+@keyframes tpPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+#tp-loader .tp-load-txt{font-size:.78rem;font-weight:700;color:var(--text2);letter-spacing:.04em;}
+#tp-loader.hide{opacity:0;pointer-events:none;}
+
+/* ══════════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════════ */
+#tp-auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;}
+
+/* Decorative background blobs (mobile / narrow) */
+.tp-bg-blob{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+.tp-bg-blob-1{width:460px;height:460px;top:-160px;left:-170px;background:linear-gradient(135deg,var(--blue-dk),var(--blue));opacity:.9;}
+.tp-bg-blob-2{width:560px;height:560px;bottom:-260px;right:-220px;background:linear-gradient(135deg,var(--blue-lt),var(--blue));opacity:.28;}
+.tp-bg-dot{position:fixed;border-radius:50%;pointer-events:none;z-index:0;}
+.tp-bg-dot-1{width:26px;height:26px;top:64px;left:76px;background:var(--blue-dk);}
+.tp-bg-dot-2{width:22px;height:22px;bottom:64px;right:96px;background:var(--blue-lt);opacity:.8;}
+@media(max-width:900px){.tp-bg-blob,.tp-bg-dot{display:none;}}
+
+/* ── DESKTOP / LAPTOP — full-screen split layout with irregular wave divider ── */
+.tp-side-panel{display:none;}
+.tp-divider-wave{display:none;}
+@media(min-width:901px){
+  #tp-auth-screen{justify-content:flex-start;align-items:stretch;padding:0;--tp-panel-w:min(42%,600px);--tp-wave-amp:72px;}
+  .tp-side-panel{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    width:var(--tp-panel-w);flex-shrink:0;min-height:100vh;
+    position:relative;overflow:hidden;padding:4rem 3rem;color:#fff;
+  }
+  .tp-side-panel::before{
+    content:'';position:absolute;top:0;bottom:0;left:0;right:var(--tp-wave-amp);
+    background:linear-gradient(160deg,var(--blue-dk) 0%,#132a45 55%,#0a1c30 100%);
+  }
+  .tp-side-panel .tsp-blob{position:absolute;border-radius:50%;pointer-events:none;}
+  .tp-side-panel .tsp-blob-1{width:360px;height:360px;top:-130px;right:-130px;background:rgba(255,255,255,.055);}
+  .tp-side-panel .tsp-blob-2{width:280px;height:280px;bottom:-110px;left:-90px;background:rgba(93,173,226,.18);}
+  .tp-side-panel .tsp-dot{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);}
+  .tp-side-panel .tsp-dot-1{width:14px;height:14px;top:16%;right:20%;}
+  .tp-side-panel .tsp-dot-2{width:10px;height:10px;bottom:22%;left:14%;background:var(--blue-lt);opacity:.9;}
+  .tp-side-panel .tsp-illustration{position:relative;z-index:1;width:100%;max-width:320px;margin:0 auto 2.4rem;}
+  .tp-side-panel .tsp-illustration svg{width:100%;height:auto;display:block;}
+  .tp-side-panel .tsp-brand{position:relative;z-index:1;text-align:center;}
+  .tp-side-panel .tsp-brand-name{font-size:1.5rem;font-weight:900;margin-bottom:.6rem;letter-spacing:-.01em;}
+  .tp-side-panel .tsp-brand-tag{font-size:.88rem;color:rgba(255,255,255,.72);font-weight:500;line-height:1.55;max-width:320px;margin:0 auto;min-height:2.7em;transition:opacity .35s ease;}
+  .tp-side-panel .tsp-brand-tag.fading{opacity:0;}
+  .tp-side-panel .tsp-tip-dots{display:flex;justify-content:center;gap:.4rem;margin-top:1.1rem;position:relative;z-index:1;}
+  .tp-side-panel .tsp-tip-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .25s,width .25s;}
+  .tp-side-panel .tsp-tip-dot.active{background:var(--blue-lt);width:18px;border-radius:3px;}
+
+  /* Irregular wave divider — bridges the gap left by ::before, dipping in and
+     bulging out so the seam reads as an organic edge, not a straight line. */
+  .tp-divider-wave{display:block;position:absolute;top:0;bottom:0;left:calc(var(--tp-panel-w) - var(--tp-wave-amp));width:calc(var(--tp-wave-amp) * 2);z-index:2;pointer-events:none;}
+  .tp-divider-wave svg{width:100%;height:100%;display:block;}
+
+  .tp-cards-wrap{flex:1;min-height:100vh;padding:40px 4vw;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;}
+  .tp-bg-blob,.tp-bg-dot{display:none;}
+  .tp-auth-card{box-shadow:none;border:none;background:transparent;}
+  #tp-theme-toggle-auth{top:26px;right:30px;}
+}
+.tp-auth-card{
+  position:relative;width:100%;max-width:408px;
+  background:var(--surface);border-radius:26px;
+  border:1px solid var(--border);
+  box-shadow:0 30px 90px rgba(10,30,60,.28),0 0 0 1px rgba(41,128,185,.06);
+  padding:2.1rem 2rem 1.9rem;
+  max-height:calc(100vh - 40px);overflow-y:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+  animation:tpCardIn .35s cubic-bezier(.34,1.35,.64,1);
+}
+.tp-auth-card::-webkit-scrollbar{display:none;}
+@keyframes tpCardIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.tp-illustration{position:relative;width:100%;height:118px;display:flex;align-items:center;justify-content:center;margin-bottom:.6rem;}
+.tp-illustration svg{width:180px;height:118px;}
+.tp-logo-badge{position:absolute;bottom:-6px;right:calc(50% - 100px);width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 8px 22px var(--blue-glow);border:3px solid var(--surface);}
+
+.tp-heading{font-size:1.55rem;font-weight:900;color:var(--text);margin-bottom:.2rem;letter-spacing:-.01em;text-align:center;}
+.tp-subtitle{color:var(--text2);font-size:.83rem;margin-bottom:1.4rem;font-weight:500;text-align:center;}
+
+.tp-tabs{display:flex;background:var(--surface2);border-radius:14px;padding:4px;margin-bottom:1.1rem;gap:3px;}
+.tp-tab{flex:1;border:none;background:transparent;border-radius:11px;padding:.6rem .5rem;font-size:.79rem;font-weight:700;color:var(--text2);cursor:pointer;transition:var(--transition);}
+.tp-tab.active{background:var(--blue-dk);color:#fff;box-shadow:0 4px 14px var(--blue-glow);}
+.tp-tab:not(.active):hover{color:var(--text);}
+
+.tp-field{width:100%;margin-bottom:.6rem;text-align:left;position:relative;}
+.tp-field input,.tp-field select{width:100%;padding:.8rem .95rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.85rem;outline:none;transition:border-color .15s;}
+.tp-field input:focus,.tp-field select:focus{border-color:var(--blue-lt);}
+.tp-field-icon input{padding-left:2.7rem !important;}
+.tp-field-icon>svg{position:absolute;left:.95rem;top:.85rem;width:16px;height:16px;color:var(--text3);pointer-events:none;}
+.tp-float-label{position:absolute;left:2.7rem;top:.85rem;font-size:.85rem;color:var(--text3);pointer-events:none;transition:var(--transition);background:transparent;}
+.tp-field-icon input:focus+.tp-float-label,.tp-field-icon input:not(:placeholder-shown)+.tp-float-label{top:-.5rem;left:.7rem;font-size:.65rem;font-weight:700;background:var(--surface2);padding:0 5px;border-radius:6px;}
+.tp-field-icon input:focus+.tp-float-label{color:var(--blue-lt);}
+
+.tp-row2{display:flex;gap:.55rem;}
+
+.tp-submit-btn{width:100%;padding:.9rem 1.5rem;border:none;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));color:#fff;font-size:.88rem;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(20,40,70,.35);transition:var(--transition);margin-top:.35rem;}
+.tp-submit-btn:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(20,40,70,.42);}
+.tp-submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.tp-submit-btn:active{transform:translateY(0);}
+
+.tp-err{display:none;background:rgba(231,76,60,.09);border:1px solid rgba(231,76,60,.25);color:var(--red-dk);font-size:.76rem;font-weight:600;padding:.6rem .8rem;border-radius:12px;margin-bottom:.7rem;}
+.tp-err.on{display:block;}
+
+.tp-pwd-strength{margin:-.25rem 0 .65rem;}
+.tp-pwd-strength-track{width:100%;height:5px;border-radius:3px;background:var(--surface3);overflow:hidden;}
+.tp-pwd-strength-track span{display:block;height:100%;width:0%;border-radius:3px;transition:width .25s,background .25s;}
+.tp-pwd-strength-label{font-size:.68rem;font-weight:700;color:var(--text3);margin-top:.3rem;}
+
+.tp-switch-line{text-align:center;font-size:.79rem;color:var(--text2);margin-top:1rem;}
+.tp-switch-line a{color:var(--blue);font-weight:700;text-decoration:none;cursor:pointer;}
+.tp-switch-line a:hover{text-decoration:underline;}
+
+.tp-theme-toggle{position:fixed;top:18px;right:18px;z-index:20;width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:var(--card-shadow);}
+
+/* ══════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════ */
+.tp-shell{display:none;min-height:100vh;position:relative;z-index:1;}
+.tp-sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:600;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.tp-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.tp-brand-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px var(--blue-glow);flex-shrink:0;}
+.tp-brand-name{font-size:14px;font-weight:900;color:var(--text);}
+.tp-brand-role{font-size:10px;color:var(--blue-lt);font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+
+.tp-nav{padding:16px 12px;flex:1;overflow-y:auto;}
+.tp-nav-label{font-size:9px;font-weight:800;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;padding:0 8px;margin:14px 0 6px;}
+.tp-nav-label:first-child{margin-top:0;}
+.tp-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-md);cursor:pointer;transition:var(--transition);font-size:13px;font-weight:600;color:var(--text2);margin-bottom:2px;}
+.tp-nav-item:hover{background:rgba(41,128,185,.1);color:var(--text);}
+.tp-nav-item.active{background:linear-gradient(135deg,rgba(41,128,185,.2),rgba(41,128,185,.08));color:var(--blue-lt);border:1px solid rgba(41,128,185,.25);}
+.tp-nav-item .tp-nav-icon{font-size:16px;flex-shrink:0;width:18px;text-align:center;}
+.tp-nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;}
+
+.tp-sidebar-footer{padding:14px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.tp-av{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--purple),#6c3483);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;}
+.tp-sidebar-footer .tp-name{font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;}
+.tp-sidebar-footer .tp-role{font-size:10px;color:var(--text2);}
+.tp-logout-btn{margin-left:auto;width:30px;height:30px;border-radius:9px;border:none;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);flex-shrink:0;}
+.tp-logout-btn:hover{background:rgba(231,76,60,.12);color:var(--red);}
+
+.tp-main{margin-left:var(--sidebar-w);min-height:100vh;transition:margin-left .3s cubic-bezier(.4,0,.2,1);}
+.tp-topbar{position:sticky;top:0;z-index:100;background:var(--topbar);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.tp-topbar-title{font-size:1.05rem;font-weight:900;color:var(--text);}
+.tp-topbar-sub{font-size:.72rem;color:var(--text2);font-weight:600;margin-top:1px;}
+.tp-topbar-right{display:flex;align-items:center;gap:10px;}
+.tp-icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:var(--transition);}
+.tp-icon-btn:hover{border-color:var(--blue-lt);color:var(--blue-lt);}
+.tp-hamburger{display:none;}
+
+.tp-content{padding:24px 26px 60px;}
+.tp-view{display:none;animation:tpFadeUp .35s ease;}
+.tp-view.active{display:block;}
+@keyframes tpFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Cards / shared */
+.tp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--card-shadow);}
+.tp-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.tp-section-hdr h3{font-size:15px;font-weight:800;color:var(--text);}
+.tp-section-hdr p{font-size:.76rem;color:var(--text2);font-weight:500;margin-top:2px;}
+
+/* Today view — greeting */
+.tp-greet{margin-bottom:20px;}
+.tp-greet h2{font-size:1.5rem;font-weight:900;color:var(--text);letter-spacing:-.01em;}
+.tp-greet .tp-greet-sub{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:.83rem;color:var(--text2);font-weight:600;}
+.tp-clock{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:700;}
+
+.tp-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px;}
+.tp-stat-card{padding:18px;position:relative;overflow:hidden;}
+.tp-stat-card .tp-stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;}
+.tp-stat-card .tp-stat-val{font-size:1.6rem;font-weight:900;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.tp-stat-card .tp-stat-lbl{font-size:.72rem;color:var(--text2);font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.03em;}
+
+.tp-2col{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;}
+@media(max-width:900px){.tp-2col{grid-template-columns:1fr;}}
+
+/* Signature: the school-day rail */
+.tp-day-rail{padding:20px;}
+.tp-period{display:flex;gap:14px;padding:12px 6px;border-radius:14px;position:relative;transition:var(--transition);}
+.tp-period+.tp-period{margin-top:2px;}
+.tp-period-time{width:64px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--text3);padding-top:2px;text-align:right;}
+.tp-period-rail{width:2px;flex-shrink:0;background:var(--border);position:relative;}
+.tp-period-dot{position:absolute;left:-4px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--border-strong);border:2px solid var(--surface);}
+.tp-period-body{flex:1;padding-bottom:6px;}
+.tp-period-subj{font-size:.86rem;font-weight:800;color:var(--text);}
+.tp-period-class{font-size:.73rem;color:var(--text2);font-weight:600;}
+.tp-period.now{background:linear-gradient(90deg,rgba(41,128,185,.12),transparent);}
+.tp-period.now .tp-period-dot{background:var(--blue);box-shadow:0 0 0 4px var(--blue-glow);animation:tpDotPulse 2s ease-in-out infinite;}
+.tp-period.now .tp-period-time{color:var(--blue);}
+.tp-period.now .tp-period-subj{color:var(--blue-dk);}
+[data-theme="dark"] .tp-period.now .tp-period-subj{color:var(--blue-lt);}
+@keyframes tpDotPulse{0%,100%{box-shadow:0 0 0 4px var(--blue-glow)}50%{box-shadow:0 0 0 8px transparent}}
+.tp-period.done{opacity:.45;}
+.tp-period-tag{font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:8px;background:var(--blue);color:#fff;margin-left:auto;align-self:flex-start;}
+.tp-period.done .tp-period-tag{background:var(--surface3);color:var(--text3);}
+
+/* Grading donuts */
+.tp-donut-wrap{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.tp-donut-row{display:flex;align-items:center;gap:14px;}
+.tp-donut{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+.tp-donut::before{content:'';position:absolute;inset:6px;border-radius:50%;background:var(--surface);}
+.tp-donut span{position:relative;font-size:.68rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--text);}
+.tp-donut-info .tp-donut-title{font-size:.82rem;font-weight:800;color:var(--text);}
+.tp-donut-info .tp-donut-sub{font-size:.71rem;color:var(--text2);font-weight:600;}
+.tp-empty{padding:26px 20px;text-align:center;color:var(--text2);font-size:.82rem;font-weight:600;}
+
+/* Gradebook */
+.tp-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.tp-toolbar select,.tp-toolbar input[type=text]{padding:.65rem .9rem;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.8rem;outline:none;}
+.tp-toolbar select:focus,.tp-toolbar input:focus{border-color:var(--blue-lt);}
+.tp-subject-chip{background:linear-gradient(135deg,var(--gold),var(--orange));color:#fff;font-size:.72rem;font-weight:800;padding:.5rem .9rem;border-radius:12px;display:flex;align-items:center;gap:6px;}
+.tp-spacer{flex:1;}
+.tp-btn{padding:.65rem 1.1rem;border-radius:12px;border:none;font-size:.8rem;font-weight:700;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:6px;}
+.tp-btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-dk));color:#fff;box-shadow:0 8px 20px var(--blue-glow);}
+.tp-btn-primary:hover{transform:translateY(-1px);}
+.tp-btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.tp-btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text2);}
+.tp-btn-outline:hover{border-color:var(--blue-lt);color:var(--blue-lt);}
+
+.tp-gb-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.tp-gb-pill{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:.5rem .9rem;font-size:.74rem;font-weight:700;color:var(--text2);}
+.tp-gb-pill b{color:var(--text);font-family:'JetBrains Mono',monospace;}
+
+.tp-table-wrap{overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--border);}
+table.tp-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+table.tp-table thead th{background:var(--surface2);color:var(--text2);font-weight:800;text-transform:uppercase;font-size:.66rem;letter-spacing:.05em;padding:10px 14px;text-align:left;position:sticky;top:0;}
+table.tp-table tbody td{padding:9px 14px;border-top:1px solid var(--border);color:var(--text);}
+table.tp-table tbody tr:hover{background:var(--surface2);}
+table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
+.tp-score-input{width:70px;padding:.4rem .55rem;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:700;text-align:center;outline:none;}
+.tp-score-input:focus{border-color:var(--blue-lt);}
+.tp-score-badge{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:8px;}
+.tp-score-badge.filled{background:rgba(39,174,96,.14);color:var(--green-dk);}
+.tp-score-badge.empty{background:rgba(231,76,60,.1);color:var(--red-dk);}
+
+/* Student cards */
+.tp-student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.tp-student-card{padding:14px;display:flex;align-items:center;gap:10px;}
+.tp-s-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--teal),#0e7a67);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.tp-s-name{font-size:.82rem;font-weight:700;color:var(--text);}
+.tp-s-upi{font-size:.68rem;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.tp-s-score{margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;}
+
+/* Timetable */
+.tp-tt-grid{display:grid;grid-template-columns:70px repeat(5,1fr);gap:6px;}
+.tp-tt-head{font-size:.68rem;font-weight:800;color:var(--text2);text-align:center;padding:6px 0;text-transform:uppercase;letter-spacing:.04em;}
+.tp-tt-time{font-size:.66rem;font-weight:700;color:var(--text3);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
+.tp-tt-cell{background:var(--surface2);border-radius:9px;padding:7px 6px;font-size:.68rem;text-align:center;color:var(--text2);font-weight:700;min-height:38px;display:flex;align-items:center;justify-content:center;}
+.tp-tt-cell.subj{background:rgba(41,128,185,.1);color:var(--blue-dk);}
+[data-theme="dark"] .tp-tt-cell.subj{color:var(--blue-lt);}
+.tp-tt-cell.break{background:rgba(243,156,18,.1);color:var(--orange-dk);}
+
+/* Announcements */
+.tp-announce-form{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.tp-announce-form input,.tp-announce-form textarea,.tp-announce-form select{padding:.7rem .9rem;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.83rem;outline:none;resize:vertical;}
+.tp-announce-form textarea{min-height:70px;}
+.tp-announce-list{display:flex;flex-direction:column;gap:10px;}
+.tp-announce-item{padding:14px 16px;}
+.tp-announce-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.tp-announce-title{font-size:.86rem;font-weight:800;color:var(--text);}
+.tp-announce-tag{font-size:.62rem;font-weight:800;background:var(--surface2);color:var(--text2);padding:2px 8px;border-radius:8px;}
+.tp-announce-msg{font-size:.8rem;color:var(--text2);font-weight:500;line-height:1.5;}
+.tp-announce-meta{font-size:.68rem;color:var(--text3);margin-top:6px;font-weight:600;}
+.tp-announce-del{margin-left:auto;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;}
+.tp-announce-del:hover{color:var(--red);}
+
+/* Profile */
+.tp-profile-hdr{display:flex;align-items:center;gap:16px;padding:22px;margin-bottom:16px;}
+.tp-profile-av{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#6c3483);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;}
+.tp-profile-name{font-size:1.15rem;font-weight:900;color:var(--text);}
+.tp-profile-email{font-size:.78rem;color:var(--text2);font-weight:600;}
+.tp-profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:20px;}
+.tp-pf-field label{font-size:.68rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+.tp-pf-field input{width:100%;margin-top:5px;padding:.65rem .8rem;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.82rem;outline:none;}
+.tp-pf-field input:focus{border-color:var(--blue-lt);}
+.tp-pf-field input:disabled{opacity:.65;}
+
+/* Toast */
+#tp-toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.tp-toast{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--blue);box-shadow:0 12px 30px rgba(0,0,0,.18);border-radius:12px;padding:12px 16px;font-size:.8rem;font-weight:600;color:var(--text);max-width:320px;animation:tpToastIn .25s ease;}
+.tp-toast.success{border-left-color:var(--green);}
+.tp-toast.error{border-left-color:var(--red);}
+@keyframes tpToastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* Responsive */
+@media(max-width:860px){
+  .tp-sidebar{transform:translateX(-100%);}
+  .tp-sidebar.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,.3);}
+  .tp-main{margin-left:0;}
+  .tp-hamburger{display:flex;}
+  .tp-content{padding:18px 14px 60px;}
+  .tp-topbar{padding:12px 14px;}
+}
+@media(max-width:520px){
+  .tp-row2{flex-direction:column;}
+  .tp-tt-grid{grid-template-columns:50px repeat(5,minmax(46px,1fr));font-size:.6rem;overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ BOOT LOADER ══════════════ -->
+<div id="tp-loader">
+  <div class="tp-load-badge">🎓</div>
+  <div class="tp-load-txt">Loading Parent Portal…</div>
+</div>
+
+<button class="tp-theme-toggle" id="tp-theme-toggle-auth" title="Toggle theme">🌙</button>
+
+<!-- ══════════════ AUTH SCREEN ══════════════ -->
+<div id="tp-auth-screen">
+
+  <!-- Decorative background blobs (mobile / narrow) -->
+  <div class="tp-bg-blob tp-bg-blob-1"></div>
+  <div class="tp-bg-blob tp-bg-blob-2"></div>
+  <div class="tp-bg-dot tp-bg-dot-1"></div>
+  <div class="tp-bg-dot tp-bg-dot-2"></div>
+
+  <!-- ── DESKTOP / LAPTOP SIDE PANEL — hidden on mobile ── -->
+  <div class="tp-side-panel" aria-hidden="true">
+    <div class="tsp-blob tsp-blob-1"></div>
+    <div class="tsp-blob tsp-blob-2"></div>
+    <div class="tsp-dot tsp-dot-1"></div>
+    <div class="tsp-dot tsp-dot-2"></div>
+    <div class="tsp-illustration">
+      <svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="160" cy="130" r="112" fill="rgba(255,255,255,.06)"/>
+        <!-- parent -->
+        <g transform="translate(118,150)">
+          <circle cx="0" cy="-52" r="20" fill="rgba(255,255,255,.22)"/>
+          <path d="M-26 30 Q-26 -22 0 -22 Q26 -22 26 30 Z" fill="rgba(255,255,255,.14)" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        </g>
+        <!-- child -->
+        <g transform="translate(186,168)">
+          <circle cx="0" cy="-34" r="13" fill="var(--blue-lt)" opacity=".8"/>
+          <path d="M-17 20 Q-17 -14 0 -14 Q17 -14 17 20 Z" fill="var(--blue-lt)" opacity=".55" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        </g>
+        <!-- joined hands -->
+        <path d="M138 152 Q160 168 168 154" stroke="rgba(255,255,255,.55)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- report card held up -->
+        <g transform="translate(160,72)">
+          <rect x="-46" y="-38" width="92" height="66" rx="10" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+          <path d="M-30 -18 h50 M-30 -4 h60 M-30 10 h34" stroke="var(--blue-lt)" stroke-width="3.5" stroke-linecap="round" opacity=".65"/>
+          <circle cx="26" cy="18" r="13" fill="#7fd8b8"/>
+          <path d="M20 18 l4 5 l8 -9" stroke="#0a1c30" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <circle cx="270" cy="70" r="14" fill="var(--blue-lt)" opacity=".35"/>
+        <circle cx="48" cy="212" r="11" fill="rgba(255,255,255,.2)"/>
+        <path d="M250 210 l14 -14 m0 14 l-14 -14" stroke="rgba(255,255,255,.5)" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="tsp-brand">
+      <div class="tsp-brand-name">Kanyadet PRI &amp; Junior School</div>
+      <div class="tsp-brand-tag" id="tsp-tip-text">Your child's grades, progress and school updates — all in one secure parent portal.</div>
+      <div class="tsp-tip-dots" id="tsp-tip-dots"></div>
+    </div>
+  </div>
+
+  <!-- ── IRREGULAR WAVE DIVIDER — replaces the straight seam between panel and content on desktop ── -->
+  <div class="tp-divider-wave" aria-hidden="true">
+    <svg viewBox="0 0 144 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="tpWaveGrad" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%"  stop-color="#1a5276"/>
+          <stop offset="55%" stop-color="#132a45"/>
+          <stop offset="100%" stop-color="#0a1c30"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#tpWaveGrad)" d="M88,0 L103.7,16 L101.8,32 L96.3,48 L100.9,64 L114.1,80 L120.3,96 L105.6,112 L73.2,128 L41.4,144 L27.7,160 L33.5,176 L44.2,192 L45.2,208 L37.4,224 L35.5,240 L52.7,256 L85.5,272 L115.6,288 L125.5,304 L114.7,320 L98.4,336 L91.9,352 L95.3,368 L94.4,384 L76.6,400 L45.2,416 L18.6,432 L13.5,448 L30,464 L51.8,480 L63,496 L62.6,512 L64.4,528 L81,544 L109.2,560 L131,576 L130.5,592 L108.4,608 L81.8,624 L67.4,640 L66.6,656 L65.7,672 L52.1,688 L28.6,704 L12.3,720 L18.5,736 L45.4,752 L75.5,768 L91.3,784 L91.5,800 L0,800 L0,0 Z"/>
+    </svg>
+  </div>
+
+  <div class="tp-cards-wrap">
+  <div class="tp-auth-card">
+    <div class="tp-illustration">
+      <svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg">
+        <!-- report card + heart, parent-portal signature illustration -->
+        <rect x="46" y="14" width="128" height="88" rx="10" fill="var(--surface3)" stroke="var(--border-strong)" stroke-width="2"/>
+        <path d="M64 36 h60 M64 50 h84 M64 64 h44" stroke="var(--blue-lt)" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+        <circle cx="146" cy="80" r="15" fill="var(--green)" opacity=".85"/>
+        <path d="M139 80 l5 6 l10 -11" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="24" y="110" width="172" height="8" rx="4" fill="var(--border-strong)"/>
+        <path d="M92 132 c-10 -12 -30 -6 -30 8 c0 12 20 20 30 28 c10 -8 30 -16 30 -28 c0 -14 -20 -20 -30 -8z" fill="var(--red)" opacity=".22"/>
+        <circle cx="188" cy="28" r="10" fill="var(--gold)" opacity=".35"/>
+        <circle cx="18" cy="128" r="9" fill="var(--blue-dk)" opacity=".22"/>
+      </svg>
+      <div class="tp-logo-badge">🎓</div>
+    </div>
+
+    <div class="tp-heading" id="tp-auth-heading">Parent Sign In</div>
+    <div class="tp-subtitle" id="tp-auth-subtitle">See your child's grades, attendance and school updates</div>
+
+    <div class="tp-tabs" role="tablist">
+      <button type="button" class="tp-tab active" id="tp-tab-signin">Sign In</button>
+      <button type="button" class="tp-tab" id="tp-tab-signup">Create Account</button>
+    </div>
+
+    <div class="tp-err" id="tp-auth-err"></div>
+
+    <div id="tp-signup-extra" style="display:none">
+      <div class="tp-row2">
+        <div class="tp-field tp-field-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <input type="text" id="tp-fname" placeholder=" " autocomplete="given-name">
+          <label class="tp-float-label" for="tp-fname">First name</label>
+        </div>
+        <div class="tp-field tp-field-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <input type="text" id="tp-lname" placeholder=" " autocomplete="family-name">
+          <label class="tp-float-label" for="tp-lname">Last name</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="tp-field tp-field-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <input type="email" id="tp-email" placeholder=" " autocomplete="username">
+      <label class="tp-float-label" for="tp-email">Email address</label>
+    </div>
+
+    <div id="tp-signup-extra2" style="display:none">
+      <div class="tp-field tp-field-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h2.28a1 1 0 01.98.8l1.06 4.6a1 1 0 01-.5 1.11l-1.86 1a12 12 0 006.53 6.53l1-1.86a1 1 0 011.11-.5l4.6 1.06a1 1 0 01.8.98V19a2 2 0 01-2 2h-1C9.72 21 3 14.28 3 6V5z"/></svg>
+        <input type="tel" id="tp-phone" placeholder=" " autocomplete="tel">
+        <label class="tp-float-label" for="tp-phone">Phone number</label>
+      </div>
+      <div class="tp-field">
+        <select id="tp-relationship">
+          <option value="Parent">I am the Parent</option>
+          <option value="Guardian">I am the Guardian</option>
+          <option value="Other">Other relation</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tp-field tp-field-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      <input type="password" id="tp-password" placeholder=" " autocomplete="current-password">
+      <label class="tp-float-label" for="tp-password">Password</label>
+    </div>
+
+    <div class="tp-pwd-strength" id="tp-pwd-strength" style="display:none">
+      <div class="tp-pwd-strength-track"><span id="tp-pwd-strength-fill"></span></div>
+      <div class="tp-pwd-strength-label" id="tp-pwd-strength-label">&nbsp;</div>
+    </div>
+
+    <div class="tp-field tp-field-icon" id="tp-confirm-row" style="display:none">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      <input type="password" id="tp-confirm" placeholder=" " autocomplete="new-password">
+      <label class="tp-float-label" for="tp-confirm">Confirm password</label>
+    </div>
+
+    <button type="button" class="tp-submit-btn" id="tp-submit-btn">Sign In</button>
+
+    <div class="tp-switch-line" id="tp-forgot-line">
+      <a id="tp-forgot-link">Forgot password?</a>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div class="tp-shell" id="tp-shell">
+
+  <aside class="tp-sidebar" id="tp-sidebar">
+    <div class="tp-brand">
+      <div class="tp-brand-icon">🏫</div>
+      <div>
+        <div class="tp-brand-name">Kanyadet School</div>
+        <div class="tp-brand-role">Parent Portal</div>
+      </div>
+    </div>
+    <nav class="tp-nav">
+      <div class="tp-nav-label">Overview</div>
+      <div class="tp-nav-item active" data-view="today"><span class="tp-nav-icon">🏠</span> Overview</div>
+      <div class="tp-nav-label">Your Child</div>
+      <div class="tp-nav-item" data-view="gradebook"><span class="tp-nav-icon">📊</span> Grades</div>
+      <div class="tp-nav-item" data-view="students"><span class="tp-nav-icon">🗓️</span> Attendance</div>
+      <div class="tp-nav-label">School</div>
+      <div class="tp-nav-item" data-view="announcements"><span class="tp-nav-icon">📣</span> Announcements</div>
+      <div class="tp-nav-item" data-view="profile"><span class="tp-nav-icon">👤</span> Profile</div>
+    </nav>
+    <div class="tp-sidebar-footer">
+      <div class="tp-av" id="tp-sidebar-av">P</div>
+      <div style="min-width:0">
+        <div class="tp-name" id="tp-sidebar-name">Parent</div>
+        <div class="tp-role" id="tp-sidebar-role">Standard access</div>
+      </div>
+      <button class="tp-logout-btn" id="tp-logout-btn" title="Sign out">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="tp-main">
+    <div class="tp-topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="tp-icon-btn tp-hamburger" id="tp-hamburger-btn">☰</button>
+        <div>
+          <div class="tp-topbar-title" id="tp-topbar-title">Today</div>
+          <div class="tp-topbar-sub" id="tp-topbar-sub">—</div>
+        </div>
+      </div>
+      <div class="tp-topbar-right">
+        <button class="tp-icon-btn" id="tp-theme-toggle-app" title="Toggle theme">🌙</button>
+      </div>
+    </div>
+
+    <div class="tp-content">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="tp-view active" id="view-today">
+        <div class="tp-greet">
+          <h2 id="tp-greeting">Good day 👋</h2>
+          <div class="tp-greet-sub"><span id="tp-today-date">—</span> · <span class="tp-clock" id="tp-clock">--:--:--</span></div>
+        </div>
+
+        <div id="tp-child-switcher" class="tp-toolbar" style="display:none;margin-bottom:18px;"></div>
+
+        <div id="tp-no-child-card" class="tp-card" style="display:none;padding:22px;margin-bottom:20px;">
+          <div class="tp-section-hdr"><h3>Link your child</h3><p>Add your child using their admission details to see their grades</p></div>
+          <div class="tp-row2" style="margin-bottom:.6rem;">
+            <div class="tp-field"><input type="text" id="add-child-upi" placeholder="Child's UPI / Admission No."></div>
+            <div class="tp-field"><input type="text" id="add-child-name" placeholder="Child's full name (as on record)"></div>
+          </div>
+          <button class="tp-btn tp-btn-primary" id="add-child-btn">➕ Link child</button>
+          <div class="tp-err" id="add-child-err" style="margin-top:.8rem;"></div>
+        </div>
+
+        <div id="tp-overview-body" style="display:none;">
+          <div class="tp-stat-grid">
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(142,68,173,.12);color:var(--purple);">📊</div>
+              <div class="tp-stat-val" id="stat-avg">—</div>
+              <div class="tp-stat-lbl">Overall average</div>
+            </div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(39,174,96,.12);color:var(--green-dk);">🏆</div>
+              <div class="tp-stat-val" id="stat-best" style="font-size:1.05rem;">—</div>
+              <div class="tp-stat-lbl">Strongest subject</div>
+            </div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(41,128,185,.12);color:var(--blue-dk);">✅</div>
+              <div class="tp-stat-val" id="stat-done">—</div>
+              <div class="tp-stat-lbl">Subjects scored</div>
+            </div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(243,156,18,.12);color:var(--orange-dk);">🎓</div>
+              <div class="tp-stat-val" id="stat-class" style="font-size:1.05rem;">—</div>
+              <div class="tp-stat-lbl">Class / exam</div>
+            </div>
+          </div>
+
+          <div class="tp-2col">
+            <div class="tp-card tp-day-rail">
+              <div class="tp-section-hdr"><h3>Report Card at a Glance</h3><p>Score vs. class average, per subject</p></div>
+              <div id="tp-report-bars"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div class="tp-card tp-profile-hdr" style="padding:18px;">
+                <div class="tp-profile-av" id="child-avatar">?</div>
+                <div>
+                  <div class="tp-profile-name" id="child-name" style="font-size:1rem;">—</div>
+                  <div class="tp-profile-email" id="child-upi">—</div>
+                </div>
+              </div>
+              <div class="tp-card tp-donut-wrap" style="padding:18px;">
+                <div class="tp-section-hdr" style="margin-bottom:8px;"><h3>Latest Announcement</h3></div>
+                <div id="tp-latest-announce" class="tp-empty" style="padding:6px 0;">Nothing posted yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GRADES ── -->
+      <div class="tp-view" id="view-gradebook">
+        <div class="tp-section-hdr">
+          <div><h3>Grades</h3><p id="gr-sub">Full subject breakdown for your child</p></div>
+        </div>
+        <div id="gb-table-holder"></div>
+      </div>
+
+      <!-- ── ATTENDANCE ── -->
+      <div class="tp-view" id="view-students">
+        <div class="tp-section-hdr">
+          <div><h3>Attendance</h3><p id="st-sub">Attendance records for your child</p></div>
+        </div>
+        <div id="st-grid"></div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS ── -->
+      <div class="tp-view" id="view-announcements">
+        <div class="tp-section-hdr">
+          <div><h3>Announcements</h3><p>Updates from the school and your child's teachers</p></div>
+        </div>
+        <div class="tp-announce-list" id="an-list"></div>
+      </div>
+
+      <!-- ── PROFILE ── -->
+      <div class="tp-view" id="view-profile">
+        <div class="tp-card tp-profile-hdr">
+          <div class="tp-profile-av" id="pf-avatar">P</div>
+          <div>
+            <div class="tp-profile-name" id="pf-name">—</div>
+            <div class="tp-profile-email" id="pf-email">—</div>
+          </div>
+        </div>
+        <div class="tp-card tp-profile-grid">
+          <div class="tp-pf-field"><label>First name</label><input type="text" id="pf-fname"></div>
+          <div class="tp-pf-field"><label>Last name</label><input type="text" id="pf-lname"></div>
+          <div class="tp-pf-field"><label>Phone number</label><input type="text" id="pf-phone"></div>
+          <div class="tp-pf-field"><label>Relationship</label>
+            <select id="pf-relationship" style="width:100%;margin-top:5px;padding:.65rem .8rem;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.82rem;">
+              <option value="Parent">Parent</option>
+              <option value="Guardian">Guardian</option>
+              <option value="Other">Other relation</option>
+            </select>
+          </div>
+          <div class="tp-pf-field"><label>Email (locked)</label><input type="text" id="pf-email2" disabled></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="tp-btn tp-btn-primary" id="pf-save-btn">💾 Save profile</button>
+          <button class="tp-btn tp-btn-outline" id="pf-signout-btn">Sign out</button>
+        </div>
+
+        <div class="tp-card" style="padding:20px;">
+          <div class="tp-section-hdr"><h3>Your Children</h3><p>Manage which children are linked to your account</p></div>
+          <div id="pf-children-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+          <div class="tp-row2" style="margin-bottom:.6rem;">
+            <div class="tp-field"><input type="text" id="pf-add-child-upi" placeholder="Child's UPI / Admission No."></div>
+            <div class="tp-field"><input type="text" id="pf-add-child-name" placeholder="Child's full name (as on record)"></div>
+          </div>
+          <button class="tp-btn tp-btn-primary" id="pf-add-child-btn">➕ Link another child</button>
+          <div class="tp-err" id="pf-add-child-err" style="margin-top:.8rem;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="tp-toast-wrap"></div>
+
+<!-- ══════════════════════════════════════════
+     JS — Firebase (Auth + Firestore + Realtime DB)
+══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, sendPasswordResetEmail, updateProfile
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot,
+  deleteDoc, query, orderBy, getDocs
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import {
+  getDatabase, ref, get, update
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+/* ── Same Firebase project as the Results Portal ── */
+const FB_CONFIG = {
+  apiKey:"AIzaSyA_41WpdMjHJOU5s3gQ9aieIayZRvUoRLE",
+  authDomain:"kanyadet-school-admin.firebaseapp.com",
+  projectId:"kanyadet-school-admin",
+  databaseURL:"https://kanyadet-school-admin-default-rtdb.firebaseio.com",
+  storageBucket:"kanyadet-school-admin.firebasestorage.app",
+  messagingSenderId:"409708360032",
+};
+const DB_PATH = 'Results/default-app-id/students';
+
+const app  = getApps().length === 0 ? initializeApp(FB_CONFIG) : getApps()[0];
+const auth = getAuth(app);
+const db   = getDatabase(app);
+const fs   = getFirestore(app);
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function notify(msg, type='info', ms=4200){
+  const wrap = document.getElementById('tp-toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'tp-toast ' + type;
+  el.innerHTML = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, ms);
+}
+
+/* ══════════════════════════════════════════
+   THEME
+══════════════════════════════════════════ */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelectorAll('#tp-theme-toggle-auth,#tp-theme-toggle-app').forEach(b=>{ if(b) b.textContent = t==='dark' ? '☀️' : '🌙'; });
+  try{ localStorage.setItem('tp_theme', t); }catch(e){}
+}
+(function initTheme(){
+  let t = 'light';
+  try{ t = localStorage.getItem('tp_theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }catch(e){}
+  applyTheme(t);
+})();
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+document.getElementById('tp-theme-toggle-auth').addEventListener('click', toggleTheme);
+document.getElementById('tp-theme-toggle-app').addEventListener('click', toggleTheme);
+
+/* ══════════════════════════════════════════
+   BOOT LOADER OUT
+══════════════════════════════════════════ */
+function hideLoader(){ document.getElementById('tp-loader').classList.add('hide'); }
+
+/* ══════════════════════════════════════════
+   ROTATING TIPS — desktop side panel (no-op on mobile, where it's hidden)
+══════════════════════════════════════════ */
+const _tpTips = [
+  "Your gradebook, timetable and classes — all in one secure teacher portal.",
+  "Enter scores once — report cards and parent portals update automatically.",
+  "See your teaching day at a glance, with the current period highlighted live.",
+  "Track grading progress across every class you teach, in real time.",
+  "Post announcements straight to parents and staff from your dashboard."
+];
+let _tpTipIdx = 0;
+function _renderTpTipDots(){
+  const dotsEl = document.getElementById('tsp-tip-dots');
+  if(!dotsEl) return;
+  dotsEl.innerHTML = _tpTips.map((_, i) => `<span class="tsp-tip-dot${i === _tpTipIdx ? ' active' : ''}"></span>`).join('');
+}
+function _rotateTpTip(){
+  const el = document.getElementById('tsp-tip-text');
+  if(!el) return;
+  el.classList.add('fading');
+  setTimeout(()=>{
+    _tpTipIdx = (_tpTipIdx + 1) % _tpTips.length;
+    el.textContent = _tpTips[_tpTipIdx];
+    _renderTpTipDots();
+    el.classList.remove('fading');
+  }, 350);
+}
+_renderTpTipDots();
+setInterval(_rotateTpTip, 5000);
+
+/* ══════════════════════════════════════════
+   AUTH SCREEN LOGIC
+══════════════════════════════════════════ */
+let mode = 'signin';
+const els = {
+  heading: document.getElementById('tp-auth-heading'),
+  subtitle: document.getElementById('tp-auth-subtitle'),
+  tabSignin: document.getElementById('tp-tab-signin'),
+  tabSignup: document.getElementById('tp-tab-signup'),
+  extra1: document.getElementById('tp-signup-extra'),
+  extra2: document.getElementById('tp-signup-extra2'),
+  confirmRow: document.getElementById('tp-confirm-row'),
+  pwStrength: document.getElementById('tp-pwd-strength'),
+  submitBtn: document.getElementById('tp-submit-btn'),
+  err: document.getElementById('tp-auth-err'),
+  forgotLine: document.getElementById('tp-forgot-line'),
+};
+
+function setMode(m){
+  mode = m;
+  els.err.classList.remove('on');
+  els.tabSignin.classList.toggle('active', m==='signin');
+  els.tabSignup.classList.toggle('active', m==='signup');
+  const signup = m === 'signup';
+  els.extra1.style.display = signup ? '' : 'none';
+  els.extra2.style.display = signup ? '' : 'none';
+  els.confirmRow.style.display = signup ? '' : 'none';
+  els.pwStrength.style.display = signup ? '' : 'none';
+  els.forgotLine.style.display = signup ? 'none' : '';
+  els.heading.textContent = signup ? 'Create Parent Account' : 'Parent Sign In';
+  els.subtitle.textContent = signup ? 'Set up access to your child\'s school updates' : 'See your child\'s grades, attendance and school updates';
+  els.submitBtn.textContent = signup ? 'Create Account' : 'Sign In';
+}
+els.tabSignin.addEventListener('click', ()=>setMode('signin'));
+els.tabSignup.addEventListener('click', ()=>setMode('signup'));
+
+function showErr(msg){ els.err.textContent = msg; els.err.classList.add('on'); }
+
+/* Password strength meter */
+const pwInput = document.getElementById('tp-password');
+pwInput.addEventListener('input', ()=>{
+  if(mode !== 'signup') return;
+  const v = pwInput.value;
+  let score = 0;
+  if(v.length >= 8) score++;
+  if(/[A-Z]/.test(v)) score++;
+  if(/[0-9]/.test(v)) score++;
+  if(/[^A-Za-z0-9]/.test(v)) score++;
+  const fill = document.getElementById('tp-pwd-strength-fill');
+  const label = document.getElementById('tp-pwd-strength-label');
+  const map = [
+    {w:'0%',  c:'var(--border)',   t:'\u00A0'},
+    {w:'25%', c:'var(--red)',      t:'Weak'},
+    {w:'55%', c:'var(--orange)',   t:'Fair'},
+    {w:'80%', c:'var(--gold)',     t:'Good'},
+    {w:'100%',c:'var(--green)',    t:'Strong'},
+  ][v.length ? score+1 : 0] || {w:'0%',c:'var(--border)',t:'\u00A0'};
+  fill.style.width = map.w; fill.style.background = map.c; label.textContent = map.t;
+});
+
+/* Auth submit */
+document.getElementById('tp-submit-btn').addEventListener('click', async ()=>{
+  els.err.classList.remove('on');
+  const email = document.getElementById('tp-email').value.trim();
+  const pass  = document.getElementById('tp-password').value;
+  if(!email || !pass){ showErr('Please enter your email and password.'); return; }
+
+  els.submitBtn.disabled = true;
+  els.submitBtn.textContent = mode === 'signup' ? '⏳ Creating account…' : '⏳ Signing in…';
+
+  try{
+    if(mode === 'signup'){
+      const confirm = document.getElementById('tp-confirm').value;
+      if(pass !== confirm){ throw {code:'custom', message:'Passwords do not match.'}; }
+      if(pass.length < 6){ throw {code:'custom', message:'Password must be at least 6 characters.'}; }
+      const fname = document.getElementById('tp-fname').value.trim();
+      const lname = document.getElementById('tp-lname').value.trim();
+      const phone = document.getElementById('tp-phone').value.trim();
+      const relationship = document.getElementById('tp-relationship').value;
+      const fullName = (fname + ' ' + lname).trim() || email.split('@')[0];
+
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      try{ await updateProfile(cred.user, { displayName: fullName }); }catch(e){}
+      await setDoc(doc(fs, 'parents', cred.user.uid), {
+        name: fullName, firstName: fname, lastName: lname,
+        email, phone, relationship,
+        linkedStudents: [],
+        createdAt: new Date().toISOString(),
+      });
+      notify('✓ Account created — welcome to the Parent Portal!', 'success');
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+    // onAuthStateChanged below takes it from here (loads profile, opens shell)
+  } catch(e){
+    const msg = ({
+      'auth/email-already-in-use': 'An account already exists for that email — try signing in instead.',
+      'auth/invalid-email': 'That email address looks invalid.',
+      'auth/user-not-found': 'No account found for that email — tap "Create Account" above.',
+      'auth/wrong-password': 'Incorrect password. Try again or reset it below.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/weak-password': 'Password is too weak — use at least 6 characters.',
+      'auth/too-many-requests': 'Too many attempts — please wait a moment and try again.',
+    })[e.code] || e.message || 'Something went wrong. Please try again.';
+    showErr(msg);
+    els.submitBtn.disabled = false;
+    els.submitBtn.textContent = mode === 'signup' ? 'Create Account' : 'Sign In';
+  }
+});
+
+document.getElementById('tp-forgot-link').addEventListener('click', async ()=>{
+  const email = document.getElementById('tp-email').value.trim();
+  if(!email){ showErr('Enter your email above first, then tap "Forgot password?" again.'); return; }
+  try{
+    await sendPasswordResetEmail(auth, email);
+    notify('📧 Password reset email sent to ' + email, 'success', 6000);
+  }catch(e){ showErr(e.message || 'Could not send reset email.'); }
+});
+
+/* ══════════════════════════════════════════
+   VIEW ROUTER
+══════════════════════════════════════════ */
+const viewTitles = {
+  today: ['Overview', "Your child's progress at a glance"],
+  gradebook: ['Grades', 'Full subject breakdown'],
+  students: ['Attendance', "Your child's attendance record"],
+  announcements: ['Announcements', 'Updates from the school'],
+  profile: ['Profile', 'Your account details'],
+};
+function showView(name){
+  document.querySelectorAll('.tp-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tp-nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+  const [title, sub] = viewTitles[name] || ['',''];
+  document.getElementById('tp-topbar-title').textContent = title;
+  document.getElementById('tp-topbar-sub').textContent = sub;
+  document.getElementById('tp-sidebar').classList.remove('open');
+}
+document.querySelectorAll('.tp-nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>showView(item.dataset.view));
+});
+document.getElementById('tp-hamburger-btn').addEventListener('click', ()=>{
+  document.getElementById('tp-sidebar').classList.toggle('open');
+});
+document.getElementById('tp-logout-btn').addEventListener('click', doSignOut);
+document.getElementById('pf-signout-btn').addEventListener('click', doSignOut);
+async function doSignOut(){
+  try{ await signOut(auth); }catch(e){}
+}
+
+/* ══════════════════════════════════════════
+   CLOCK (kept for the Overview greeting timestamp)
+══════════════════════════════════════════ */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('tp-clock').textContent = now.toLocaleTimeString('en-GB');
+  document.getElementById('tp-today-date').textContent = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+setInterval(tickClock, 1000);
+
+/* ══════════════════════════════════════════
+   CBC SCORE BANDING — standard 4-level rubric
+══════════════════════════════════════════ */
+function cbcBand(score){
+  if(score >= 80) return { label:'Exceeding Expectation', color:'var(--green)' };
+  if(score >= 60) return { label:'Meeting Expectation',   color:'var(--blue)' };
+  if(score >= 40) return { label:'Approaching Expectation', color:'var(--gold)' };
+  return { label:'Below Expectation', color:'var(--red)' };
+}
+
+/* ══════════════════════════════════════════
+   PROFILE + LINKED CHILDREN
+══════════════════════════════════════════ */
+let currentProfile = null;
+let currentUid = null;
+let allStudentRecords = {};      // key -> record (full Realtime DB student table)
+let linkedChildren = [];         // [{key, name, upi, grade}]
+let activeChildKey = '';
+
+async function loadAllStudents(){
+  const snap = await get(ref(db, DB_PATH));
+  allStudentRecords = snap.exists() ? snap.val() : {};
+}
+
+async function loadProfile(user){
+  currentUid = user.uid;
+  const snap = await getDoc(doc(fs, 'parents', user.uid));
+  const data = snap.exists() ? snap.data() : {};
+  currentProfile = data;
+  linkedChildren = Array.isArray(data.linkedStudents) ? data.linkedStudents : [];
+  activeChildKey = linkedChildren[0] ? linkedChildren[0].key : '';
+
+  const fullName = data.name || user.displayName || user.email.split('@')[0];
+  const initials = fullName.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || 'P';
+
+  document.getElementById('tp-sidebar-name').textContent = fullName;
+  document.getElementById('tp-sidebar-role').textContent = data.relationship || 'Parent';
+  document.getElementById('tp-sidebar-av').textContent = initials;
+  document.getElementById('tp-greeting').textContent = greetingFor(fullName.split(' ')[0]);
+
+  document.getElementById('pf-avatar').textContent = initials;
+  document.getElementById('pf-name').textContent = fullName;
+  document.getElementById('pf-email').textContent = user.email;
+  document.getElementById('pf-email2').value = user.email;
+  document.getElementById('pf-fname').value = data.firstName || '';
+  document.getElementById('pf-lname').value = data.lastName || '';
+  document.getElementById('pf-phone').value = data.phone || '';
+  document.getElementById('pf-relationship').value = data.relationship || 'Parent';
+
+  renderChildSwitcher();
+  renderChildrenManageList();
+  renderEverythingForActiveChild();
+}
+function greetingFor(first){
+  const h = new Date().getHours();
+  const t = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  return `${t}, ${first || 'there'} 👋`;
+}
+
+document.getElementById('pf-save-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('pf-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+  try{
+    const payload = {
+      firstName: document.getElementById('pf-fname').value.trim(),
+      lastName: document.getElementById('pf-lname').value.trim(),
+      phone: document.getElementById('pf-phone').value.trim(),
+      relationship: document.getElementById('pf-relationship').value,
+    };
+    payload.name = (payload.firstName + ' ' + payload.lastName).trim() || document.getElementById('pf-name').textContent;
+    await updateDoc(doc(fs, 'parents', currentUid), payload);
+    notify('✓ Profile updated.', 'success');
+    await loadProfile(auth.currentUser);
+  }catch(e){
+    notify('Error saving profile: ' + e.message, 'error');
+  }finally{
+    btn.disabled = false; btn.textContent = '💾 Save profile';
+  }
+});
+
+/* ══════════════════════════════════════════
+   LINK A CHILD — validated against the real Realtime-DB student records
+══════════════════════════════════════════ */
+function findStudentRecord(upiInput, nameInput){
+  const upi = upiInput.trim().toLowerCase();
+  const name = nameInput.trim().toLowerCase();
+  for(const [key, r] of Object.entries(allStudentRecords)){
+    if(!r) continue;
+    const recUpi = (r['UPI']||'').toString().trim().toLowerCase();
+    const recName = (r['Official Student Name']||'').toString().trim().toLowerCase();
+    if(recUpi && recUpi === upi && recName === name) return { key, ...r };
+  }
+  return null;
+}
+async function linkChild(upi, name, errEl){
+  errEl.classList.remove('on');
+  if(!upi || !name){ errEl.textContent = "Enter the child's UPI/Admission No. and full name."; errEl.classList.add('on'); return false; }
+  const match = findStudentRecord(upi, name);
+  if(!match){ errEl.textContent = "No student record matches that UPI and name — please check them and try again."; errEl.classList.add('on'); return false; }
+  if(linkedChildren.some(c=>c.key === match.key)){ errEl.textContent = "That child is already linked to your account."; errEl.classList.add('on'); return false; }
+  const entry = { key: match.key, name: match['Official Student Name']||'', upi: match['UPI']||'', grade: match['Grade']||'' };
+  const updated = [...linkedChildren, entry];
+  await updateDoc(doc(fs, 'parents', currentUid), { linkedStudents: updated });
+  linkedChildren = updated;
+  activeChildKey = activeChildKey || entry.key;
+  return true;
+}
+document.getElementById('add-child-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('add-child-btn');
+  const errEl = document.getElementById('add-child-err');
+  const upi = document.getElementById('add-child-upi').value;
+  const name = document.getElementById('add-child-name').value;
+  btn.disabled = true; btn.textContent = '⏳ Linking…';
+  try{
+    const ok = await linkChild(upi, name, errEl);
+    if(ok){
+      document.getElementById('add-child-upi').value = '';
+      document.getElementById('add-child-name').value = '';
+      notify('✓ Child linked to your account.', 'success');
+      renderChildSwitcher();
+      renderChildrenManageList();
+      renderEverythingForActiveChild();
+    }
+  }catch(e){ errEl.textContent = e.message; errEl.classList.add('on'); }
+  finally{ btn.disabled = false; btn.textContent = '➕ Link child'; }
+});
+document.getElementById('pf-add-child-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('pf-add-child-btn');
+  const errEl = document.getElementById('pf-add-child-err');
+  const upi = document.getElementById('pf-add-child-upi').value;
+  const name = document.getElementById('pf-add-child-name').value;
+  btn.disabled = true; btn.textContent = '⏳ Linking…';
+  try{
+    const ok = await linkChild(upi, name, errEl);
+    if(ok){
+      document.getElementById('pf-add-child-upi').value = '';
+      document.getElementById('pf-add-child-name').value = '';
+      notify('✓ Child linked to your account.', 'success');
+      renderChildSwitcher();
+      renderChildrenManageList();
+      renderEverythingForActiveChild();
+    }
+  }catch(e){ errEl.textContent = e.message; errEl.classList.add('on'); }
+  finally{ btn.disabled = false; btn.textContent = '➕ Link another child'; }
+});
+async function unlinkChild(key){
+  const updated = linkedChildren.filter(c=>c.key !== key);
+  await updateDoc(doc(fs, 'parents', currentUid), { linkedStudents: updated });
+  linkedChildren = updated;
+  if(activeChildKey === key) activeChildKey = linkedChildren[0] ? linkedChildren[0].key : '';
+  renderChildSwitcher();
+  renderChildrenManageList();
+  renderEverythingForActiveChild();
+  notify('Child removed from your account.', 'success', 2500);
+}
+
+function renderChildSwitcher(){
+  const wrap = document.getElementById('tp-child-switcher');
+  if(linkedChildren.length <= 1){ wrap.style.display = 'none'; wrap.innerHTML=''; return; }
+  wrap.style.display = 'flex';
+  wrap.innerHTML = linkedChildren.map(c=>{
+    const active = c.key === activeChildKey;
+    return `<button class="tp-btn ${active?'tp-btn-primary':'tp-btn-outline'}" data-childkey="${c.key}" style="font-size:.76rem;">${(c.name||'Child').split(' ')[0]}</button>`;
+  }).join('');
+  wrap.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeChildKey = btn.dataset.childkey;
+      renderChildSwitcher();
+      renderEverythingForActiveChild();
+    });
+  });
+}
+
+function renderChildrenManageList(){
+  const holder = document.getElementById('pf-children-list');
+  if(!linkedChildren.length){ holder.innerHTML = '<div class="tp-empty">No children linked yet.</div>'; return; }
+  holder.innerHTML = linkedChildren.map(c=>{
+    const initials = (c.name||'?').split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
+    return `<div class="tp-card tp-student-card">
+      <div class="tp-s-avatar">${initials}</div>
+      <div>
+        <div class="tp-s-name">${(c.name||'—').replace(/</g,'&lt;')}</div>
+        <div class="tp-s-upi">${(c.upi||'—').replace(/</g,'&lt;')} · ${(c.grade||'—').replace(/</g,'&lt;')}</div>
+      </div>
+      <button class="tp-announce-del" data-key="${c.key}" title="Remove" style="margin-left:auto;">✕</button>
+    </div>`;
+  }).join('');
+  holder.querySelectorAll('.tp-announce-del').forEach(btn=>{
+    btn.addEventListener('click', ()=> unlinkChild(btn.dataset.key));
+  });
+}
+
+/* ══════════════════════════════════════════
+   ACTIVE CHILD — resolve fresh record + render every view that depends on it
+══════════════════════════════════════════ */
+function activeChildRecord(){
+  if(!activeChildKey) return null;
+  const r = allStudentRecords[activeChildKey];
+  return r ? { key: activeChildKey, ...r } : null;
+}
+// Fields on a student record that are metadata, not subjects
+const NON_SUBJECT_FIELDS = new Set(['Official Student Name','UPI','Assessment No','Gender','Grade','Term']);
+function subjectEntries(record){
+  if(!record) return [];
+  return Object.entries(record)
+    .filter(([k,v]) => !NON_SUBJECT_FIELDS.has(k) && v !== null && v !== undefined && v !== '' && !isNaN(parseFloat(v)))
+    .map(([k,v]) => ({ subject:k, score:parseFloat(v) }));
+}
+function classmatesFor(record){
+  if(!record) return [];
+  return Object.entries(allStudentRecords)
+    .filter(([k,r]) => r && r.Grade === record.Grade)
+    .map(([k,r]) => ({ key:k, ...r }));
+}
+function classAverageFor(subject, record){
+  const mates = classmatesFor(record);
+  const nums = mates.map(m=>parseFloat(m[subject])).filter(n=>!isNaN(n));
+  return nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : null;
+}
+
+function renderEverythingForActiveChild(){
+  const record = activeChildRecord();
+  const noChildCard = document.getElementById('tp-no-child-card');
+  const overviewBody = document.getElementById('tp-overview-body');
+
+  if(!linkedChildren.length){
+    noChildCard.style.display = '';
+    overviewBody.style.display = 'none';
+  } else {
+    noChildCard.style.display = 'none';
+    overviewBody.style.display = '';
+  }
+
+  renderOverview(record);
+  renderGradesView(record);
+  renderAttendanceView(record);
+  renderLatestAnnouncementPreview();
+  filterAnnouncementsForChild();
+}
+
+function renderOverview(record){
+  if(!record){
+    document.getElementById('child-name').textContent = '—';
+    document.getElementById('child-upi').textContent = '—';
+    document.getElementById('child-avatar').textContent = '?';
+    document.getElementById('stat-avg').textContent = '—';
+    document.getElementById('stat-best').textContent = '—';
+    document.getElementById('stat-done').textContent = '—';
+    document.getElementById('stat-class').textContent = '—';
+    document.getElementById('tp-report-bars').innerHTML = '<div class="tp-empty">Link a child above to see their report.</div>';
+    return;
+  }
+  const name = record['Official Student Name'] || 'Your child';
+  const initials = name.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
+  document.getElementById('child-name').textContent = name;
+  document.getElementById('child-upi').textContent = (record['UPI']||'—') + ' · ' + (record['Grade']||'—');
+  document.getElementById('child-avatar').textContent = initials;
+
+  const subs = subjectEntries(record);
+  const avg = subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null;
+  const best = subs.length ? subs.reduce((a,b)=> b.score > a.score ? b : a) : null;
+
+  document.getElementById('stat-avg').textContent = avg !== null ? avg.toFixed(1) : '—';
+  document.getElementById('stat-best').textContent = best ? best.subject : '—';
+  document.getElementById('stat-done').textContent = subs.length;
+  document.getElementById('stat-class').textContent = record['Grade'] || '—';
+
+  const barsHolder = document.getElementById('tp-report-bars');
+  if(!subs.length){
+    barsHolder.innerHTML = '<div class="tp-empty">No scores published for this exam yet.</div>';
+  } else {
+    barsHolder.innerHTML = subs.map(s=>{
+      const band = cbcBand(s.score);
+      const classAvg = classAverageFor(s.subject, record);
+      const delta = classAvg !== null ? (s.score - classAvg) : null;
+      const deltaTxt = delta === null ? '' : (delta >= 0 ? `+${delta.toFixed(1)} vs class` : `${delta.toFixed(1)} vs class`);
+      const deltaColor = delta === null ? 'var(--text3)' : (delta >= 0 ? 'var(--green-dk)' : 'var(--red-dk)');
+      return `<div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:5px;">
+          <span>${s.subject.replace(/</g,'&lt;')}</span>
+          <span class="mono">${s.score} <span style="color:${deltaColor};font-weight:800;font-size:.7rem;">${deltaTxt}</span></span>
+        </div>
+        <div style="width:100%;height:9px;border-radius:5px;background:var(--surface3);overflow:hidden;">
+          <div style="width:${Math.min(100,s.score)}%;height:100%;border-radius:5px;background:${band.color};"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+/* ══════════════════════════════════════════
+   GRADES VIEW — full subject table, read-only
+══════════════════════════════════════════ */
+function renderGradesView(record){
+  const holder = document.getElementById('gb-table-holder');
+  const sub = document.getElementById('gr-sub');
+  if(!record){
+    holder.innerHTML = '<div class="tp-card tp-empty">Link your child to see their grades here.</div>';
+    sub.textContent = 'Full subject breakdown for your child';
+    return;
+  }
+  sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
+  const subs = subjectEntries(record).sort((a,b)=>a.subject.localeCompare(b.subject));
+  if(!subs.length){
+    holder.innerHTML = '<div class="tp-card tp-empty">No scores published for this exam yet.</div>';
+    return;
+  }
+  const rows = subs.map(s=>{
+    const band = cbcBand(s.score);
+    const classAvg = classAverageFor(s.subject, record);
+    return `<tr>
+      <td>${s.subject.replace(/</g,'&lt;')}</td>
+      <td class="mono">${s.score}</td>
+      <td class="mono">${classAvg !== null ? classAvg.toFixed(1) : '—'}</td>
+      <td><span class="tp-score-badge" style="background:${band.color}22;color:${band.color};">${band.label}</span></td>
+    </tr>`;
+  }).join('');
+  holder.innerHTML = `<div class="tp-table-wrap"><table class="tp-table">
+    <thead><tr><th>Subject</th><th>Score</th><th>Class average</th><th>Level</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+/* ══════════════════════════════════════════
+   ATTENDANCE VIEW — Firestore-backed, real query (empty until the
+   school starts publishing records)
+══════════════════════════════════════════ */
+async function renderAttendanceView(record){
+  const holder = document.getElementById('st-grid');
+  const sub = document.getElementById('st-sub');
+  if(!record){
+    holder.innerHTML = '<div class="tp-card tp-empty">Link your child to see attendance here.</div>';
+    sub.textContent = "Attendance records for your child";
+    return;
+  }
+  sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
+  holder.innerHTML = '<div class="tp-card tp-empty">Loading…</div>';
+  try{
+    const q = query(collection(fs, 'attendance', record.key, 'entries'), orderBy('date','desc'));
+    const snap = await getDocs(q);
+    if(!snap || snap.empty){
+      holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
+      return;
+    }
+    let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
+    snap.forEach(d=>{
+      const a = d.data();
+      const color = a.status === 'Present' ? 'var(--green-dk)' : a.status === 'Late' ? 'var(--orange-dk)' : 'var(--red-dk)';
+      html += `<tr><td>${a.date||'—'}</td><td style="color:${color};font-weight:700;">${a.status||'—'}</td><td>${(a.note||'').replace(/</g,'&lt;')}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    holder.innerHTML = html;
+  }catch(e){
+    holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
+  }
+}
+/* ══════════════════════════════════════════
+   ANNOUNCEMENTS — Firestore, real-time, read-only for parents
+══════════════════════════════════════════ */
+let allAnnouncements = [];
+let unsubAnnouncements = null;
+function startAnnouncementsListener(){
+  if(unsubAnnouncements) return;
+  const q = query(collection(fs,'announcements'), orderBy('createdAt','desc'));
+  unsubAnnouncements = onSnapshot(q, (snap)=>{
+    allAnnouncements = [];
+    snap.forEach(d=> allAnnouncements.push({ id:d.id, ...d.data() }));
+    filterAnnouncementsForChild();
+    renderLatestAnnouncementPreview();
+  }, (err)=>{
+    document.getElementById('an-list').innerHTML = '<div class="tp-card tp-empty">Could not load announcements.</div>';
+  });
+}
+function filterAnnouncementsForChild(){
+  const list = document.getElementById('an-list');
+  const record = activeChildRecord();
+  const grade = record ? record['Grade'] : null;
+  const relevant = allAnnouncements.filter(a => a.classGrade === 'All' || !a.classGrade || a.classGrade === grade);
+  if(!relevant.length){ list.innerHTML = '<div class="tp-card tp-empty">No announcements yet.</div>'; return; }
+  list.innerHTML = relevant.map(a=>{
+    const when = a.createdAt ? new Date(a.createdAt).toLocaleString('en-GB') : '';
+    return `<div class="tp-card tp-announce-item">
+      <div class="tp-announce-top">
+        <div class="tp-announce-title">${(a.title||'Untitled').replace(/</g,'&lt;')}</div>
+        <span class="tp-announce-tag">${(a.classGrade||'All').replace(/</g,'&lt;')}</span>
+      </div>
+      <div class="tp-announce-msg">${(a.message||'').replace(/</g,'&lt;')}</div>
+      <div class="tp-announce-meta">${(a.createdByName||'School').replace(/</g,'&lt;')} · ${when}</div>
+    </div>`;
+  }).join('');
+}
+function renderLatestAnnouncementPreview(){
+  const holder = document.getElementById('tp-latest-announce');
+  const record = activeChildRecord();
+  const grade = record ? record['Grade'] : null;
+  const relevant = allAnnouncements.filter(a => a.classGrade === 'All' || !a.classGrade || a.classGrade === grade);
+  if(!relevant.length){ holder.innerHTML = 'Nothing posted yet.'; holder.className = 'tp-empty'; return; }
+  const a = relevant[0];
+  holder.className = '';
+  holder.innerHTML = `<div class="tp-announce-title" style="margin-bottom:4px;">${(a.title||'Untitled').replace(/</g,'&lt;')}</div>
+    <div class="tp-announce-msg">${(a.message||'').replace(/</g,'&lt;')}</div>`;
+}
+
+/* ══════════════════════════════════════════
+   AUTH STATE
+══════════════════════════════════════════ */
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    try{
+      await loadAllStudents();
+      await loadProfile(user);
+      startAnnouncementsListener();
+      document.getElementById('tp-auth-screen').style.display = 'none';
+      document.getElementById('tp-shell').style.display = 'flex';
+      document.querySelector('.tp-theme-toggle').style.display = 'none';
+      tickClock();
+    }catch(e){
+      notify('Error loading your account: ' + e.message, 'error', 8000);
+    }
+  } else {
+    document.getElementById('tp-shell').style.display = 'none';
+    document.getElementById('tp-auth-screen').style.display = 'flex';
+    document.querySelector('.tp-theme-toggle').style.display = 'flex';
+    document.getElementById('tp-submit-btn').disabled = false;
+    setMode('signin');
+  }
+  hideLoader();
+});
+</script>
+</body>
+</html>
