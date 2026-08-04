@@ -1205,6 +1205,28 @@ document.getElementById('pf-add-child-btn').addEventListener('click', async ()=>
   }catch(e){ errEl.textContent = e.message; errEl.classList.add('on'); }
   finally{ btn.disabled = false; btn.textContent = '➕ Link another child'; }
 });
+// Once approved, auto-link using the Assessment No + student name the
+// parent already gave at signup, instead of making them retype it into
+// the "Link child" form. Reuses the same real-record matching linkChild()
+// uses manually, so it only succeeds on a genuine match; if it doesn't
+// (typo, wrong number, etc.) it fails silently here — they can still use
+// "Link child" manually with the correct details.
+async function autoLinkFromSignup(){
+  if(linkedChildren.length) return; // already has a linked child
+  const assessment = (currentProfile.childAssessment || '').trim();
+  const name = (currentProfile.childName || '').trim();
+  if(!assessment || !name) return;
+  const errEl = document.getElementById('add-child-err');
+  let ok = false;
+  try{ ok = await linkChild(assessment, name, errEl); }catch(e){ ok = false; }
+  if(ok){
+    errEl.classList.remove('on');
+    notify(`✓ Linked ${name} to your account automatically.`, 'success');
+    renderChildSwitcher();
+    renderChildrenManageList();
+    renderEverythingForActiveChild();
+  }
+}
 async function unlinkChild(key){
   const updated = linkedChildren.filter(c=>c.key !== key);
   await updateDoc(doc(fs, 'parents', currentUid), { linkedStudents: updated });
@@ -1644,6 +1666,7 @@ async function enterApprovedApp(user){
   hidePendingScreen();
   await loadAllStudents();
   await loadProfile(user);
+  await autoLinkFromSignup();
   startAnnouncementsListener();
   document.getElementById('tp-auth-screen').style.display = 'none';
   document.getElementById('tp-shell').style.display = 'flex';
