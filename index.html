@@ -161,6 +161,16 @@ button,input,select,textarea{font-family:inherit;}
 .tp-submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 .tp-submit-btn:active{transform:translateY(0);}
 
+.tp-auth-divider{display:flex;align-items:center;gap:.6rem;margin:.9rem 0;font-size:.68rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.tp-auth-divider::before,.tp-auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.tp-oauth-btn{width:100%;padding:.85rem 1.2rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:.6rem;}
+.tp-oauth-btn:hover{border-color:var(--blue-lt);transform:translateY(-1px);}
+.tp-oauth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+
+/* ── Pending-approval screen (shown after a new/unauthorized sign-in) ── */
+#tp-pending-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;}
+.tp-pending-icon{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 1rem;box-shadow:0 10px 26px rgba(230,126,34,.3);}
+
 .tp-err{display:none;background:rgba(231,76,60,.09);border:1px solid rgba(231,76,60,.25);color:var(--red-dk);font-size:.76rem;font-weight:600;padding:.6rem .8rem;border-radius:12px;margin-bottom:.7rem;}
 .tp-err.on{display:block;}
 
@@ -205,7 +215,7 @@ button,input,select,textarea{font-family:inherit;}
 .tp-logout-btn{margin-left:auto;width:30px;height:30px;border-radius:9px;border:none;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);flex-shrink:0;}
 .tp-logout-btn:hover{background:rgba(231,76,60,.12);color:var(--red);}
 
-.tp-main{margin-left:var(--sidebar-w);min-height:100vh;transition:margin-left .3s cubic-bezier(.4,0,.2,1);}
+.tp-main{flex:1;min-width:0;margin-left:var(--sidebar-w);min-height:100vh;transition:margin-left .3s cubic-bezier(.4,0,.2,1);}
 .tp-topbar{position:sticky;top:0;z-index:100;background:var(--topbar);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
 .tp-topbar-title{font-size:1.05rem;font-weight:900;color:var(--text);}
 .tp-topbar-sub{font-size:.72rem;color:var(--text2);font-weight:600;margin-top:1px;}
@@ -213,6 +223,8 @@ button,input,select,textarea{font-family:inherit;}
 .tp-icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:var(--transition);}
 .tp-icon-btn:hover{border-color:var(--blue-lt);color:var(--blue-lt);}
 .tp-hamburger{display:none;}
+.tp-sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:590;}
+.tp-sidebar-backdrop.show{display:block;}
 
 .tp-content{padding:24px 26px 60px;}
 .tp-view{display:none;animation:tpFadeUp .35s ease;}
@@ -499,6 +511,25 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       </div>
     </div>
 
+    <div id="tp-signup-extra3" style="display:none">
+      <div class="tp-field tp-field-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.42A12.083 12.083 0 0112 21a12.083 12.083 0 01-6.16-10.42L12 14z"/></svg>
+        <input type="text" id="tp-child-name" placeholder=" " autocomplete="off">
+        <label class="tp-float-label" for="tp-child-name">Student's full name</label>
+      </div>
+      <div class="tp-row2">
+        <div class="tp-field">
+          <input type="text" id="tp-child-assessment" placeholder=" " autocomplete="off">
+          <label class="tp-float-label" for="tp-child-assessment">Student's Assessment No.</label>
+        </div>
+        <div class="tp-field">
+          <input type="text" id="tp-child-grade" placeholder=" " autocomplete="off">
+          <label class="tp-float-label" for="tp-child-grade">Grade/Class (e.g. Grade 7)</label>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">The school admin checks these against student records before approving your account.</div>
+    </div>
+
     <div class="tp-field tp-field-icon">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
       <input type="password" id="tp-password" placeholder=" " autocomplete="current-password">
@@ -518,6 +549,12 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 
     <button type="button" class="tp-submit-btn" id="tp-submit-btn">Sign In</button>
 
+    <div class="tp-auth-divider">or</div>
+    <button type="button" class="tp-oauth-btn" id="tp-google-btn">
+      <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <span id="tp-google-btn-label">Continue with Google</span>
+    </button>
+
     <div class="tp-switch-line" id="tp-forgot-line">
       <a id="tp-forgot-link">Forgot password?</a>
     </div>
@@ -525,8 +562,44 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
   </div>
 </div>
 
+<!-- ══════════════ PENDING APPROVAL SCREEN ══════════════
+     Shown after sign-up (or a Google sign-in) whose email hasn't
+     been approved yet by the school admin in the "Authorized Parents"
+     configuration. ── -->
+<div id="tp-pending-screen">
+  <div class="tp-auth-card" style="text-align:center;">
+    <div class="tp-pending-icon" id="tp-pending-icon">⏳</div>
+    <div class="tp-heading">Awaiting approval</div>
+    <div class="tp-subtitle" id="tp-pending-msg">Your parent account has been created and is waiting for the school admin to approve access. This page will update automatically — no need to refresh — the moment it's approved.</div>
+    <button type="button" class="tp-submit-btn" id="tp-pending-back-btn">Sign out</button>
+  </div>
+</div>
+
+<div id="tp-verify-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;align-items:center;justify-content:center;padding:16px;">
+  <div class="tp-auth-card" style="max-width:420px;width:100%;">
+    <div class="tp-heading" style="font-size:1.1rem;">One more step</div>
+    <div class="tp-subtitle" style="margin-bottom:16px;">Tell us which child you're the parent or guardian of, so the school admin can verify before approving your account.</div>
+    <div class="tp-field">
+      <input type="text" id="tp-verify-child-name" placeholder=" " autocomplete="off">
+      <label class="tp-float-label" for="tp-verify-child-name">Student's full name</label>
+    </div>
+    <div class="tp-field">
+      <input type="text" id="tp-verify-child-assessment" placeholder=" " autocomplete="off">
+      <label class="tp-float-label" for="tp-verify-child-assessment">Student's Assessment No.</label>
+    </div>
+    <div class="tp-field">
+      <input type="text" id="tp-verify-child-grade" placeholder=" " autocomplete="off">
+      <label class="tp-float-label" for="tp-verify-child-grade">Grade/Class (e.g. Grade 7)</label>
+    </div>
+    <div class="tp-err" id="tp-verify-err"></div>
+    <button type="button" class="tp-submit-btn" id="tp-verify-submit-btn">Continue</button>
+  </div>
+</div>
+
 <!-- ══════════════ APP SHELL ══════════════ -->
 <div class="tp-shell" id="tp-shell">
+
+  <div class="tp-sidebar-backdrop" id="tp-sidebar-backdrop"></div>
 
   <aside class="tp-sidebar" id="tp-sidebar">
     <div class="tp-brand">
@@ -586,7 +659,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
         <div id="tp-no-child-card" class="tp-card" style="display:none;padding:22px;margin-bottom:20px;">
           <div class="tp-section-hdr"><h3>Link your child</h3><p>Add your child using their admission details to see their grades</p></div>
           <div class="tp-row2" style="margin-bottom:.6rem;">
-            <div class="tp-field"><input type="text" id="add-child-upi" placeholder="Child's UPI / Admission No."></div>
+            <div class="tp-field"><input type="text" id="add-child-upi" placeholder="Child's Assessment No."></div>
             <div class="tp-field"><input type="text" id="add-child-name" placeholder="Child's full name (as on record)"></div>
           </div>
           <button class="tp-btn tp-btn-primary" id="add-child-btn">➕ Link child</button>
@@ -694,7 +767,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
           <div class="tp-section-hdr"><h3>Your Children</h3><p>Manage which children are linked to your account</p></div>
           <div id="pf-children-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
           <div class="tp-row2" style="margin-bottom:.6rem;">
-            <div class="tp-field"><input type="text" id="pf-add-child-upi" placeholder="Child's UPI / Admission No."></div>
+            <div class="tp-field"><input type="text" id="pf-add-child-upi" placeholder="Child's Assessment No."></div>
             <div class="tp-field"><input type="text" id="pf-add-child-name" placeholder="Child's full name (as on record)"></div>
           </div>
           <button class="tp-btn tp-btn-primary" id="pf-add-child-btn">➕ Link another child</button>
@@ -715,11 +788,11 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signOut, sendPasswordResetEmail, updateProfile
+  signOut, sendPasswordResetEmail, updateProfile, GoogleAuthProvider, signInWithPopup
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot,
-  deleteDoc, query, orderBy, getDocs
+  deleteDoc, query, orderBy, getDocs, where
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import {
   getDatabase, ref, get, update
@@ -740,6 +813,7 @@ const app  = getApps().length === 0 ? initializeApp(FB_CONFIG) : getApps()[0];
 const auth = getAuth(app);
 const db   = getDatabase(app);
 const fs   = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
 /* ══════════════════════════════════════════
    TOAST
@@ -819,6 +893,7 @@ const els = {
   tabSignup: document.getElementById('tp-tab-signup'),
   extra1: document.getElementById('tp-signup-extra'),
   extra2: document.getElementById('tp-signup-extra2'),
+  extra3: document.getElementById('tp-signup-extra3'),
   confirmRow: document.getElementById('tp-confirm-row'),
   pwStrength: document.getElementById('tp-pwd-strength'),
   submitBtn: document.getElementById('tp-submit-btn'),
@@ -834,6 +909,7 @@ function setMode(m){
   const signup = m === 'signup';
   els.extra1.style.display = signup ? '' : 'none';
   els.extra2.style.display = signup ? '' : 'none';
+  els.extra3.style.display = signup ? '' : 'none';
   els.confirmRow.style.display = signup ? '' : 'none';
   els.pwStrength.style.display = signup ? '' : 'none';
   els.forgotLine.style.display = signup ? 'none' : '';
@@ -871,7 +947,7 @@ pwInput.addEventListener('input', ()=>{
 /* Auth submit */
 document.getElementById('tp-submit-btn').addEventListener('click', async ()=>{
   els.err.classList.remove('on');
-  const email = document.getElementById('tp-email').value.trim();
+  const email = document.getElementById('tp-email').value.trim().toLowerCase();
   const pass  = document.getElementById('tp-password').value;
   if(!email || !pass){ showErr('Please enter your email and password.'); return; }
 
@@ -887,6 +963,12 @@ document.getElementById('tp-submit-btn').addEventListener('click', async ()=>{
       const lname = document.getElementById('tp-lname').value.trim();
       const phone = document.getElementById('tp-phone').value.trim();
       const relationship = document.getElementById('tp-relationship').value;
+      const childName = document.getElementById('tp-child-name').value.trim();
+      const childAssessment = document.getElementById('tp-child-assessment').value.trim();
+      const childGrade = document.getElementById('tp-child-grade').value.trim();
+      if(!childName || !childAssessment || !childGrade){
+        throw {code:'custom', message:"Enter your child's full name, Assessment No. and Grade/Class — the admin needs these to verify you before approving."};
+      }
       const fullName = (fname + ' ' + lname).trim() || email.split('@')[0];
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -894,10 +976,14 @@ document.getElementById('tp-submit-btn').addEventListener('click', async ()=>{
       await setDoc(doc(fs, 'parents', cred.user.uid), {
         name: fullName, firstName: fname, lastName: lname,
         email, phone, relationship,
+        childName, childAssessment, childGrade,
         linkedStudents: [],
+        status: 'pending', source: 'signup',
         createdAt: new Date().toISOString(),
       });
-      notify('✓ Account created — welcome to the Parent Portal!', 'success');
+      notify('✓ Account created — checking approval…', 'success');
+      // onAuthStateChanged below checks the 'authorizedParents' configuration and
+      // either opens the portal (if pre-approved) or shows the pending screen.
     } else {
       await signInWithEmailAndPassword(auth, email, pass);
     }
@@ -945,12 +1031,18 @@ function showView(name){
   document.getElementById('tp-topbar-title').textContent = title;
   document.getElementById('tp-topbar-sub').textContent = sub;
   document.getElementById('tp-sidebar').classList.remove('open');
+  document.getElementById('tp-sidebar-backdrop').classList.remove('show');
 }
 document.querySelectorAll('.tp-nav-item').forEach(item=>{
   item.addEventListener('click', ()=>showView(item.dataset.view));
 });
 document.getElementById('tp-hamburger-btn').addEventListener('click', ()=>{
   document.getElementById('tp-sidebar').classList.toggle('open');
+  document.getElementById('tp-sidebar-backdrop').classList.toggle('show');
+});
+document.getElementById('tp-sidebar-backdrop').addEventListener('click', ()=>{
+  document.getElementById('tp-sidebar').classList.remove('open');
+  document.getElementById('tp-sidebar-backdrop').classList.remove('show');
 });
 document.getElementById('tp-logout-btn').addEventListener('click', doSignOut);
 document.getElementById('pf-signout-btn').addEventListener('click', doSignOut);
@@ -1051,22 +1143,22 @@ document.getElementById('pf-save-btn').addEventListener('click', async ()=>{
 /* ══════════════════════════════════════════
    LINK A CHILD — validated against the real Realtime-DB student records
 ══════════════════════════════════════════ */
-function findStudentRecord(upiInput, nameInput){
-  const upi = upiInput.trim().toLowerCase();
+function findStudentRecord(idInput, nameInput){
+  const idVal = idInput.trim().toLowerCase();
   const name = nameInput.trim().toLowerCase();
   for(const [key, r] of Object.entries(allStudentRecords)){
     if(!r) continue;
-    const recUpi = (r['UPI']||'').toString().trim().toLowerCase();
     const recName = (r['Official Student Name']||'').toString().trim().toLowerCase();
-    if(recUpi && recUpi === upi && recName === name) return { key, ...r };
+    const recAssessment = (r['Assessment No']||'').toString().trim().toLowerCase();
+    if(recAssessment && recAssessment === idVal && recName.includes(name)) return { key, ...r };
   }
   return null;
 }
 async function linkChild(upi, name, errEl){
   errEl.classList.remove('on');
-  if(!upi || !name){ errEl.textContent = "Enter the child's UPI/Admission No. and full name."; errEl.classList.add('on'); return false; }
+  if(!upi || !name){ errEl.textContent = "Enter the child's Assessment No. and name."; errEl.classList.add('on'); return false; }
   const match = findStudentRecord(upi, name);
-  if(!match){ errEl.textContent = "No student record matches that UPI and name — please check them and try again."; errEl.classList.add('on'); return false; }
+  if(!match){ errEl.textContent = "No student record matches that Assessment No. and name — please check them and try again."; errEl.classList.add('on'); return false; }
   if(linkedChildren.some(c=>c.key === match.key)){ errEl.textContent = "That child is already linked to your account."; errEl.classList.add('on'); return false; }
   const entry = { key: match.key, name: match['Official Student Name']||'', upi: match['UPI']||'', grade: match['Grade']||'' };
   const updated = [...linkedChildren, entry];
@@ -1169,7 +1261,7 @@ function activeChildRecord(){
   return r ? { key: activeChildKey, ...r } : null;
 }
 // Fields on a student record that are metadata, not subjects
-const NON_SUBJECT_FIELDS = new Set(['Official Student Name','UPI','Assessment No','Gender','Grade','Term']);
+const NON_SUBJECT_FIELDS = new Set(['Official Student Name','UPI','Assessment No','Gender','Grade','Term','Class','key','Closing Date','Opening Date']);
 function subjectEntries(record){
   if(!record) return [];
   return Object.entries(record)
@@ -1187,7 +1279,28 @@ function classAverageFor(subject, record){
   const nums = mates.map(m=>parseFloat(m[subject])).filter(n=>!isNaN(n));
   return nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : null;
 }
-
+// A student can have several exam-result records — one per Grade/Term
+// they've sat — stored as separate keys in the same students table.
+// The linked child only pins one of those keys (activeChildKey), so to
+// show a student's full result history we look up every record sharing
+// their Assessment No (the school's actual universal student identifier,
+// not UPI). Falls back to an exact name match if Assessment No is blank
+// on the linked record.
+function examHistoryFor(record){
+  if(!record) return [];
+  const assessment = (record['Assessment No']||'').toString().trim().toLowerCase();
+  const name = (record['Official Student Name']||'').toString().trim().toLowerCase();
+  const matches = Object.entries(allStudentRecords)
+    .filter(([k,r]) => {
+      if(!r) return false;
+      if(assessment){
+        return (r['Assessment No']||'').toString().trim().toLowerCase() === assessment;
+      }
+      return (r['Official Student Name']||'').toString().trim().toLowerCase() === name;
+    })
+    .map(([k,r]) => ({ key:k, ...r }));
+  return matches.sort((a,b) => (b['Grade']||'').localeCompare(a['Grade']||''));
+}
 function renderEverythingForActiveChild(){
   const record = activeChildRecord();
   const noChildCard = document.getElementById('tp-no-child-card');
@@ -1269,26 +1382,32 @@ function renderGradesView(record){
     sub.textContent = 'Full subject breakdown for your child';
     return;
   }
-  sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
-  const subs = subjectEntries(record).sort((a,b)=>a.subject.localeCompare(b.subject));
-  if(!subs.length){
+  sub.textContent = `${record['Official Student Name']||''} — full exam history`;
+  const history = examHistoryFor(record);
+  if(!history.length){
     holder.innerHTML = '<div class="tp-card tp-empty">No scores published for this exam yet.</div>';
     return;
   }
-  const rows = subs.map(s=>{
-    const band = cbcBand(s.score);
-    const classAvg = classAverageFor(s.subject, record);
-    return `<tr>
-      <td>${s.subject.replace(/</g,'&lt;')}</td>
-      <td class="mono">${s.score}</td>
-      <td class="mono">${classAvg !== null ? classAvg.toFixed(1) : '—'}</td>
-      <td><span class="tp-score-badge" style="background:${band.color}22;color:${band.color};">${band.label}</span></td>
-    </tr>`;
+  holder.innerHTML = history.map((rec, i) => {
+    const subs = subjectEntries(rec).sort((a,b)=>a.subject.localeCompare(b.subject));
+    const body = subs.length ? `<div class="tp-table-wrap"><table class="tp-table">
+        <thead><tr><th>Subject</th><th>Score</th><th>Class average</th><th>Level</th></tr></thead>
+        <tbody>${subs.map(s=>{
+          const band = cbcBand(s.score);
+          const classAvg = classAverageFor(s.subject, rec);
+          return `<tr>
+            <td>${s.subject.replace(/</g,'&lt;')}</td>
+            <td class="mono">${s.score}</td>
+            <td class="mono">${classAvg !== null ? classAvg.toFixed(1) : '—'}</td>
+            <td><span class="tp-score-badge" style="background:${band.color}22;color:${band.color};">${band.label}</span></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>` : `<div class="tp-empty">No scores published for this exam yet.</div>`;
+    return `<details class="tp-card" style="margin-bottom:12px;" ${i===0 ? 'open' : ''}>
+      <summary style="cursor:pointer;font-weight:800;">${(rec['Grade']||'Exam').replace(/</g,'&lt;')}</summary>
+      <div style="margin-top:12px;">${body}</div>
+    </details>`;
   }).join('');
-  holder.innerHTML = `<div class="tp-table-wrap"><table class="tp-table">
-    <thead><tr><th>Subject</th><th>Score</th><th>Class average</th><th>Level</th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
 }
 
 /* ══════════════════════════════════════════
@@ -1372,29 +1491,272 @@ function renderLatestAnnouncementPreview(){
 }
 
 /* ══════════════════════════════════════════
+   PARENT AUTHORIZATION — checked against the 'authorizedParents'
+   configuration collection, which the school admin manages (add an
+   email there ahead of time to pre-approve it). Any parent who signs
+   up or signs in with Google whose email isn't already approved in
+   that collection is held on a "pending" screen until an admin
+   approves the account.
+══════════════════════════════════════════ */
+async function findAuthorizedParent(email){
+  const snap = await getDoc(doc(fs, 'authorizedParents', email.toLowerCase()));
+  if(!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() };
+}
+async function requestParentAuthorization(email, name, source, details){
+  const existing = await findAuthorizedParent(email);
+  if(existing) return existing;
+  const rec = {
+    email: email.toLowerCase(), name: name || '', status: 'pending',
+    source: source || 'signup', requestedAt: new Date().toISOString(),
+    childName: (details && details.childName) || '',
+    childAssessment: (details && details.childAssessment) || '',
+    childGrade: (details && details.childGrade) || '',
+  };
+  await setDoc(doc(fs, 'authorizedParents', email.toLowerCase()), rec);
+  return rec;
+}
+
+let showingPendingScreen = false;
+function showPendingScreen(msg, icon){
+  showingPendingScreen = true;
+  document.getElementById('tp-shell').style.display = 'none';
+  document.getElementById('tp-auth-screen').style.display = 'none';
+  document.querySelector('.tp-theme-toggle').style.display = 'flex';
+  document.getElementById('tp-pending-icon').textContent = icon || '⏳';
+  document.getElementById('tp-pending-msg').textContent = msg ||
+    "Your parent account has been created and is waiting for the school admin to approve access. This page will update automatically — no need to refresh — the moment it's approved.";
+  document.getElementById('tp-pending-screen').style.display = 'flex';
+}
+function hidePendingScreen(){
+  showingPendingScreen = false;
+  document.getElementById('tp-pending-screen').style.display = 'none';
+}
+
+/* Live watch on the 'authorizedParents' record for this email. This now
+   stays running for the ENTIRE session, not just while pending — an admin
+   revoking a previously-approved account (by rejecting or removing the
+   record) must kick the parent out immediately even if they're already
+   inside the app, not just take effect on their next sign-in. */
+let authWatchUnsub = null;
+let isInsideApp = false;
+function stopAuthorizationWatch(){
+  if(authWatchUnsub){ authWatchUnsub(); authWatchUnsub = null; }
+}
+function startAuthorizationWatch(email, uid){
+  stopAuthorizationWatch();
+  authWatchUnsub = onSnapshot(doc(fs, 'authorizedParents', email.toLowerCase()), async (snap)=>{
+    const rec = snap.exists() ? snap.data() : null;
+
+    if(rec && rec.status === 'approved'){
+      if(isInsideApp) return; // already in — nothing changed
+      try{
+        await updateDoc(doc(fs, 'parents', uid), { status: 'approved' });
+        notify('✓ Your account has been approved — welcome!', 'success');
+        await enterApprovedApp(auth.currentUser);
+      }catch(e){ notify('Error activating your account: ' + e.message, 'error'); }
+      return;
+    }
+
+    // Anything else (rejected, or the record itself was removed) means
+    // access is not currently approved. If the parent is already inside
+    // the app, this is a live revocation — sign them out right now instead
+    // of leaving them logged in with access the admin just pulled.
+    if(isInsideApp){
+      exitApprovedApp();
+      await signOut(auth);
+      showPendingScreen("Your access to the Parent Portal has been revoked by the school admin. Please contact the school office if you believe this is a mistake.", '🚫');
+      return;
+    }
+
+    if(rec && rec.status === 'rejected'){
+      await signOut(auth);
+      showPendingScreen("Access to the Parent Portal for this email was declined by the school admin. Please contact the school office if you believe this is a mistake.", '🚫');
+      return;
+    }
+    // else: not yet inside the app and still pending — keep waiting silently
+  }, (err)=>{ console.error('Authorization watch error:', err); });
+}
+
+document.getElementById('tp-pending-back-btn').addEventListener('click', async ()=>{
+  stopAuthorizationWatch();
+  try{ await signOut(auth); }catch(e){}
+  hidePendingScreen();
+  document.getElementById('tp-auth-screen').style.display = 'flex';
+  setMode('signin');
+});
+
+/* Google sign-in — same authorization + profile flow is finished in onAuthStateChanged below */
+const googleBtn = document.getElementById('tp-google-btn');
+const googleBtnLabel = document.getElementById('tp-google-btn-label');
+googleBtn.addEventListener('click', async ()=>{
+  els.err.classList.remove('on');
+  googleBtn.disabled = true;
+  googleBtnLabel.textContent = 'Connecting…';
+  try{
+    await signInWithPopup(auth, googleProvider);
+    // onAuthStateChanged handles profile creation, authorization check, and routing from here
+  }catch(e){
+    if(e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request'){
+      showErr(e.message || 'Could not sign in with Google.');
+    }
+  }finally{
+    googleBtn.disabled = false;
+    googleBtnLabel.textContent = 'Continue with Google';
+  }
+});
+
+/* ══════════════════════════════════════════
    AUTH STATE
 ══════════════════════════════════════════ */
-onAuthStateChanged(auth, async (user)=>{
-  if(user){
-    try{
-      await loadAllStudents();
-      await loadProfile(user);
-      startAnnouncementsListener();
-      document.getElementById('tp-auth-screen').style.display = 'none';
-      document.getElementById('tp-shell').style.display = 'flex';
-      document.querySelector('.tp-theme-toggle').style.display = 'none';
-      tickClock();
-    }catch(e){
-      notify('Error loading your account: ' + e.message, 'error', 8000);
+function askChildVerification(){
+  const modal = document.getElementById('tp-verify-modal');
+  const nameEl = document.getElementById('tp-verify-child-name');
+  const assessEl = document.getElementById('tp-verify-child-assessment');
+  const gradeEl = document.getElementById('tp-verify-child-grade');
+  const errEl = document.getElementById('tp-verify-err');
+  const btn = document.getElementById('tp-verify-submit-btn');
+  nameEl.value = ''; assessEl.value = ''; gradeEl.value = '';
+  errEl.classList.remove('on');
+  modal.style.display = 'flex';
+  return new Promise((resolve)=>{
+    function onSubmit(){
+      const childName = nameEl.value.trim();
+      const childAssessment = assessEl.value.trim();
+      const childGrade = gradeEl.value.trim();
+      if(!childName || !childAssessment || !childGrade){
+        errEl.textContent = "Please fill in all three fields — the admin needs these to verify you.";
+        errEl.classList.add('on');
+        return;
+      }
+      cleanup();
+      modal.style.display = 'none';
+      resolve({ childName, childAssessment, childGrade });
     }
-  } else {
-    document.getElementById('tp-shell').style.display = 'none';
-    document.getElementById('tp-auth-screen').style.display = 'flex';
-    document.querySelector('.tp-theme-toggle').style.display = 'flex';
-    document.getElementById('tp-submit-btn').disabled = false;
-    setMode('signin');
+    function cleanup(){
+      btn.removeEventListener('click', onSubmit);
+    }
+    btn.addEventListener('click', onSubmit);
+  });
+}
+async function enterApprovedApp(user){
+  isInsideApp = true;
+  hidePendingScreen();
+  await loadAllStudents();
+  await loadProfile(user);
+  startAnnouncementsListener();
+  document.getElementById('tp-auth-screen').style.display = 'none';
+  document.getElementById('tp-shell').style.display = 'flex';
+  document.querySelector('.tp-theme-toggle').style.display = 'none';
+  tickClock();
+}
+function exitApprovedApp(){
+  isInsideApp = false;
+  if(unsubAnnouncements){ unsubAnnouncements(); unsubAnnouncements = null; }
+  document.getElementById('tp-shell').style.display = 'none';
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  try{
+    if(user){
+      // Staff who are Advanced Admins on the main school system (same flag
+      // authorized-teachers-admin.html gates on) should never be stuck
+      // waiting on the parent-approval queue, even if they also sign in
+      // here as a parent. Check this first, before the pending-screen logic.
+      let isStaffAdvancedAdmin = false;
+      try{
+        const userDocSnap = await getDoc(doc(fs, 'users', user.uid));
+        isStaffAdvancedAdmin = userDocSnap.exists() && userDocSnap.data()?.Advancedadmin === true;
+      }catch(e){ /* not an admin, or doc unreadable — fall through to normal parent flow */ }
+
+      let snap = await getDoc(doc(fs, 'parents', user.uid));
+      let data = snap.exists() ? snap.data() : null;
+
+      if(isStaffAdvancedAdmin){
+        if(!data){
+          data = {
+            name: user.displayName || user.email.split('@')[0], firstName: '', lastName: '', phone: '',
+            relationship: 'Parent', email: (user.email || '').toLowerCase(),
+            childName: '', childAssessment: '', childGrade: '',
+            linkedStudents: [], status: 'pending', source: 'admin',
+            createdAt: new Date().toISOString(),
+          };
+          await setDoc(doc(fs, 'parents', user.uid), data); // create-as-self+pending, allowed by rules
+        }
+        if(data.status !== 'approved'){
+          await updateDoc(doc(fs, 'parents', user.uid), { status: 'approved' }); // allowed via isAdvancedAdmin() in rules
+        }
+        // Also clear them out of the pending queue in the admin tool, so
+        // they don't sit there looking stuck even though they're already in.
+        try{
+          const email = (user.email || '').toLowerCase();
+          await setDoc(doc(fs, 'authorizedParents', email), {
+            email, name: data.name || '', status: 'approved',
+            approvedAt: Date.now(), approvedBy: user.email || '',
+          }, { merge: true });
+        }catch(e){ /* non-fatal — they're already in the app regardless */ }
+        stopAuthorizationWatch();
+        await enterApprovedApp(user);
+        return;
+      }
+
+      // Brand-new sign-in with no parent profile yet (e.g. first-time Google sign-in) — create one.
+      if(!data){
+        const providerId = (user.providerData && user.providerData[0] && user.providerData[0].providerId) || '';
+        const fullName = user.displayName || user.email.split('@')[0];
+        const verify = await askChildVerification();
+        data = {
+          name: fullName, firstName: '', lastName: '', phone: '',
+          relationship: 'Parent', email: (user.email || '').toLowerCase(),
+          childName: verify.childName, childAssessment: verify.childAssessment, childGrade: verify.childGrade,
+          linkedStudents: [], status: 'pending',
+          source: providerId.includes('google') ? 'google' : 'signup',
+          createdAt: new Date().toISOString(),
+        };
+        await setDoc(doc(fs, 'parents', user.uid), data);
+      }
+
+      // Never trust the locally-cached parents/{uid}.status blindly — a
+      // parent's own rules-restricted client can't rewrite it back to
+      // 'rejected' if an admin revokes access, so it can go stale. Always
+      // reconcile against the live 'authorizedParents' record instead.
+      const authRecord = await requestParentAuthorization(user.email, data.name, data.source || 'signup', {
+        childName: data.childName, childAssessment: data.childAssessment, childGrade: data.childGrade
+      });
+      if(authRecord && authRecord.status === 'approved'){
+        if(data.status !== 'approved'){
+          await updateDoc(doc(fs, 'parents', user.uid), { status: 'approved' });
+        }
+        startAuthorizationWatch(user.email, user.uid); // keep watching for the rest of the session
+        await enterApprovedApp(user);
+        return;
+      }
+      if(authRecord && authRecord.status === 'rejected'){
+        await signOut(auth);
+        showPendingScreen("Access to the Parent Portal for this email was declined by the school admin. Please contact the school office if you believe this is a mistake.", '🚫');
+        return;
+      }
+
+      // Pending — stay signed in and watch the configuration live, so an
+      // admin approval takes effect immediately without a fresh sign-in.
+      showPendingScreen();
+      startAuthorizationWatch(user.email, user.uid);
+    } else {
+      stopAuthorizationWatch();
+      isInsideApp = false;
+      document.getElementById('tp-shell').style.display = 'none';
+      if(!showingPendingScreen){
+        document.getElementById('tp-auth-screen').style.display = 'flex';
+      }
+      document.querySelector('.tp-theme-toggle').style.display = 'flex';
+      document.getElementById('tp-submit-btn').disabled = false;
+      setMode('signin');
+    }
+  }catch(e){
+    notify('Error loading your account: ' + e.message, 'error', 8000);
+  }finally{
+    hideLoader();
   }
-  hideLoader();
 });
 </script>
 </body>
