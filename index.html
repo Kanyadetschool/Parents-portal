@@ -9,6 +9,44 @@
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
+
+
+
+
+.Automations a{
+  color: #000000 !important;
+}
+.automationimg{
+  width:35px;
+  border-radius: 50%;
+  /* filter: grayscale(100%); */
+
+}
+.Automations{
+  color: #000000 !important;
+	font-size: 16px;
+	transition: all 0.5s ease-in-out;
+  background: -webkit-gradient(linear, left top, right top, from(#fcbb04), to(#fffc00));
+  /* background: linear-gradient(to right, #fcbb04, #fffc00); */
+  background: linear-gradient(to right, #fc0480, #c50334);
+	position:fixed ;
+  border: none;
+  top: 73%;
+	right: 25px;
+	font-weight: bold;
+  backdrop-filter: blur(50px);
+  transition: all 0.8s cubic-bezier(0.15, 0.83, 0.66, 1);
+	transform: translatey(-50%, -50%);
+	padding: 10px 10px ;
+	border-radius: 20px;
+	box-shadow: 0px 0px 10px rgb(143, 7, 11);
+  backdrop-filter: blur(30px);
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  z-index: 10000;
+}
+
+
+
 /* ══════════════════════════════════════════
    CSS VARIABLES — same palette as the Results Portal
 ══════════════════════════════════════════ */
@@ -56,6 +94,13 @@ button,input,select,textarea{font-family:inherit;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px;}
 ::-webkit-scrollbar-track{background:transparent;}
+
+
+
+.auth-links{text-align:center;margin-top:.3rem;font-size:.79rem;color:var(--orange);font-weight:500}
+    .auth-links a{color:var(--orange);font-weight:700;text-decoration: none; border: #0e7a67;}
+    .auth-links a:hover{text-decoration:dotted underline var(--blue-lt) 1px}
+
 
 /* ══════════════════════════════════════════
    BOOT LOADER
@@ -554,6 +599,15 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       <span id="tp-google-btn-label">Continue with Google</span>
     </button>
+
+ <button  class="Automations"> <a href="./authorized-teachers-admin.html" target="_blank" title="Activate Parent Account" > 
+                <img src="./images/authorized.jpg" class="automationimg" alt="">
+               </a>
+   </button>
+
+ <div class="auth-links">
+   <a href="./authorized-teachers-admin.html" target="_blank">Parents Admin Auth</a> 
+        </div>
 
     <div class="tp-switch-line" id="tp-forgot-line">
       <a id="tp-forgot-link">Forgot password?</a>
