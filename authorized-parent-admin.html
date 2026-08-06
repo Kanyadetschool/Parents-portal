@@ -215,6 +215,61 @@
     .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:590}
     .sidebar-backdrop.show{display:block}
 
+    /* Topbar icon buttons (notifications, search) */
+    .icon-btn{position:relative;width:34px;height:34px;border-radius:9px;background:transparent;border:1px solid var(--border);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+    .icon-btn:hover{border-color:var(--blue-lt);color:var(--blue-lt)}
+    .icon-badge{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;box-shadow:0 0 0 2px var(--surface)}
+    .icon-badge.hidden{display:none}
+    .kbd-hint{font-size:9px;font-weight:700;color:var(--text3);border:1px solid var(--border);border-radius:5px;padding:1px 5px;margin-left:6px}
+
+    /* Notifications dropdown */
+    .notif-wrap{position:relative}
+    .notif-panel{position:absolute;top:44px;right:0;width:320px;max-width:88vw;background:var(--surface2);border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);z-index:900;display:none;overflow:hidden}
+    .notif-panel.open{display:block}
+    .notif-hdr{padding:12px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text);display:flex;justify-content:space-between;align-items:center}
+    .notif-list{max-height:340px;overflow-y:auto}
+    .notif-item{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+    .notif-item:last-child{border-bottom:none}
+    .notif-item:hover{background:rgba(41,128,185,.08)}
+    .notif-ico{font-size:15px;flex-shrink:0}
+    .notif-body{min-width:0}
+    .notif-title{font-size:11.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .notif-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
+    .notif-empty{padding:26px 14px;text-align:center;color:var(--text3);font-size:12px}
+
+    /* Command palette */
+    .cmdk-backdrop{position:fixed;inset:0;background:rgba(10,20,35,.55);z-index:3100;display:none;align-items:flex-start;justify-content:center;padding:12vh 20px 20px}
+    .cmdk-backdrop.open{display:flex}
+    .cmdk-panel{width:100%;max-width:560px;background:var(--surface2);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden;animation:fadeUp .2s ease}
+    .cmdk-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+    .cmdk-input-wrap span{font-size:15px;color:var(--text3)}
+    #cmdk-input{flex:1;border:none;background:transparent;outline:none;font-family:inherit;font-size:14px;color:var(--text)}
+    .cmdk-results{max-height:360px;overflow-y:auto;padding:6px}
+    .cmdk-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;font-size:12.5px}
+    .cmdk-row.active,.cmdk-row:hover{background:rgba(41,128,185,.14)}
+    .cmdk-row .cr-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+    .cmdk-row .cr-label{font-weight:700;color:var(--text)}
+    .cmdk-row .cr-sub{color:var(--text3);font-size:10.5px;margin-left:6px}
+    .cmdk-row .cr-tag{margin-left:auto;font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+    .cmdk-empty{padding:24px;text-align:center;color:var(--text3);font-size:12px}
+    .cmdk-ftr{padding:8px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;gap:14px}
+
+    /* Account clickable footer */
+    .sidebar-footer.clickable{cursor:pointer}
+    .sidebar-footer.clickable:hover .m-name{color:var(--blue-lt)}
+
+    @media print{
+      body::before,body::after,.sidebar,.topbar,.toast-host,.dmodal-backdrop,.notif-panel,.cmdk-backdrop,.actions-row,.toolbar,#parentSelectAll,th:first-child,td:first-child{display:none!important}
+      .main-content{margin-left:0!important;max-width:100%!important}
+      .content-area{padding:0!important}
+      body,.panel{background:#fff!important;box-shadow:none!important}
+      .table-wrap{max-height:none!important;overflow:visible!important;border:none!important}
+      .view{display:none!important}
+      .view.active{display:block!important}
+      .print-only-hdr{display:block!important;margin-bottom:14px}
+    }
+    .print-only-hdr{display:none}
+
     .dmodal-backdrop{position:fixed;inset:0;background:rgba(10,20,35,.6);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px;}
     .dmodal-backdrop.open{display:flex;}
     .dmodal{background:var(--surface2);border-radius:16px;border:1px solid var(--border);max-width:460px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.4);}
@@ -333,8 +388,9 @@
         <div class="nav-item" id="nav-item-parents" data-view="parents"><span class="nav-icon">👨‍👩‍👧</span>Authorized Parents <span class="nav-badge" id="nav-parents-badge" style="display:none;">—</span></div>
         <div class="nav-item" id="nav-item-analytics" data-view="analytics"><span class="nav-icon">📈</span>Analytics</div>
         <div class="nav-item" id="nav-item-auditlog" data-view="auditlog"><span class="nav-icon">📜</span>Audit Log</div>
+        <div class="nav-item" id="nav-item-settings" data-view="settings"><span class="nav-icon">⚙️</span>Settings</div>
       </div>
-      <div class="sidebar-footer">
+      <div class="sidebar-footer clickable" id="myAccountTrigger" title="View account">
         <div class="me-av" id="me-av">A</div>
         <div class="me-info">
           <div class="m-name" id="me-name">Admin</div>
@@ -354,6 +410,16 @@
           </div>
         </div>
         <div class="topbar-right">
+          <button class="icon-btn" id="cmdkOpenBtn" title="Search (Ctrl/Cmd+K)">🔍</button>
+          <div class="notif-wrap">
+            <button class="icon-btn" id="notifBtn" title="Notifications">
+              🔔<span class="icon-badge hidden" id="notifBadge">0</span>
+            </button>
+            <div class="notif-panel" id="notifPanel">
+              <div class="notif-hdr"><span>Notifications</span><span class="muted" id="notifCount">0 new</span></div>
+              <div class="notif-list" id="notifList"><div class="notif-empty">Nothing needs attention 🎉</div></div>
+            </div>
+          </div>
           <div class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
             <span class="theme-icon moon">🌙</span>
             <span class="theme-icon sun">☀️</span>
@@ -423,12 +489,14 @@
               <div class="sec-sub">Emails allow-listed to sign in via Google or email/password on the Teachers Portal. Adding someone here does not create their password — they set that up themselves, or you create it separately in Firebase Auth.</div>
             </div>
             <div class="actions-row">
+              <button class="btn btn-outline btn-sm" id="printTeachersBtn">🖨️ Print / PDF</button>
               <button class="btn btn-outline btn-sm" id="exportTeachersBtn">⬇️ Export CSV</button>
               <button class="btn btn-blue btn-sm" id="addTeacherBtn">➕ Add Teacher</button>
             </div>
           </div>
 
           <div class="panel">
+            <div class="print-only-hdr"><h2 style="font-size:16px;">Kanyadet School — Authorized Teachers</h2><div class="muted" id="printTeachersDate"></div></div>
             <div class="toolbar">
               <input class="search-input" id="teacherSearch" type="text" placeholder="Search by name, email, or role…" />
               <select class="sel" id="teacherRoleFilter" style="max-width:160px;">
@@ -462,12 +530,15 @@
               <div class="sec-sub">Configuration that the Parent Portal checks on every sign-up and Google sign-in. Pre-add an email here to approve it in advance; otherwise new accounts land here as <b>Pending</b> and stay locked out of the portal until you approve them.</div>
             </div>
             <div class="actions-row">
+              <button class="btn btn-outline btn-sm" id="printParentsBtn">🖨️ Print / PDF</button>
               <button class="btn btn-outline btn-sm" id="exportParentsBtn">⬇️ Export CSV</button>
+              <button class="btn btn-outline btn-sm" id="importParentsBtn">⬆️ Import CSV</button>
               <button class="btn btn-blue btn-sm" id="addParentBtn">➕ Add Authorized Parent</button>
             </div>
           </div>
 
           <div class="panel">
+            <div class="print-only-hdr"><h2 style="font-size:16px;">Kanyadet School — Authorized Parents</h2><div class="muted" id="printParentsDate"></div></div>
             <div class="toolbar">
               <input class="search-input" id="parentSearch" type="text" placeholder="Search by name, email, or status…" />
               <select class="sel" id="parentStatusFilter" style="max-width:170px;">
@@ -565,11 +636,13 @@
               <div class="sec-sub">Every add, edit, approval, rejection, and removal made through this admin tool, newest first.</div>
             </div>
             <div class="actions-row">
+              <button class="btn btn-outline btn-sm" id="printAuditBtn">🖨️ Print / PDF</button>
               <button class="btn btn-outline btn-sm" id="exportAuditBtn">⬇️ Export CSV</button>
               <button class="btn btn-outline btn-sm" id="refreshAuditBtn">🔄 Refresh</button>
             </div>
           </div>
           <div class="panel">
+            <div class="print-only-hdr"><h2 style="font-size:16px;">Kanyadet School — Audit Log</h2><div class="muted" id="printAuditDate"></div></div>
             <div class="toolbar">
               <input class="search-input" id="auditSearch" type="text" placeholder="Search by actor, action, or target…" />
             </div>
@@ -585,8 +658,51 @@
             </div>
           </div>
         </section>
+
+        <section class="view" id="view-settings">
+          <div class="sec-hdr">
+            <div>
+              <h2>Settings</h2>
+              <div class="sec-sub">School profile and access-control preferences for this admin tool.</div>
+            </div>
+          </div>
+
+          <div class="panel" style="max-width:560px;">
+            <h3 style="font-size:13px;font-weight:900;margin-bottom:14px;">🏫 School Profile</h3>
+            <div class="field-group"><label>School Name</label>
+              <input class="field-input" id="set-school-name" placeholder="Kanyadet PRI &amp; Junior School" /></div>
+            <div class="field-group"><label>Contact Email</label>
+              <input class="field-input" type="email" id="set-contact-email" placeholder="office@kanyadet.school" /></div>
+            <div class="field-group"><label>Auto-Approve Email Domains <span class="muted">(comma-separated, optional)</span></label>
+              <input class="field-input" id="set-auto-domains" placeholder="e.g. kanyadet.school, staff.kanyadet.school" />
+              <div class="muted" style="margin-top:2px;">New parent sign-ups matching these domains are flagged as trusted below — approval is still a manual click in the Parents list.</div>
+            </div>
+            <button class="btn btn-blue btn-sm" id="settingsSaveBtn">💾 Save Settings</button>
+            <span class="muted" id="settingsSavedNote" style="margin-left:10px;display:none;">Saved just now</span>
+          </div>
+
+          <div class="panel" style="max-width:560px;">
+            <h3 style="font-size:13px;font-weight:900;margin-bottom:6px;">⌨️ Shortcuts</h3>
+            <div class="muted" style="line-height:1.9;">
+              <span class="kbd-hint">Ctrl/Cmd + K</span> Open quick search &nbsp;·&nbsp;
+              <span class="kbd-hint">Esc</span> Close any dialog
+            </div>
+          </div>
+        </section>
       </div>
     </main>
+  </div>
+
+  <!-- Command palette -->
+  <div class="cmdk-backdrop" id="cmdk-backdrop">
+    <div class="cmdk-panel">
+      <div class="cmdk-input-wrap">
+        <span>🔍</span>
+        <input id="cmdk-input" type="text" placeholder="Search views, teachers, or parents…" autocomplete="off" />
+      </div>
+      <div class="cmdk-results" id="cmdk-results"></div>
+      <div class="cmdk-ftr"><span>↑↓ navigate</span><span>↵ select</span><span>esc close</span></div>
+    </div>
   </div>
 
   <!-- Reusable add/edit modal -->
@@ -605,7 +721,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js';
     import {
       getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-      GoogleAuthProvider, signInWithPopup, signOut
+      GoogleAuthProvider, signInWithPopup, signOut, sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js';
     import {
       getFirestore, collection, getDocs, addDoc, setDoc, updateDoc, deleteDoc, doc, getDoc, query, where
@@ -642,6 +758,7 @@
       teacherSort: { field: 'name', dir: 1 },
       parentSort: { field: 'requestedAt', dir: -1 },
       selectedParentIds: new Set(),
+      settings: { schoolName: '', contactEmail: '', autoApproveDomains: '' },
     };
 
     /* ── Utils ── */
@@ -711,8 +828,9 @@
       parents:  { title: 'Authorized Parents',  crumb: 'Who can sign in to the Parent Portal' },
       analytics:{ title: 'Analytics', crumb: 'Trends and breakdowns across teachers and parents' },
       auditlog: { title: 'Audit Log', crumb: 'Every access-control change made through this tool' },
+      settings: { title: 'Settings', crumb: 'School profile and access-control preferences' },
     };
-    const NAV_VIEWS = ['overview','teachers','parents','analytics','auditlog'];
+    const NAV_VIEWS = ['overview','teachers','parents','analytics','auditlog','settings'];
     function showNavView(name){
       if(!NAV_VIEWS.includes(name)) name = 'overview';
       document.querySelectorAll('.nav-item[data-view]').forEach(n => n.classList.toggle('active', n.dataset.view === name));
@@ -725,6 +843,7 @@
       if(name === 'overview') updateOverview();
       if(name === 'auditlog') loadAuditLog();
       if(name === 'analytics') renderAnalytics();
+      if(name === 'settings') renderSettingsForm();
     }
     document.querySelectorAll('.nav-item[data-view]').forEach(n => {
       n.addEventListener('click', () => showNavView(n.dataset.view));
@@ -765,7 +884,9 @@
       await loadTeachers();
       await loadAuthorizedParents();
       await loadAuditLog();
+      await loadSettings();
       updateOverview();
+      renderNotifications();
     }
 
     /* ── Audit Log ── */
@@ -1241,6 +1362,7 @@
       }
       renderAuthorizedParents();
       updateOverview();
+      renderNotifications();
     }
 
     function filteredParents(){
@@ -1572,6 +1694,285 @@
         }catch(err){ toast(err.message, 'err'); }
       });
     });
+
+    /* ══════════ Feature: Settings (school profile + auto-approve domains) ══════════ */
+    async function loadSettings(){
+      try{
+        const snap = await getDoc(doc(fst, 'settings', 'general'));
+        if(snap.exists()) state.settings = { schoolName:'', contactEmail:'', autoApproveDomains:'', ...snap.data() };
+      }catch(e){ console.error('Could not load settings:', e); }
+      renderSettingsForm();
+    }
+    function renderSettingsForm(){
+      if(!$('set-school-name')) return;
+      $('set-school-name').value = state.settings.schoolName || '';
+      $('set-contact-email').value = state.settings.contactEmail || '';
+      $('set-auto-domains').value = state.settings.autoApproveDomains || '';
+    }
+    $('settingsSaveBtn')?.addEventListener('click', async () => {
+      const schoolName = $('set-school-name').value.trim();
+      const contactEmail = $('set-contact-email').value.trim();
+      const autoApproveDomains = $('set-auto-domains').value.trim();
+      try{
+        await setDoc(doc(fst, 'settings', 'general'), {
+          schoolName, contactEmail, autoApproveDomains,
+          updatedAt: Date.now(), updatedBy: state.user?.email || ''
+        }, { merge: true });
+        state.settings = { schoolName, contactEmail, autoApproveDomains };
+        await logAudit('Updated settings', 'settings/general', schoolName || '');
+        toast('Settings saved', 'ok');
+        const note = $('settingsSavedNote');
+        note.style.display = 'inline';
+        setTimeout(() => note.style.display = 'none', 2500);
+      }catch(err){ toast(err.message, 'err'); }
+    });
+
+    /* ══════════ Feature: Notifications bell ══════════ */
+    function trustedDomainList(){
+      return (state.settings.autoApproveDomains || '').split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+    }
+    function computeNotifications(){
+      const items = [];
+      const domains = trustedDomainList();
+      const now = Date.now();
+      for(const p of state.parents){
+        const status = p.status || 'pending';
+        if(status !== 'pending') continue;
+        const reqTs = Date.parse(p.requestedAt || p.addedAt || '') || 0;
+        const ageHrs = reqTs ? (now - reqTs) / 3600000 : 0;
+        const emailDomain = (p.email || '').split('@')[1]?.toLowerCase() || '';
+        const trusted = domains.includes(emailDomain);
+        const check = p._dbCheck;
+        const mismatch = check?.checked && check?.found && (!check.nameOk || !check.gradeOk);
+        if(mismatch){
+          items.push({ icon:'🚩', title:`Name/grade mismatch — ${p.email}`, sub:`Claimed child record doesn't fully match on file`, id:p.id, weight:3 });
+        } else if(ageHrs >= 48){
+          items.push({ icon:'⏳', title:`Waiting ${Math.floor(ageHrs/24)}d — ${p.email}`, sub: trusted ? 'Trusted domain — safe to fast-track' : 'Pending approval', id:p.id, weight:2 });
+        } else if(trusted){
+          items.push({ icon:'✅', title:`Trusted domain sign-up — ${p.email}`, sub:'Matches an auto-approve domain in Settings', id:p.id, weight:1 });
+        }
+      }
+      return items.sort((a,b) => b.weight - a.weight).slice(0, 25);
+    }
+    function renderNotifications(){
+      const items = computeNotifications();
+      const badge = $('notifBadge');
+      if(items.length){ badge.textContent = items.length > 9 ? '9+' : items.length; badge.classList.remove('hidden'); }
+      else badge.classList.add('hidden');
+      $('notifCount').textContent = `${items.length} new`;
+      $('notifList').innerHTML = items.length
+        ? items.map(n => `<div class="notif-item" data-id="${escapeHtml(n.id)}">
+            <div class="notif-ico">${n.icon}</div>
+            <div class="notif-body"><div class="notif-title">${escapeHtml(n.title)}</div><div class="notif-sub">${escapeHtml(n.sub)}</div></div>
+          </div>`).join('')
+        : `<div class="notif-empty">Nothing needs attention 🎉</div>`;
+      $('notifList').querySelectorAll('.notif-item[data-id]').forEach(el => {
+        el.addEventListener('click', () => {
+          $('notifPanel').classList.remove('open');
+          showNavView('parents');
+          $('parentSearch').value = '';
+          renderAuthorizedParents();
+          const row = document.querySelector(`#parents-tbody tr[data-id="${CSS.escape(el.dataset.id)}"]`);
+          row?.scrollIntoView({ behavior:'smooth', block:'center' });
+          if(row){ row.style.outline = '2px solid var(--blue-lt)'; setTimeout(() => row.style.outline = '', 1800); }
+        });
+      });
+    }
+    $('notifBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderNotifications();
+      $('notifPanel').classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('.notif-wrap')) $('notifPanel')?.classList.remove('open');
+    });
+
+    /* ══════════ Feature: Command palette (Ctrl/Cmd+K quick search) ══════════ */
+    let cmdkActive = -1, cmdkRows = [];
+    function cmdkIndex(){
+      const q = ($('cmdk-input').value || '').trim().toLowerCase();
+      const rows = [];
+      NAV_VIEWS.forEach(v => {
+        const meta = NAV_META[v];
+        if(!q || meta.title.toLowerCase().includes(q) || v.includes(q))
+          rows.push({ ico:'📄', label: meta.title, sub: meta.crumb, tag:'View', action: () => showNavView(v) });
+      });
+      if(q.length >= 1){
+        state.teachers.forEach(t => {
+          const hay = [t.name, t.username, t.email].filter(Boolean).join(' ').toLowerCase();
+          if(hay.includes(q)) rows.push({ ico:'👩‍🏫', label: t.name || t.username || t.email, sub: t.email, tag:'Teacher', action: () => { showNavView('teachers'); openTeacherModal(t); } });
+        });
+        state.parents.forEach(p => {
+          const hay = [p.name, p.email].filter(Boolean).join(' ').toLowerCase();
+          if(hay.includes(q)) rows.push({ ico:'👨‍👩‍👧', label: p.name || p.email, sub: `${p.email} · ${p.status || 'pending'}`, tag:'Parent', action: () => { showNavView('parents'); openParentDetailModal(p); } });
+        });
+      }
+      return rows.slice(0, 40);
+    }
+    function cmdkRender(){
+      cmdkRows = cmdkIndex();
+      cmdkActive = cmdkRows.length ? 0 : -1;
+      const box = $('cmdk-results');
+      box.innerHTML = cmdkRows.length
+        ? cmdkRows.map((r,i) => `<div class="cmdk-row${i===0?' active':''}" data-i="${i}">
+            <span class="cr-ico">${r.ico}</span><span class="cr-label">${escapeHtml(r.label)}</span>
+            <span class="cr-sub">${escapeHtml(r.sub||'')}</span><span class="cr-tag">${r.tag}</span>
+          </div>`).join('')
+        : `<div class="cmdk-empty">No matches</div>`;
+      box.querySelectorAll('.cmdk-row').forEach(el => {
+        el.addEventListener('mouseenter', () => { cmdkActive = +el.dataset.i; cmdkHighlight(); });
+        el.addEventListener('click', () => cmdkSelect(+el.dataset.i));
+      });
+    }
+    function cmdkHighlight(){
+      $('cmdk-results').querySelectorAll('.cmdk-row').forEach(el => el.classList.toggle('active', +el.dataset.i === cmdkActive));
+      $('cmdk-results').querySelector('.cmdk-row.active')?.scrollIntoView({ block:'nearest' });
+    }
+    function cmdkSelect(i){
+      const row = cmdkRows[i];
+      if(!row) return;
+      closeCmdk();
+      row.action();
+    }
+    function openCmdk(){
+      $('cmdk-backdrop').classList.add('open');
+      $('cmdk-input').value = '';
+      cmdkRender();
+      setTimeout(() => $('cmdk-input').focus(), 10);
+    }
+    function closeCmdk(){ $('cmdk-backdrop').classList.remove('open'); }
+    $('cmdkOpenBtn')?.addEventListener('click', openCmdk);
+    $('cmdk-backdrop').addEventListener('click', (e) => { if(e.target.id === 'cmdk-backdrop') closeCmdk(); });
+    $('cmdk-input').addEventListener('input', cmdkRender);
+    $('cmdk-input').addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowDown'){ e.preventDefault(); cmdkActive = Math.min(cmdkActive+1, cmdkRows.length-1); cmdkHighlight(); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); cmdkActive = Math.max(cmdkActive-1, 0); cmdkHighlight(); }
+      else if(e.key === 'Enter'){ e.preventDefault(); cmdkSelect(cmdkActive); }
+      else if(e.key === 'Escape'){ closeCmdk(); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); openCmdk(); }
+      else if(e.key === 'Escape'){ closeCmdk(); $('notifPanel')?.classList.remove('open'); }
+    });
+
+    /* ══════════ Feature: My Account panel ══════════ */
+    $('myAccountTrigger')?.addEventListener('click', (e) => {
+      if(e.target.closest('#logoutBtn')) return; // logout keeps its own handler
+      openAccountModal();
+    });
+    function openAccountModal(){
+      const u = state.user;
+      const lastSignIn = u?.metadata?.lastSignInTime ? fmtTime(Date.parse(u.metadata.lastSignInTime)) : '—';
+      const created = u?.metadata?.creationTime ? fmtTime(Date.parse(u.metadata.creationTime)) : '—';
+      $('dmodal-title').textContent = 'My Account';
+      $('dmodal-body').innerHTML = `
+        <div class="field-group"><label>Name</label><div style="font-size:13px;">${escapeHtml(u?.displayName || u?.email?.split('@')[0] || '—')}</div></div>
+        <div class="field-group"><label>Email</label><div class="mono" style="font-size:13px;">${escapeHtml(u?.email || '—')}</div></div>
+        <div class="field-group"><label>Access Level</label><span class="pill purple">Administrator</span></div>
+        <div class="field-group"><label>Last Sign-In</label><div class="muted">${lastSignIn}</div></div>
+        <div class="field-group"><label>Account Created</label><div class="muted">${created}</div></div>
+      `;
+      $('dmodal-ftr').innerHTML = `
+        <button class="btn btn-outline btn-sm" id="acct-close">Close</button>
+        <button class="btn btn-blue btn-sm" id="acct-reset-pw">✉️ Send Password Reset Email</button>
+      `;
+      $('dmodal-backdrop').classList.add('open');
+      $('acct-close').addEventListener('click', closeTeacherModal);
+      $('acct-reset-pw').addEventListener('click', async () => {
+        if(!u?.email){ toast('No email on this account', 'err'); return; }
+        try{
+          await sendPasswordResetEmail(auth, u.email);
+          await logAudit('Requested password reset', u.email, 'self-service');
+          toast(`Reset email sent to ${u.email}`, 'ok');
+        }catch(err){ toast(err.message, 'err'); }
+      });
+    }
+
+    /* ══════════ Feature: CSV bulk import for Authorized Parents ══════════ */
+    function parseCsv(text){
+      return text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(line => {
+        // simple CSV split (handles plain, comma-separated, optionally quoted fields)
+        const cells = [];
+        let cur = '', inQ = false;
+        for(let i=0;i<line.length;i++){
+          const c = line[i];
+          if(c === '"'){ inQ = !inQ; continue; }
+          if(c === ',' && !inQ){ cells.push(cur); cur=''; continue; }
+          cur += c;
+        }
+        cells.push(cur);
+        return cells.map(c => c.trim());
+      });
+    }
+    $('importParentsBtn')?.addEventListener('click', () => {
+      $('dmodal-title').textContent = 'Import Authorized Parents (CSV)';
+      $('dmodal-body').innerHTML = `
+        <div class="field-group"><label>CSV File</label>
+          <input class="field-input" type="file" id="pi-file" accept=".csv,text/csv" /></div>
+        <div class="muted" style="margin-bottom:10px;">Or paste rows directly — format: <span class="mono">name,email,status</span> (status is optional, defaults to <b>approved</b>).</div>
+        <div class="field-group"><label>Paste CSV rows</label>
+          <textarea class="field-input" id="pi-paste" rows="6" placeholder="Jane Wanjiru, jane@example.com, approved&#10;John Otieno, john@example.com"></textarea>
+        </div>
+        <div class="muted" id="pi-preview-count">No rows parsed yet.</div>
+      `;
+      $('dmodal-ftr').innerHTML = `
+        <button class="btn btn-outline btn-sm" id="pi-cancel">Cancel</button>
+        <button class="btn btn-green btn-sm" id="pi-import">⬆️ Import</button>
+      `;
+      $('dmodal-backdrop').classList.add('open');
+      $('pi-cancel').addEventListener('click', closeTeacherModal);
+      $('pi-file').addEventListener('change', async () => {
+        const f = $('pi-file').files[0];
+        if(f) $('pi-paste').value = await f.text();
+        updatePreview();
+      });
+      $('pi-paste').addEventListener('input', updatePreview);
+      function updatePreview(){
+        const rows = parseCsv($('pi-paste').value).filter(r => isValidEmail(r[1] || r[0] || ''));
+        $('pi-preview-count').textContent = rows.length ? `${rows.length} valid row(s) ready to import.` : 'No valid rows found — need at least name,email.';
+      }
+      $('pi-import').addEventListener('click', async () => {
+        const raw = parseCsv($('pi-paste').value);
+        // Accept either "name,email,status" or a header row / email-only rows.
+        const rows = raw
+          .map(r => {
+            let [c0,c1,c2] = r;
+            if(c0 && isValidEmail(c0) && !isValidEmail(c1||'')) return { name:'', email:c0, status:c1||'approved' };
+            return { name:c0||'', email:c1||'', status:c2||'approved' };
+          })
+          .filter(r => isValidEmail(r.email) && !/^(name|email)$/i.test(r.name));
+        if(!rows.length){ toast('No valid rows to import', 'err'); return; }
+        let ok = 0, skipped = 0;
+        for(const r of rows){
+          const email = r.email.trim().toLowerCase();
+          const status = ['approved','pending','rejected'].includes((r.status||'').toLowerCase()) ? r.status.toLowerCase() : 'approved';
+          if(state.parents.find(p => (p.email||'').toLowerCase() === email)){ skipped++; continue; }
+          try{
+            await setDoc(doc(fst, 'authorizedParents', email), {
+              name: r.name || '', email, status, source: 'csv-import',
+              requestedAt: new Date().toISOString(), addedBy: state.user?.email || '',
+              ...(status === 'approved' ? { approvedAt: Date.now(), approvedBy: state.user?.email || '' } : {})
+            });
+            ok++;
+          }catch(e){ skipped++; }
+        }
+        await logAudit('Bulk imported parents', `${ok} imported`, skipped ? `${skipped} skipped (duplicate/invalid)` : '');
+        toast(`Imported ${ok}${skipped ? `, skipped ${skipped}` : ''}`, ok ? 'ok' : 'err');
+        closeTeacherModal();
+        await loadAuthorizedParents();
+      });
+    });
+
+    /* ══════════ Feature: Print / PDF export ══════════ */
+    function preparePrint(view, dateElId){
+      const el = $(dateElId);
+      if(el) el.textContent = `Printed ${new Date().toLocaleString('en-KE', { dateStyle:'medium', timeStyle:'short' })}`;
+      showNavView(view);
+      setTimeout(() => window.print(), 60);
+    }
+    $('printTeachersBtn')?.addEventListener('click', () => preparePrint('teachers', 'printTeachersDate'));
+    $('printParentsBtn')?.addEventListener('click', () => preparePrint('parents', 'printParentsDate'));
+    $('printAuditBtn')?.addEventListener('click', () => preparePrint('auditlog', 'printAuditDate'));
   </script>
 </body>
 </html>
