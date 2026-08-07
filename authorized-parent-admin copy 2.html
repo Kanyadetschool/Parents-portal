@@ -258,35 +258,6 @@
     .sidebar-footer.clickable{cursor:pointer}
     .sidebar-footer.clickable:hover .m-name{color:var(--blue-lt)}
 
-    /* Smart Views (saved filter chips) */
-    .chip-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:-2px 0 12px}
-    .filter-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface2);font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;transition:var(--transition)}
-    .filter-chip:hover{border-color:var(--blue-lt);color:var(--blue-lt)}
-    .filter-chip.active{background:linear-gradient(135deg,rgba(41,128,185,.22),rgba(41,128,185,.1));border-color:var(--blue-lt);color:var(--blue-lt)}
-    .filter-chip .fc-x{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);background:rgba(0,0,0,.06)}
-    .filter-chip .fc-x:hover{background:var(--red);color:#fff}
-    .filter-chip.add{border-style:dashed;color:var(--text3)}
-
-    /* Undo toasts */
-    .toast-undo{display:flex;align-items:center;gap:10px;border-left:4px solid var(--blue);max-width:360px}
-    .undo-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;white-space:nowrap}
-    .undo-btn:hover{background:var(--blue-dk)}
-
-    /* Data health rows */
-    .dh-sev{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-    .dh-sev.high{background:var(--red)}
-    .dh-sev.med{background:var(--gold)}
-
-    /* Idle auto-lock overlay */
-    .lock-overlay{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;background:rgba(6,12,22,.75);backdrop-filter:blur(8px)}
-    .lock-overlay.open{display:flex}
-    .lock-card{width:100%;max-width:340px;background:var(--surface);border-radius:22px;padding:2rem 1.8rem;box-shadow:0 30px 90px rgba(0,0,0,.5);text-align:center;animation:fadeUp .35s cubic-bezier(.34,1.56,.64,1)}
-    .lock-icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:grid;place-items:center;font-size:22px;margin:0 auto 1rem;box-shadow:0 10px 26px var(--blue-glow)}
-    .lock-card h3{font-size:1.15rem;font-weight:900;color:var(--text);margin-bottom:4px}
-    .lock-card p{font-size:.8rem;color:var(--text2);margin-bottom:1.1rem}
-    .lock-card input{width:100%;padding:.75rem .9rem;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:.85rem;outline:none;margin-bottom:.7rem}
-    .lock-err{color:#e25b4b;font-size:11px;font-weight:700;margin-bottom:8px;display:none}
-
     @media print{
       body::before,body::after,.sidebar,.topbar,.toast-host,.dmodal-backdrop,.notif-panel,.cmdk-backdrop,.actions-row,.toolbar,#parentSelectAll,th:first-child,td:first-child{display:none!important}
       .main-content{margin-left:0!important;max-width:100%!important}
@@ -466,7 +437,6 @@
               <div class="sec-sub">Live snapshot of who has access to the Teachers Portal and Parent Portal.</div>
             </div>
             <div class="actions-row">
-              <button class="btn btn-outline btn-sm" id="digestBtn">📋 Weekly Digest</button>
               <button class="btn btn-outline btn-sm" id="ov-refreshBtn">🔄 Refresh</button>
             </div>
           </div>
@@ -560,8 +530,6 @@
               <div class="sec-sub">Configuration that the Parent Portal checks on every sign-up and Google sign-in. Pre-add an email here to approve it in advance; otherwise new accounts land here as <b>Pending</b> and stay locked out of the portal until you approve them.</div>
             </div>
             <div class="actions-row">
-              <button class="btn btn-outline btn-sm" id="verifyStudentBtn">🔎 Verify Student</button>
-              <button class="btn btn-outline btn-sm" id="portalQrBtn">📱 Portal QR</button>
               <button class="btn btn-outline btn-sm" id="printParentsBtn">🖨️ Print / PDF</button>
               <button class="btn btn-outline btn-sm" id="exportParentsBtn">⬇️ Export CSV</button>
               <button class="btn btn-outline btn-sm" id="importParentsBtn">⬆️ Import CSV</button>
@@ -571,7 +539,6 @@
 
           <div class="panel">
             <div class="print-only-hdr"><h2 style="font-size:16px;">Kanyadet School — Authorized Parents</h2><div class="muted" id="printParentsDate"></div></div>
-            <div class="chip-row" id="smartViewChips"></div>
             <div class="toolbar">
               <input class="search-input" id="parentSearch" type="text" placeholder="Search by name, email, or status…" />
               <select class="sel" id="parentStatusFilter" style="max-width:170px;">
@@ -660,17 +627,6 @@
               </table>
             </div>
           </div>
-
-          <div class="panel">
-            <h3 style="font-size:13px;font-weight:900;margin-bottom:2px;">🩺 Data Health</h3>
-            <div class="muted" style="margin-bottom:10px;">Possible duplicate or mistyped email addresses across authorized parents and teachers — worth a quick look.</div>
-            <div class="table-wrap" style="max-height:260px;">
-              <table>
-                <thead><tr><th>Flag</th><th>Record A</th><th>Record B / Suggestion</th><th></th></tr></thead>
-                <tbody id="dh-tbody"><tr><td colspan="4" class="muted">Scanning…</td></tr></tbody>
-              </table>
-            </div>
-          </div>
         </section>
 
         <section class="view" id="view-auditlog">
@@ -721,33 +677,8 @@
               <input class="field-input" id="set-auto-domains" placeholder="e.g. kanyadet.school, staff.kanyadet.school" />
               <div class="muted" style="margin-top:2px;">New parent sign-ups matching these domains are flagged as trusted below — approval is still a manual click in the Parents list.</div>
             </div>
-            <div class="field-group"><label>Parent Portal URL <span class="muted">(optional)</span></label>
-              <input class="field-input" id="set-portal-url" placeholder="https://kanyadet-school-portal.web.app" />
-              <div class="muted" style="margin-top:2px;">Used to generate the "📱 Portal QR" share codes in the Parents tab.</div>
-            </div>
             <button class="btn btn-blue btn-sm" id="settingsSaveBtn">💾 Save Settings</button>
             <span class="muted" id="settingsSavedNote" style="margin-left:10px;display:none;">Saved just now</span>
-          </div>
-
-          <div class="panel" style="max-width:560px;">
-            <h3 style="font-size:13px;font-weight:900;margin-bottom:14px;">🔒 Security</h3>
-            <div class="field-group"><label>Auto-Lock After Inactivity <span class="muted">(minutes, 0 = disabled)</span></label>
-              <input class="field-input" type="number" min="0" max="180" id="set-autolock-min" placeholder="10" style="max-width:120px;" />
-              <div class="muted" style="margin-top:2px;">Locks this screen behind a re-authentication prompt after the tab sits idle — recommended on shared office computers.</div>
-            </div>
-            <button class="btn btn-blue btn-sm" id="securitySaveBtn">💾 Save Security Setting</button>
-          </div>
-
-          <div class="panel" style="max-width:680px;">
-            <h3 style="font-size:13px;font-weight:900;margin-bottom:2px;">👤 Admin Access</h3>
-            <div class="muted" style="margin-bottom:10px;">Grant or revoke <span class="mono">Advancedadmin</span> access on <span class="mono">users</span> profiles — this is the same flag that controls entry to this admin tool.</div>
-            <input class="field-input" id="admin-mgr-search" placeholder="Search by name or email…" style="margin-bottom:10px;" />
-            <div class="table-wrap" style="max-height:280px;">
-              <table>
-                <thead><tr><th>Name</th><th>Email</th><th>Access</th><th></th></tr></thead>
-                <tbody id="admin-mgr-tbody"><tr><td colspan="4" class="muted">Click to load users…</td></tr></tbody>
-              </table>
-            </div>
           </div>
 
           <div class="panel" style="max-width:560px;">
@@ -783,20 +714,6 @@
       </div>
       <div class="dmodal-body" id="dmodal-body"></div>
       <div class="dmodal-ftr" id="dmodal-ftr"></div>
-    </div>
-  </div>
-
-  <!-- Idle auto-lock overlay -->
-  <div class="lock-overlay" id="lockOverlay">
-    <div class="lock-card">
-      <div class="lock-icon">🔒</div>
-      <h3>Session Locked</h3>
-      <p id="lockSub">This screen locked after a period of inactivity. Re-enter your password to continue.</p>
-      <div class="lock-err" id="lockErr"></div>
-      <input type="password" id="lockPasswordInput" placeholder="Password" autocomplete="current-password" />
-      <button class="btn btn-blue" id="lockUnlockBtn" style="width:100%;justify-content:center;margin-bottom:8px;">Unlock</button>
-      <button class="btn btn-outline btn-sm" id="lockGoogleBtn" style="width:100%;justify-content:center;display:none;margin-bottom:8px;">Continue with Google</button>
-      <button class="btn btn-outline btn-sm" id="lockSignOutBtn" style="width:100%;justify-content:center;">Sign out instead</button>
     </div>
   </div>
 
@@ -841,7 +758,7 @@
       teacherSort: { field: 'name', dir: 1 },
       parentSort: { field: 'requestedAt', dir: -1 },
       selectedParentIds: new Set(),
-      settings: { schoolName: '', contactEmail: '', autoApproveDomains: '', portalUrl: '', autoLockMinutes: 10 },
+      settings: { schoolName: '', contactEmail: '', autoApproveDomains: '' },
     };
 
     /* ── Utils ── */
@@ -926,11 +843,7 @@
       if(name === 'overview') updateOverview();
       if(name === 'auditlog') loadAuditLog();
       if(name === 'analytics') renderAnalytics();
-      if(name === 'settings'){
-        renderSettingsForm();
-        $('admin-mgr-tbody').innerHTML = `<tr><td colspan="4" class="muted">Loading users…</td></tr>`;
-        loadAdminMgrUsers().then(renderAdminMgr);
-      }
+      if(name === 'settings') renderSettingsForm();
     }
     document.querySelectorAll('.nav-item[data-view]').forEach(n => {
       n.addEventListener('click', () => showNavView(n.dataset.view));
@@ -1144,7 +1057,6 @@
       $('an-actions-tbody').innerHTML = topActions.length
         ? topActions.map(([action,count]) => `<tr><td><span class="pill blue">${escapeHtml(action)}</span></td><td class="mono">${count}</td></tr>`).join('')
         : `<tr><td colspan="2" class="muted">No activity yet.</td></tr>`;
-      renderDataHealth();
     }
     $('analyticsRefreshBtn')?.addEventListener('click', () => Promise.all([loadTeachers(), loadAuthorizedParents(), loadAuditLog()]).then(() => { renderAnalytics(); toast('Refreshed', 'ok'); }));
 
@@ -1527,7 +1439,6 @@
     function renderAuthorizedParents(){
       const rows = filteredParents();
       const body = $('parents-tbody');
-      renderSmartViews();
       const visibleIds = new Set(rows.map(p => p.id));
       for(const id of [...state.selectedParentIds]) if(!visibleIds.has(id)) state.selectedParentIds.delete(id);
       if(!rows.length){
@@ -1572,9 +1483,71 @@
           if(p) openParentDetailModal(p);
         });
       });
-      // Row action buttons (approve/reject/remove) are handled by a single
-      // delegated listener on #parents-tbody — see "Feature: Undo-able
-      // destructive actions" below — so nothing to bind here per-render.
+      body.querySelectorAll('button[data-act]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const act = btn.dataset.act;
+          const p = state.parents.find(x => x.id === id);
+          if(!p) return;
+          // Canonical doc id is the lowercased email — the Parent Portal's
+          // live approval watch listens at this exact path. Older records
+          // (created before authorizedParents moved to email-keyed docs)
+          // may still live at a random legacy id, so approve/reject also
+          // write the canonical doc and clean up the legacy one, instead
+          // of just updating whatever id happened to be loaded.
+          const email = (p.email || '').toLowerCase();
+          const canonicalRef = doc(fst, 'authorizedParents', email);
+          const legacyId = (id !== email) ? id : null;
+          if(act === 'approve'){
+            try{
+              await setDoc(canonicalRef, {
+                email, name: p.name || '', source: p.source || 'signup',
+                requestedAt: p.requestedAt || new Date().toISOString(),
+                childName: p.childName || '', childAssessment: p.childAssessment || '', childGrade: p.childGrade || '',
+                status: 'approved', approvedAt: Date.now(), approvedBy: state.user?.email || ''
+              }, { merge: true });
+              if(legacyId) await deleteDoc(doc(fst, 'authorizedParents', legacyId));
+              await logAudit('Approved parent', email, p.childName || '');
+              toast(`Approved ${p.email}`, 'ok');
+              await loadAuthorizedParents();
+            }catch(err){ toast(err.message, 'err'); }
+          } else if(act === 'reject'){
+            const confirmed = await Swal.fire({
+              title: 'Reject this account?',
+              html: `<b>${escapeHtml(p.email)}</b> will be blocked from signing in to the Parent Portal.`,
+              icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c'
+            });
+            if(!confirmed.isConfirmed) return;
+            try{
+              await setDoc(canonicalRef, {
+                email, name: p.name || '', source: p.source || 'signup',
+                requestedAt: p.requestedAt || new Date().toISOString(),
+                childName: p.childName || '', childAssessment: p.childAssessment || '', childGrade: p.childGrade || '',
+                status: 'rejected', rejectedAt: Date.now(), rejectedBy: state.user?.email || ''
+              }, { merge: true });
+              if(legacyId) await deleteDoc(doc(fst, 'authorizedParents', legacyId));
+              await logAudit('Rejected parent', email, p.childName || '');
+              toast('Rejected', 'ok');
+              await loadAuthorizedParents();
+            }catch(err){ toast(err.message, 'err'); }
+          } else if(act === 'remove'){
+            const confirmed = await Swal.fire({
+              title: 'Remove this entry?',
+              html: `<b>${escapeHtml(p.email)}</b> will be removed from the authorized list entirely.`,
+              icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c'
+            });
+            if(!confirmed.isConfirmed) return;
+            try{
+              await deleteDoc(doc(fst, 'authorizedParents', id));
+              if(legacyId) await deleteDoc(canonicalRef).catch(()=>{});
+              await logAudit('Removed parent', email, p.childName || '');
+              toast('Removed', 'ok');
+              await loadAuthorizedParents();
+            }catch(err){ toast(err.message, 'err'); }
+          }
+        });
+      });
     }
     $('parentSearch').addEventListener('input', renderAuthorizedParents);
     $('parentStatusFilter').addEventListener('change', renderAuthorizedParents);
@@ -1641,7 +1614,6 @@
         <div class="field-group"><label>Status</label>${parentStatusPill(status)}</div>
         <div class="field-group"><label>Child</label><div style="font-size:13px;">${escapeHtml(p.childName || '—')} · ${escapeHtml(p.childAssessment || '—')} · ${escapeHtml(p.childGrade || '—')}</div></div>
         <div class="field-group"><label>Requested</label><div class="muted">${fmtTime(p.requestedAt || p.addedAt)}</div></div>
-        ${p.followUpAt ? `<div class="field-group"><label>Follow-up Reminder</label><div class="muted">⏰ ${new Date(p.followUpAt).toLocaleDateString()}</div></div>` : ''}
         <div class="field-group"><label>Internal Note</label>
           <textarea class="field-input" id="pf-note-input" rows="3" placeholder="Only visible to admins in this tool…">${escapeHtml(p.note || '')}</textarea>
         </div>
@@ -1649,22 +1621,10 @@
       `;
       $('dmodal-ftr').innerHTML = `
         <button class="btn btn-outline btn-sm" id="pd-close">Close</button>
-        <button class="btn btn-outline btn-sm" id="pd-qr">📱 Share Sign-In QR</button>
-        <button class="btn btn-outline btn-sm" id="pd-snooze">${p.followUpAt ? '⏰ Clear Reminder' : '⏰ Set Reminder'}</button>
         <button class="btn btn-blue btn-sm" id="pd-save-note">💾 Save Note</button>
       `;
       $('dmodal-backdrop').classList.add('open');
-      $('pd-snooze').addEventListener('click', async () => {
-        if(p.followUpAt) await clearFollowUp(p); else await setFollowUp(p);
-        closeTeacherModal();
-        openParentDetailModal(p);
-      });
       $('pd-close').addEventListener('click', closeTeacherModal);
-      $('pd-qr').addEventListener('click', () => {
-        const base = state.settings.portalUrl;
-        const link = base ? `${base}${base.includes('?') ? '&' : '?'}email=${encodeURIComponent(p.email||'')}` : '';
-        showQrDialog(`📱 Sign-In QR — ${p.name || p.email}`, link);
-      });
       $('pd-save-note').addEventListener('click', async () => {
         const note = $('pf-note-input').value.trim();
         try{
@@ -1739,47 +1699,31 @@
     async function loadSettings(){
       try{
         const snap = await getDoc(doc(fst, 'settings', 'general'));
-        if(snap.exists()) state.settings = { schoolName:'', contactEmail:'', autoApproveDomains:'', portalUrl:'', autoLockMinutes:10, ...snap.data() };
+        if(snap.exists()) state.settings = { schoolName:'', contactEmail:'', autoApproveDomains:'', ...snap.data() };
       }catch(e){ console.error('Could not load settings:', e); }
       renderSettingsForm();
-      resetIdleTimer();
     }
     function renderSettingsForm(){
       if(!$('set-school-name')) return;
       $('set-school-name').value = state.settings.schoolName || '';
       $('set-contact-email').value = state.settings.contactEmail || '';
       $('set-auto-domains').value = state.settings.autoApproveDomains || '';
-      $('set-portal-url').value = state.settings.portalUrl || '';
-      $('set-autolock-min').value = state.settings.autoLockMinutes ?? 10;
     }
     $('settingsSaveBtn')?.addEventListener('click', async () => {
       const schoolName = $('set-school-name').value.trim();
       const contactEmail = $('set-contact-email').value.trim();
       const autoApproveDomains = $('set-auto-domains').value.trim();
-      const portalUrl = $('set-portal-url').value.trim();
       try{
         await setDoc(doc(fst, 'settings', 'general'), {
-          schoolName, contactEmail, autoApproveDomains, portalUrl,
+          schoolName, contactEmail, autoApproveDomains,
           updatedAt: Date.now(), updatedBy: state.user?.email || ''
         }, { merge: true });
-        Object.assign(state.settings, { schoolName, contactEmail, autoApproveDomains, portalUrl });
+        state.settings = { schoolName, contactEmail, autoApproveDomains };
         await logAudit('Updated settings', 'settings/general', schoolName || '');
         toast('Settings saved', 'ok');
         const note = $('settingsSavedNote');
         note.style.display = 'inline';
         setTimeout(() => note.style.display = 'none', 2500);
-      }catch(err){ toast(err.message, 'err'); }
-    });
-    $('securitySaveBtn')?.addEventListener('click', async () => {
-      const autoLockMinutes = Math.max(0, Math.min(180, parseInt($('set-autolock-min').value, 10) || 0));
-      try{
-        await setDoc(doc(fst, 'settings', 'general'), {
-          autoLockMinutes, updatedAt: Date.now(), updatedBy: state.user?.email || ''
-        }, { merge: true });
-        state.settings.autoLockMinutes = autoLockMinutes;
-        await logAudit('Updated security setting', 'settings/general', `Auto-lock: ${autoLockMinutes || 'off'} min`);
-        toast(autoLockMinutes ? `Auto-lock set to ${autoLockMinutes} min` : 'Auto-lock disabled', 'ok');
-        resetIdleTimer();
       }catch(err){ toast(err.message, 'err'); }
     });
 
@@ -1808,7 +1752,6 @@
           items.push({ icon:'✅', title:`Trusted domain sign-up — ${p.email}`, sub:'Matches an auto-approve domain in Settings', id:p.id, weight:1 });
         }
       }
-      items.push(...computeReminderNotifications());
       return items.sort((a,b) => b.weight - a.weight).slice(0, 25);
     }
     function renderNotifications(){
@@ -2030,463 +1973,6 @@
     $('printTeachersBtn')?.addEventListener('click', () => preparePrint('teachers', 'printTeachersDate'));
     $('printParentsBtn')?.addEventListener('click', () => preparePrint('parents', 'printParentsDate'));
     $('printAuditBtn')?.addEventListener('click', () => preparePrint('auditlog', 'printAuditDate'));
-
-    /* ══════════ Feature 1: Smart Views (saved parent filters) ══════════ */
-    const SMART_VIEWS_KEY = 'ata_smart_views_v1';
-    function loadSmartViews(){
-      try{ return JSON.parse(localStorage.getItem(SMART_VIEWS_KEY) || '[]'); }catch(e){ return []; }
-    }
-    function saveSmartViews(list){ localStorage.setItem(SMART_VIEWS_KEY, JSON.stringify(list)); }
-    function isSmartViewActive(v){
-      return ($('parentSearch').value.trim() === (v.query||'')) && ($('parentStatusFilter').value === (v.status||''));
-    }
-    function renderSmartViews(){
-      const box = $('smartViewChips');
-      if(!box) return;
-      const views = loadSmartViews();
-      const builtins = [
-        { label:'⏳ Pending', status:'pending', query:'', builtin:true },
-        { label:'✅ Approved', status:'approved', query:'', builtin:true },
-      ];
-      const all = [...builtins, ...views];
-      box.innerHTML = all.map((v,i) => `
-        <span class="filter-chip ${isSmartViewActive(v) ? 'active':''}" data-i="${i}" data-builtin="${!!v.builtin}">
-          ${escapeHtml(v.label)}
-          ${v.builtin ? '' : `<span class="fc-x" data-del="${i - builtins.length}" title="Delete view">✕</span>`}
-        </span>`).join('')
-        + `<span class="filter-chip add" id="smartViewAddChip">💾 Save current filter</span>`;
-      box.querySelectorAll('.filter-chip[data-i]').forEach(chip => {
-        chip.addEventListener('click', (e) => {
-          if(e.target.closest('.fc-x')) return;
-          const v = all[+chip.dataset.i];
-          $('parentSearch').value = v.query || '';
-          $('parentStatusFilter').value = v.status || '';
-          renderAuthorizedParents();
-          renderSmartViews();
-        });
-      });
-      box.querySelectorAll('.fc-x[data-del]').forEach(x => {
-        x.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const idx = +x.dataset.del;
-          const list = loadSmartViews();
-          list.splice(idx, 1);
-          saveSmartViews(list);
-          renderSmartViews();
-        });
-      });
-      $('smartViewAddChip')?.addEventListener('click', async () => {
-        const { value: label } = await Swal.fire({
-          title: 'Save this filter as a view',
-          input: 'text',
-          inputPlaceholder: 'e.g. "Flagged this week"',
-          showCancelButton: true,
-          confirmButtonColor: '#2980b9'
-        });
-        if(!label) return;
-        const list = loadSmartViews();
-        list.push({ label: label.trim().slice(0,40), status: $('parentStatusFilter').value, query: $('parentSearch').value.trim() });
-        saveSmartViews(list);
-        renderSmartViews();
-        toast('View saved', 'ok');
-      });
-    }
-    $('parentSearch')?.addEventListener('input', renderSmartViews);
-    $('parentStatusFilter')?.addEventListener('change', renderSmartViews);
-
-    /* ══════════ Feature 2: Undo-able destructive actions ══════════ */
-    function toastUndo(message, commitFn, revertFn, delayMs = 5500){
-      const host = document.getElementById('toastHost') || document.querySelector('.toast-host');
-      if(!host){ commitFn(); return; }
-      const el = document.createElement('div');
-      el.className = 'toast toast-undo';
-      let remaining = Math.round(delayMs / 1000);
-      el.innerHTML = `<span>${escapeHtml(message)}</span><button class="undo-btn">Undo (<span class="undo-secs">${remaining}</span>s)</button>`;
-      host.appendChild(el);
-      let settled = false;
-      const secsEl = el.querySelector('.undo-secs');
-      const tick = setInterval(() => { remaining--; if(secsEl) secsEl.textContent = Math.max(remaining, 0); }, 1000);
-      const timer = setTimeout(async () => {
-        if(settled) return; settled = true;
-        clearInterval(tick); el.remove();
-        try{ await commitFn(); }catch(err){ toast(err.message, 'err'); }
-      }, delayMs);
-      el.querySelector('.undo-btn').addEventListener('click', () => {
-        if(settled) return; settled = true;
-        clearTimeout(timer); clearInterval(tick); el.remove();
-        revertFn?.();
-        toast('Undone', 'info');
-      });
-    }
-    /* Approve / reject / remove now go through toastUndo instead of committing instantly. */
-    document.getElementById('parents-tbody')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-act]');
-      if(!btn) return;
-      e.stopPropagation();
-      const id = btn.dataset.id;
-      const act = btn.dataset.act;
-      const p = state.parents.find(x => x.id === id);
-      if(!p) return;
-      const email = (p.email || '').toLowerCase();
-      const canonicalRef = doc(fst, 'authorizedParents', email);
-      const legacyId = (id !== email) ? id : null;
-
-      if(act === 'approve'){
-        const prev = { ...p };
-        const approvedAt = Date.now();
-        Object.assign(p, { status: 'approved', approvedAt, approvedBy: state.user?.email || '' });
-        renderAuthorizedParents();
-        toastUndo(`Approving ${p.email}…`, async () => {
-          await setDoc(canonicalRef, {
-            email, name: p.name || '', source: p.source || 'signup',
-            requestedAt: p.requestedAt || new Date().toISOString(),
-            childName: p.childName || '', childAssessment: p.childAssessment || '', childGrade: p.childGrade || '',
-            status: 'approved', approvedAt, approvedBy: state.user?.email || ''
-          }, { merge: true });
-          if(legacyId) await deleteDoc(doc(fst, 'authorizedParents', legacyId));
-          await logAudit('Approved parent', email, p.childName || '');
-          toast(`Approved ${p.email}`, 'ok');
-          await loadAuthorizedParents();
-        }, () => { Object.assign(p, prev); renderAuthorizedParents(); });
-
-      } else if(act === 'reject'){
-        Swal.fire({
-          title: 'Reject this account?',
-          html: `<b>${escapeHtml(p.email)}</b> will be blocked from signing in to the Parent Portal. You'll get a few seconds to undo either way.`,
-          icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c'
-        }).then(res => {
-          if(!res.isConfirmed) return;
-          const prev = { ...p };
-          const rejectedAt = Date.now();
-          Object.assign(p, { status: 'rejected', rejectedAt, rejectedBy: state.user?.email || '' });
-          renderAuthorizedParents();
-          toastUndo(`Rejecting ${p.email}…`, async () => {
-            await setDoc(canonicalRef, {
-              email, name: p.name || '', source: p.source || 'signup',
-              requestedAt: p.requestedAt || new Date().toISOString(),
-              childName: p.childName || '', childAssessment: p.childAssessment || '', childGrade: p.childGrade || '',
-              status: 'rejected', rejectedAt, rejectedBy: state.user?.email || ''
-            }, { merge: true });
-            if(legacyId) await deleteDoc(doc(fst, 'authorizedParents', legacyId));
-            await logAudit('Rejected parent', email, p.childName || '');
-            toast('Rejected', 'ok');
-            await loadAuthorizedParents();
-          }, () => { Object.assign(p, prev); renderAuthorizedParents(); });
-        });
-
-      } else if(act === 'remove'){
-        Swal.fire({
-          title: 'Remove this entry?',
-          html: `<b>${escapeHtml(p.email)}</b> will be removed from the authorized list entirely.`,
-          icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c'
-        }).then(res => {
-          if(!res.isConfirmed) return;
-          const idx = state.parents.findIndex(x => x.id === id);
-          const [removed] = state.parents.splice(idx, 1);
-          renderAuthorizedParents(); updateOverview();
-          toastUndo(`Removing ${email}…`, async () => {
-            await deleteDoc(doc(fst, 'authorizedParents', id));
-            if(legacyId) await deleteDoc(canonicalRef).catch(()=>{});
-            await logAudit('Removed parent', email, removed.childName || '');
-            toast('Removed', 'ok');
-            await loadAuthorizedParents();
-          }, () => { state.parents.splice(idx, 0, removed); renderAuthorizedParents(); updateOverview(); });
-        });
-      }
-    });
-
-    /* ══════════ Feature 3: Data Health — duplicate / typo detector ══════════ */
-    function levenshtein(a, b){
-      const m = a.length, n = b.length;
-      if(!m) return n; if(!n) return m;
-      const dp = Array.from({length: m+1}, (_, i) => [i, ...Array(n).fill(0)]);
-      for(let j=0;j<=n;j++) dp[0][j] = j;
-      for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){
-        dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-      }
-      return dp[m][n];
-    }
-    const COMMON_DOMAIN_FIXES = { 'gmial.com':'gmail.com','gmai.com':'gmail.com','gnail.com':'gmail.com','yahho.com':'yahoo.com','yaho.com':'yahoo.com','outlok.com':'outlook.com','hotmial.com':'hotmail.com' };
-    function runDataHealthScan(){
-      const rows = [];
-      const parentEmails = state.parents.map(p => (p.email||'').toLowerCase()).filter(Boolean);
-      // exact duplicate doc-id vs email mismatches (legacy records)
-      const seen = new Map();
-      state.parents.forEach(p => {
-        const e = (p.email||'').toLowerCase();
-        if(!e) return;
-        if(seen.has(e)) rows.push({ sev:'high', flag:'Duplicate record', a:`${e} (${seen.get(e)})`, b:`${e} (${p.id})`, id:p.id });
-        else seen.set(e, p.id);
-      });
-      // domain typos
-      state.parents.forEach(p => {
-        const e = (p.email||'').toLowerCase();
-        const domain = e.split('@')[1];
-        if(domain && COMMON_DOMAIN_FIXES[domain]){
-          rows.push({ sev:'med', flag:'Likely domain typo', a:e, b:`Did you mean ${e.split('@')[0]}@${COMMON_DOMAIN_FIXES[domain]}?`, id:p.id });
-        }
-      });
-      // near-duplicate pairs (edit distance <= 2, not identical)
-      for(let i=0;i<parentEmails.length;i++){
-        for(let j=i+1;j<parentEmails.length;j++){
-          const a = parentEmails[i], b = parentEmails[j];
-          if(a === b) continue;
-          if(Math.abs(a.length - b.length) > 2) continue;
-          const d = levenshtein(a, b);
-          if(d > 0 && d <= 2) rows.push({ sev:'med', flag:'Similar emails', a, b, id: state.parents.find(p=>(p.email||'').toLowerCase()===a)?.id });
-        }
-      }
-      return rows.slice(0, 30);
-    }
-    function renderDataHealth(){
-      const tbody = $('dh-tbody');
-      if(!tbody) return;
-      const rows = runDataHealthScan();
-      tbody.innerHTML = rows.length
-        ? rows.map(r => `<tr>
-            <td><span class="dh-sev ${r.sev}"></span>${escapeHtml(r.flag)}</td>
-            <td class="mono" style="font-size:11px;">${escapeHtml(r.a)}</td>
-            <td class="mono" style="font-size:11px;">${escapeHtml(r.b)}</td>
-            <td><button class="btn btn-outline btn-sm dh-review" data-id="${escapeHtml(r.id||'')}">Review</button></td>
-          </tr>`).join('')
-        : `<tr><td colspan="4" class="muted">No duplicates or typos detected. Looking good! ✅</td></tr>`;
-      tbody.querySelectorAll('.dh-review').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const p = state.parents.find(x => x.id === btn.dataset.id);
-          if(p){ showNavView('parents'); openParentDetailModal(p); }
-        });
-      });
-    }
-    /* ══════════ Feature 4: QR quick-share (portal invite) ══════════ */
-    function qrImgUrl(data, size = 220){
-      return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}`;
-    }
-    function showQrDialog(title, url){
-      if(!url){
-        Swal.fire({ icon:'info', title:'Add a Parent Portal URL first', text:'Set it once in Settings → School Profile, then QR codes generate instantly.', confirmButtonColor:'#2980b9' });
-        return;
-      }
-      Swal.fire({
-        title,
-        html: `<img src="${qrImgUrl(url)}" alt="QR code" style="border-radius:12px;margin-bottom:10px;" />
-               <div class="mono" style="font-size:11px;word-break:break-all;background:rgba(0,0,0,.05);padding:8px;border-radius:8px;">${escapeHtml(url)}</div>`,
-        showCancelButton: true, confirmButtonText: '📋 Copy Link', confirmButtonColor:'#2980b9', cancelButtonText: 'Close'
-      }).then(res => {
-        if(res.isConfirmed) navigator.clipboard?.writeText(url).then(() => toast('Link copied', 'ok')).catch(()=>{});
-      });
-    }
-    $('portalQrBtn')?.addEventListener('click', () => showQrDialog('📱 Parent Portal Sign-Up', state.settings.portalUrl));
-
-    /* ══════════ Feature 5: Idle auto-lock ══════════ */
-    let idleTimer = null, lastActivityAt = Date.now();
-    function markActivity(){ lastActivityAt = Date.now(); }
-    ['mousemove','keydown','click','scroll','touchstart'].forEach(evt => document.addEventListener(evt, markActivity, { passive:true }));
-    function resetIdleTimer(){
-      if(idleTimer) clearInterval(idleTimer);
-      markActivity();
-      const mins = state.settings.autoLockMinutes;
-      if(!mins || mins <= 0) return;
-      idleTimer = setInterval(() => {
-        if(Date.now() - lastActivityAt >= mins * 60000) engageLock();
-      }, 15000);
-    }
-    function engageLock(){
-      if($('lockOverlay').classList.contains('open')) return;
-      $('notifPanel')?.classList.remove('open'); closeCmdk();
-      const usesGoogle = (state.user?.providerData || []).some(p => p.providerId === 'google.com');
-      $('lockPasswordInput').style.display = usesGoogle ? 'none' : 'block';
-      $('lockUnlockBtn').style.display = usesGoogle ? 'none' : 'block';
-      $('lockGoogleBtn').style.display = usesGoogle ? 'block' : 'none';
-      $('lockErr').style.display = 'none';
-      $('lockPasswordInput').value = '';
-      $('lockOverlay').classList.add('open');
-    }
-    function disengageLock(){ $('lockOverlay').classList.remove('open'); resetIdleTimer(); }
-    $('lockUnlockBtn')?.addEventListener('click', async () => {
-      const pw = $('lockPasswordInput').value;
-      if(!pw){ return; }
-      try{
-        await signInWithEmailAndPassword(auth, state.user.email, pw);
-        disengageLock();
-      }catch(err){
-        $('lockErr').textContent = 'Incorrect password. Try again.';
-        $('lockErr').style.display = 'block';
-      }
-    });
-    $('lockPasswordInput')?.addEventListener('keydown', e => { if(e.key === 'Enter') $('lockUnlockBtn').click(); });
-    $('lockGoogleBtn')?.addEventListener('click', async () => {
-      try{ await signInWithPopup(auth, googleProvider); disengageLock(); }
-      catch(err){ $('lockErr').textContent = 'Could not verify. Try again.'; $('lockErr').style.display = 'block'; }
-    });
-    $('lockSignOutBtn')?.addEventListener('click', () => { $('lockOverlay').classList.remove('open'); signOut(auth); });
-
-    /* ══════════ Feature: Admin Access Manager ══════════ */
-    let _adminMgrUsers = null;
-    async function loadAdminMgrUsers(force = false){
-      if(_adminMgrUsers && !force) return _adminMgrUsers;
-      try{
-        const snap = await getDocs(collection(fst, 'users'));
-        const list = [];
-        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-        list.sort((a,b) => (a.name || a.email || '').localeCompare(b.name || b.email || ''));
-        _adminMgrUsers = list;
-      }catch(err){
-        toast(err.message, 'err');
-        _adminMgrUsers = [];
-      }
-      return _adminMgrUsers;
-    }
-    function renderAdminMgr(list){
-      const q = ($('admin-mgr-search').value || '').trim().toLowerCase();
-      const rows = list.filter(u => !q || (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q));
-      const tbody = $('admin-mgr-tbody');
-      tbody.innerHTML = rows.length
-        ? rows.map(u => {
-            const isSelf = u.id === state.user?.uid;
-            const isAdminUser = u.Advancedadmin === true;
-            return `<tr>
-              <td>${escapeHtml(u.name || '—')}</td>
-              <td class="mono" style="font-size:11px;">${escapeHtml(u.email || u.id)}</td>
-              <td>${isAdminUser ? '<span class="pill purple">Advanced Admin</span>' : '<span class="pill blue">' + escapeHtml(u.role || 'Standard') + '</span>'}</td>
-              <td>${isSelf
-                  ? '<span class="muted">This is you</span>'
-                  : `<button class="btn btn-sm ${isAdminUser ? 'btn-outline' : 'btn-blue'}" data-toggle-admin="${escapeHtml(u.id)}" data-next="${!isAdminUser}">${isAdminUser ? 'Revoke' : 'Grant'}</button>`}
-              </td>
-            </tr>`;
-          }).join('')
-        : `<tr><td colspan="4" class="muted">No matching users.</td></tr>`;
-      tbody.querySelectorAll('button[data-toggle-admin]').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const uid = btn.dataset.toggleAdmin;
-          const next = btn.dataset.next === 'true';
-          const u = list.find(x => x.id === uid);
-          const label = next ? 'Grant' : 'Revoke';
-          const res = await Swal.fire({
-            title: `${label} admin access?`,
-            html: `${label === 'Grant' ? 'Give' : 'Remove'} <b>${escapeHtml(u?.email || uid)}</b> ${next ? 'full' : ''} access to this admin tool.`,
-            icon: 'warning', showCancelButton: true, confirmButtonColor: next ? '#2980b9' : '#e74c3c'
-          });
-          if(!res.isConfirmed) return;
-          try{
-            await updateDoc(doc(fst, 'users', uid), { Advancedadmin: next });
-            u.Advancedadmin = next;
-            await logAudit(`${label}ed admin access`, u?.email || uid, '');
-            toast(`${label}ed`, 'ok');
-            renderAdminMgr(list);
-          }catch(err){ toast(err.message, 'err'); }
-        });
-      });
-    }
-    $('admin-mgr-search')?.addEventListener('input', async () => renderAdminMgr(await loadAdminMgrUsers()));
-
-    /* ══════════ Feature: Follow-up reminders (snooze) ══════════ */
-    function computeReminderNotifications(){
-      const now = Date.now();
-      return state.parents
-        .filter(p => p.followUpAt && p.followUpAt <= now)
-        .map(p => ({ icon:'⏰', title:`Follow-up due — ${p.email}`, sub: p.followUpNote || 'Reminder you set is due', id:p.id, weight:4 }));
-    }
-    async function setFollowUp(p){
-      const { value: dateStr } = await Swal.fire({
-        title: `Remind me about ${p.email}`,
-        input: 'date',
-        inputValue: new Date(Date.now() + 3*86400000).toISOString().slice(0,10),
-        showCancelButton: true, confirmButtonColor: '#2980b9', confirmButtonText: 'Set reminder'
-      });
-      if(!dateStr) return;
-      const followUpAt = new Date(dateStr + 'T08:00:00').getTime();
-      try{
-        await setDoc(doc(fst, 'authorizedParents', (p.email||'').toLowerCase()), { followUpAt }, { merge: true });
-        p.followUpAt = followUpAt;
-        await logAudit('Set follow-up reminder', p.email, new Date(followUpAt).toLocaleDateString());
-        toast('Reminder set', 'ok');
-        renderNotifications();
-      }catch(err){ toast(err.message, 'err'); }
-    }
-    async function clearFollowUp(p){
-      try{
-        await setDoc(doc(fst, 'authorizedParents', (p.email||'').toLowerCase()), { followUpAt: null }, { merge: true });
-        p.followUpAt = null;
-        renderNotifications();
-        toast('Reminder cleared', 'ok');
-      }catch(err){ toast(err.message, 'err'); }
-    }
-
-    /* ══════════ Feature: Weekly Digest ══════════ */
-    function buildDigestText(){
-      const school = state.settings.schoolName || 'the school';
-      const pending = state.parents.filter(p => (p.status||'pending') === 'pending');
-      const approvedCount = state.parents.filter(p => p.status === 'approved').length;
-      const rejectedCount = state.parents.filter(p => p.status === 'rejected').length;
-      const flagged = pending.filter(p => p._dbCheck?.checked && p._dbCheck?.found && (!p._dbCheck.nameOk || !p._dbCheck.gradeOk));
-      const recentActions = state.auditLog.slice(0, 5);
-      const lines = [];
-      lines.push(`📋 *${school} — Admin Digest*`);
-      lines.push(new Date().toLocaleDateString('en-KE', { weekday:'long', year:'numeric', month:'long', day:'numeric' }));
-      lines.push('');
-      lines.push(`👩‍🏫 Teachers: ${state.teachers.length}`);
-      lines.push(`👨‍👩‍👧 Parents: ${state.parents.length} total — ✅ ${approvedCount} approved · ⏳ ${pending.length} pending · 🚫 ${rejectedCount} rejected`);
-      if(flagged.length) lines.push(`🚩 ${flagged.length} pending request(s) flagged for name/grade mismatch — needs a manual look`);
-      if(pending.length){
-        lines.push('');
-        lines.push('⏳ *Pending approvals:*');
-        pending.slice(0, 10).forEach(p => lines.push(`  • ${p.name || p.email} (${p.email})`));
-        if(pending.length > 10) lines.push(`  …and ${pending.length - 10} more`);
-      }
-      if(recentActions.length){
-        lines.push('');
-        lines.push('📜 *Recent activity:*');
-        recentActions.forEach(a => lines.push(`  • ${a.action} — ${a.target}`));
-      }
-      return lines.join('\n');
-    }
-    $('digestBtn')?.addEventListener('click', () => {
-      const text = buildDigestText();
-      Swal.fire({
-        title: '📋 Weekly Digest',
-        html: `<textarea readonly style="width:100%;height:260px;font-family:monospace;font-size:11.5px;padding:10px;border-radius:8px;border:1px solid #ccc;">${escapeHtml(text)}</textarea>`,
-        showCancelButton: true, confirmButtonText: '📋 Copy', confirmButtonColor:'#2980b9', cancelButtonText:'💬 Share via WhatsApp'
-      }).then(res => {
-        if(res.isConfirmed){
-          navigator.clipboard?.writeText(text).then(() => toast('Digest copied', 'ok')).catch(()=>{});
-        } else if(res.dismiss === Swal.DismissReason.cancel){
-          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-        }
-      });
-    });
-
-    /* ══════════ Feature: Student Verification Lookup ══════════ */
-    function studentSearchResults(q){
-      const records = Object.values(_studentDbCache || {});
-      if(!q) return [];
-      const needle = q.trim().toLowerCase();
-      return records.filter(r => r && (
-        (r['Official Student Name']||'').toString().toLowerCase().includes(needle) ||
-        (r['Assessment No']||'').toString().toLowerCase().includes(needle)
-      )).slice(0, 25);
-    }
-    $('verifyStudentBtn')?.addEventListener('click', async () => {
-      $('dmodal-title').textContent = '🔎 Verify Student Record';
-      $('dmodal-body').innerHTML = `
-        <div class="field-group"><label>Search by name or Assessment No</label>
-          <input class="field-input" id="vs-input" placeholder="e.g. Jane Wanjiru or 4521" autocomplete="off" /></div>
-        <div class="table-wrap" style="max-height:280px;">
-          <table><thead><tr><th>Assessment No</th><th>Name</th><th>Grade</th></tr></thead>
-          <tbody id="vs-results"><tr><td colspan="3" class="muted">Type to search…</td></tr></tbody></table>
-        </div>
-      `;
-      $('dmodal-ftr').innerHTML = `<button class="btn btn-outline btn-sm" id="vs-close">Close</button>`;
-      $('dmodal-backdrop').classList.add('open');
-      $('vs-close').addEventListener('click', closeTeacherModal);
-      await loadStudentDbRecords();
-      $('vs-input').addEventListener('input', () => {
-        const rows = studentSearchResults($('vs-input').value);
-        $('vs-results').innerHTML = rows.length
-          ? rows.map(r => `<tr><td class="mono">${escapeHtml((r['Assessment No']||'—').toString())}</td><td>${escapeHtml(r['Official Student Name']||'—')}</td><td>${escapeHtml(r['Grade']||'—')}</td></tr>`).join('')
-          : `<tr><td colspan="3" class="muted">No matches.</td></tr>`;
-      });
-      setTimeout(() => $('vs-input').focus(), 10);
-    });
   </script>
 </body>
 </html>
