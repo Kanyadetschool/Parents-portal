@@ -707,7 +707,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       <div class="tp-nav-item" data-view="students"><span class="tp-nav-icon">🗓️</span> Attendance</div>
       <div class="tp-nav-label">School</div>
       <div class="tp-nav-item" data-view="announcements"><span class="tp-nav-icon">📣</span> Announcements</div>
-      <div class="tp-nav-item" data-view="inquiries"><span class="tp-nav-icon">💬</span> Contact School <span class="tp-nav-badge" id="nav-inq-badge" style="display:none;">0</span></div>
       <div class="tp-nav-item" data-view="profile"><span class="tp-nav-icon">👤</span> Profile</div>
       <!-- Admin Portal -->
 <div class="tp-nav-item" onclick="navTo('Admin Portal',this)" data-view="Admin Portal">
@@ -831,23 +830,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
         <div class="tp-announce-list" id="an-list"></div>
       </div>
 
-      <!-- ── CONTACT SCHOOL / INQUIRIES ── -->
-      <div class="tp-view" id="view-inquiries">
-        <div class="tp-section-hdr">
-          <div><h3>Contact School</h3><p>Send feedback or ask the admin office a question</p></div>
-        </div>
-        <div class="tp-card" style="padding:20px;margin-bottom:18px;">
-          <div class="tp-field" style="margin-bottom:12px;">
-            <label style="font-size:.76rem;font-weight:700;color:var(--text2);display:block;margin-bottom:6px;">Message</label>
-            <textarea id="inq-text" rows="4" placeholder="What would you like the school to know?" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;color:var(--text);resize:vertical;outline:none;"></textarea>
-          </div>
-          <button class="tp-btn tp-btn-primary" id="inq-submit-btn">Send</button>
-          <span id="inq-submit-err" style="color:var(--red);font-size:.78rem;margin-left:10px;"></span>
-        </div>
-        <div class="tp-section-hdr"><div><h3 style="font-size:13px;">Your messages</h3></div></div>
-        <div class="tp-announce-list" id="inq-list"></div>
-      </div>
-
       <!-- ── PROFILE ── -->
       <div class="tp-view" id="view-profile">
         <div class="tp-card tp-profile-hdr">
@@ -907,7 +889,7 @@ import {
   deleteDoc, query, orderBy, getDocs, where
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import {
-  getDatabase, ref, get, update, push, onValue
+  getDatabase, ref, get, update
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 /* ── Same Firebase project as the Results Portal ── */
@@ -1133,7 +1115,6 @@ const viewTitles = {
   gradebook: ['Grades', 'Full subject breakdown'],
   students: ['Attendance', "Your child's attendance record"],
   announcements: ['Announcements', 'Updates from the school'],
-  inquiries: ['Contact School', 'Send feedback or ask a question'],
   profile: ['Profile', 'Your account details'],
 };
 function showView(name){
@@ -1145,9 +1126,6 @@ function showView(name){
   document.getElementById('tp-topbar-sub').textContent = sub;
   document.getElementById('tp-sidebar').classList.remove('open');
   document.getElementById('tp-sidebar-backdrop').classList.remove('show');
-  if(name === 'inquiries' && typeof markInquiriesSeen === 'function'){
-    markInquiriesSeen(latestInquiries);
-  }
 }
 document.querySelectorAll('.tp-nav-item').forEach(item=>{
   item.addEventListener('click', ()=>showView(item.dataset.view));
@@ -1629,162 +1607,6 @@ function renderLatestAnnouncementPreview(){
 }
 
 /* ══════════════════════════════════════════
-   CONTACT SCHOOL — writes into the same RTDB "activities" node the
-   Teacher Portal's "Report an issue" uses, tagged type:'parent_inquiry'
-   so the admin Feedback view can tell the two apart while showing both.
-══════════════════════════════════════════ */
-let unsubInquiries = null;
-let latestInquiries = [];
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function startInquiriesListener(){
-  if(unsubInquiries) return;
-  const user = auth.currentUser;
-  if(!user) return;
-  unsubInquiries = onValue(ref(db, 'activities'), (snap) => {
-    const data = snap.exists() ? snap.val() : {};
-    const mine = Object.entries(data)
-      .map(([key,v]) => ({key, ...v}))
-      .filter(f => f.type === 'parent_inquiry' && f.userId === user.uid)
-      .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-    latestInquiries = mine;
-    renderInquiries(mine);
-    updateInquiryBadge(mine);
-  }, (err) => {
-    document.getElementById('inq-list').innerHTML = '<div class="tp-card tp-empty">Could not load your messages.</div>';
-  });
-}
-function lastAdminReplyTime(f){
-  if(!f.replies) return 0;
-  return Object.values(f.replies).filter(r => r.from === 'admin').reduce((max,r) => Math.max(max, r.timestamp||0), 0);
-}
-function updateInquiryBadge(list){
-  const badge = document.getElementById('nav-inq-badge');
-  if(!badge) return;
-  const unread = list.filter(f => {
-    const lastReply = lastAdminReplyTime(f);
-    return lastReply > 0 && lastReply > (f.parentSeenAt || 0);
-  }).length;
-  badge.textContent = String(unread);
-  badge.style.display = unread > 0 ? 'inline-block' : 'none';
-}
-function markInquiriesSeen(list){
-  const user = auth.currentUser;
-  if(!user) return;
-  const now = Date.now();
-  list.forEach(f => {
-    const lastReply = lastAdminReplyTime(f);
-    if(lastReply > 0 && lastReply > (f.parentSeenAt || 0)){
-      update(ref(db, `activities/${f.key}`), { parentSeenAt: now }).catch(()=>{});
-    }
-  });
-}
-function renderInquiries(list){
-  const box = document.getElementById('inq-list');
-  if(!list.length){ box.innerHTML = '<div class="tp-card tp-empty">No messages sent yet.</div>'; return; }
-  box.innerHTML = list.map(f => {
-    const when = f.timestamp ? new Date(f.timestamp).toLocaleString('en-GB') : 'Just now';
-    const replies = f.replies ? Object.entries(f.replies).map(([rk,r]) => ({rk, ...r})).sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)) : [];
-    const answered = replies.some(r => r.from === 'admin');
-    const statusBadge = answered
-      ? '<span class="tp-announce-tag" style="background:rgba(39,174,96,.15);color:#27ae60;">Replied</span>'
-      : '<span class="tp-announce-tag">Sent</span>';
-    const threadHtml = replies.length ? `
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
-        ${replies.map(r => `
-          <div style="padding:8px 12px;border-radius:10px;font-size:.82rem;${r.from==='admin'
-            ? 'background:rgba(41,128,185,.08);border:1px solid rgba(41,128,185,.18);'
-            : 'background:var(--surface2);border:1px solid var(--border);'}">
-            <strong style="display:block;font-size:.74rem;margin-bottom:2px;">${escapeHtml(r.byName || (r.from==='admin' ? 'Admin office' : 'You'))}</strong>
-            <span>${escapeHtml(r.text||'')}</span>
-            <div style="font-size:.7rem;color:var(--text3);margin-top:3px;">${r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB') : ''}</div>
-          </div>`).join('')}
-      </div>` : '';
-    return `<div class="tp-card tp-announce-item" data-inq-key="${f.key}">
-      <div class="tp-announce-top">
-        <div class="tp-announce-title">Your message</div>
-        ${statusBadge}
-      </div>
-      <div class="tp-announce-msg">${escapeHtml(f.message)}</div>
-      <div class="tp-announce-meta">Sent ${when}</div>
-      ${threadHtml}
-      <div style="margin-top:10px;display:none;" id="inq-reply-box-${f.key}">
-        <textarea id="inq-reply-text-${f.key}" rows="2" placeholder="Reply to the admin office…" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:inherit;font-size:.82rem;color:var(--text);resize:vertical;outline:none;"></textarea>
-        <button class="tp-btn tp-btn-primary" style="margin-top:6px;padding:.5rem .9rem;font-size:.76rem;" data-send-inq-reply="${f.key}">Send</button>
-      </div>
-      <button class="tp-btn tp-btn-outline" style="margin-top:8px;padding:.45rem .85rem;font-size:.76rem;" data-toggle-inq-reply="${f.key}">↩ Reply</button>
-    </div>`;
-  }).join('');
-
-  box.querySelectorAll('[data-toggle-inq-reply]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.toggleInqReply;
-      const replyBox = document.getElementById('inq-reply-box-'+key);
-      replyBox.style.display = replyBox.style.display === 'none' ? 'block' : 'none';
-      if(replyBox.style.display === 'block') document.getElementById('inq-reply-text-'+key).focus();
-    });
-  });
-  box.querySelectorAll('[data-send-inq-reply]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const key = btn.dataset.sendInqReply;
-      const textEl = document.getElementById('inq-reply-text-'+key);
-      const text = textEl.value.trim();
-      if(!text) return;
-      const user = auth.currentUser;
-      if(!user) return;
-      btn.disabled = true;
-      try{
-        await push(ref(db, `activities/${key}/replies`), {
-          text,
-          from: 'parent',
-          byName: user.displayName || user.email || 'You',
-          byUid: user.uid,
-          timestamp: Date.now()
-        });
-        textEl.value = '';
-      }catch(err){
-        if(window.Swal) Swal.fire({ title:'Could not send', text:err.message, icon:'error' });
-      }finally{
-        btn.disabled = false;
-      }
-    });
-  });
-}
-
-document.getElementById('inq-submit-btn')?.addEventListener('click', async () => {
-  const textEl = document.getElementById('inq-text');
-  const errEl = document.getElementById('inq-submit-err');
-  const btn = document.getElementById('inq-submit-btn');
-  const message = textEl.value.trim();
-  errEl.textContent = '';
-  if(!message) return;
-  const user = auth.currentUser;
-  if(!user){ errEl.textContent = 'Please sign in again.'; return; }
-  btn.disabled = true;
-  const originalLabel = btn.textContent;
-  btn.textContent = 'Sending…';
-  try{
-    const record = activeChildRecord();
-    await push(ref(db, 'activities'), {
-      type: 'parent_inquiry',
-      message,
-      userEmail: user.email || '',
-      userName: user.displayName || user.email || 'Parent',
-      userId: user.uid,
-      childName: record ? (record['Official Student Name'] || record['Full Name'] || '') : '',
-      timestamp: Date.now()
-    });
-    textEl.value = '';
-    if(window.Swal) Swal.fire({ title:'Sent', text:'The admin office has received your message.', icon:'success', confirmButtonColor:'#2980b9' });
-  }catch(err){
-    errEl.textContent = "Couldn't send that — please try again.";
-  }finally{
-    btn.disabled = false;
-    btn.textContent = originalLabel;
-  }
-});
-
-/* ══════════════════════════════════════════
    PARENT AUTHORIZATION — checked against the 'authorizedParents'
    configuration collection, which the school admin manages (add an
    email there ahead of time to pre-approve it). Any parent who signs
@@ -1940,7 +1762,6 @@ async function enterApprovedApp(user){
   await loadProfile(user);
   await autoLinkFromSignup();
   startAnnouncementsListener();
-  startInquiriesListener();
   document.getElementById('tp-auth-screen').style.display = 'none';
   document.getElementById('tp-shell').style.display = 'flex';
   document.querySelector('.tp-theme-toggle').style.display = 'none';
