@@ -8,8 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 
 
@@ -24,32 +22,15 @@
       // profile = { email, name, givenName, familyName, picture, sub, emailVerified, raw }
       console.log('Signed in as', profile.email);
       const idToken = profile.raw && profile.raw.credential;
-      if (!idToken) {
-        console.error('[GoogleOneTap] Missing ID token — cannot sign in.');
+      if (!idToken || !window._KTP) {
+        console.error('[GoogleOneTap] Missing ID token or app not ready yet — cannot sign in.');
         return;
       }
-      // window._KTP is set up by the Firebase module script at the bottom
-      // of the page. That script loads after this one, so on a very fast
-      // One Tap response it may not have run yet — poll briefly instead
-      // of dropping the sign-in.
-      const waitForKtp = async (timeoutMs = 4000, stepMs = 50) => {
-        const start = Date.now();
-        while (!window._KTP) {
-          if (Date.now() - start > timeoutMs) return null;
-          await new Promise((r) => setTimeout(r, stepMs));
-        }
-        return window._KTP;
-      };
       try {
-        const ktp = await waitForKtp();
-        if (!ktp) {
-          console.error('[GoogleOneTap] App did not become ready in time — cannot sign in.');
-          return;
-        }
         // Exchanges the One Tap credential for a real Firebase session.
         // onAuthStateChanged (main app script) takes it from here: loads
         // the teacher profile, checks portal authorization, and calls enterApp().
-        await ktp.googleCredentialSignIn(idToken);
+        await window._KTP.googleCredentialSignIn(idToken);
       } catch (e) {
         console.error('[GoogleOneTap] Firebase sign-in failed:', e);
         const err = document.getElementById('login-error');
@@ -60,18 +41,8 @@
     },
     onUnavailable: () => { /* show your manual email field */ },
     onError: (err) => console.error(err),
-    // Don't fire the silent prompt on init() — wait until the Firebase
-    // module script's onAuthStateChanged (further down the page) tells us
-    // whether a session is already active, via window._oneTap.notifySignedIn()/
-    // notifySignedOut(). Without this, One Tap can flash briefly even for a
-    // user who's already logged in, since session restoration is async.
-    deferAutoPromptUntilSignal: true,
   });
-
-  // Exposed so the Firebase module script (bottom of page) can call
-  // notifySignedIn() / notifySignedOut() from its onAuthStateChanged handler.
-  window._oneTap = oneTap;
-
+ 
   oneTap.init();
 </script>
 
@@ -564,8 +535,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 
 <!-- ══════════════ BOOT LOADER ══════════════ -->
 <div id="tp-loader">
-  <!-- <div class="tp-load-badge">🎓</div> -->
-  <img src="./images/logo.png" alt="" class="tp-load-badge"  style="filter: grayscale();">
+  <div class="tp-load-badge">🎓</div>
   <div class="tp-load-txt">Loading Parent Portal…</div>
 </div>
 
@@ -794,9 +764,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 
   <aside class="tp-sidebar" id="tp-sidebar">
     <div class="tp-brand">
-      <!-- <div class="tp-brand-icon">🏫</div> -->
-  <img src="./images/logo.png" alt="" class="tp-brand-icon" style="filter: grayscale();" >
-
+      <div class="tp-brand-icon">🏫</div>
       <div>
         <div class="tp-brand-name">Kanyadet School</div>
         <div class="tp-brand-role">Parent Portal</div>
@@ -811,15 +779,10 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       <div class="tp-nav-label">Admissions</div>
       <div class="tp-nav-item" data-view="admission"><span class="tp-nav-icon">📝</span> Request Admission</div>
       <div class="tp-nav-label">School</div>
-      <div class="tp-nav-item" data-view="calendar"><span class="tp-nav-icon">🗓️</span> School Calendar</div>
       <div class="tp-nav-item" data-view="announcements"><span class="tp-nav-icon">📣</span> Announcements</div>
-      <div class="tp-nav-item" data-view="teachermsg"><span class="tp-nav-icon">✉️</span> Message a Teacher</div>
       <div class="tp-nav-item" data-view="inquiries"><span class="tp-nav-icon">💬</span> Contact School <span class="tp-nav-badge" id="nav-inq-badge" style="display:none;">0</span></div>
       <div class="tp-nav-item" data-view="profile"><span class="tp-nav-icon">👤</span> Profile</div>
       <!-- Admin Portal -->
-<div class="tp-nav-item" onclick="navTo('Admin Portal',this)" data-view="Admin Portal">
-  <a href="https://kanyadet-school-admin.web.app/Report-Cards/Individual-student-portal.html" target="_blank" rel="noopener noreferrer"><span class="tp-nav-icon">🛠️</span>Students Portal</a>
-</div>
 <div class="tp-nav-item" onclick="navTo('Admin Portal',this)" data-view="Admin Portal">
   <a href="./authorized-parent-admin.html" target="_blank" rel="noopener noreferrer"><span class="tp-nav-icon">🛠️</span> Admin Authorization</a>
 </div>
@@ -1062,7 +1025,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       <div class="tp-view" id="view-gradebook">
         <div class="tp-section-hdr">
           <div><h3>Grades</h3><p id="gr-sub">Full subject breakdown for your child</p></div>
-          <button class="tp-btn tp-btn-outline" id="gr-download-btn" style="white-space:nowrap;">⬇ Download Report Card</button>
         </div>
         <div id="gb-table-holder"></div>
       </div>
@@ -1075,43 +1037,12 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
         <div id="st-grid"></div>
       </div>
 
-      <!-- ── SCHOOL CALENDAR ── -->
-      <div class="tp-view" id="view-calendar">
-        <div class="tp-section-hdr">
-          <div><h3>School Calendar</h3><p>Term dates, exams, meetings and holidays</p></div>
-        </div>
-        <div class="tp-announce-list" id="cal-list"></div>
-      </div>
-
       <!-- ── ANNOUNCEMENTS ── -->
       <div class="tp-view" id="view-announcements">
         <div class="tp-section-hdr">
           <div><h3>Announcements</h3><p>Updates from the school and your child's teachers</p></div>
         </div>
         <div class="tp-announce-list" id="an-list"></div>
-      </div>
-
-      <!-- ── MESSAGE A TEACHER ── -->
-      <div class="tp-view" id="view-teachermsg">
-        <div class="tp-section-hdr">
-          <div><h3>Message a Teacher</h3><p>Send a direct message to your child's teacher</p></div>
-        </div>
-        <div class="tp-card" style="padding:20px;margin-bottom:18px;">
-          <div class="tp-field" style="margin-bottom:12px;">
-            <label style="font-size:.76rem;font-weight:700;color:var(--text2);display:block;margin-bottom:6px;">Teacher</label>
-            <select id="tm-teacher-select" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:.86rem;color:var(--text);outline:none;">
-              <option value="">Select a teacher…</option>
-            </select>
-          </div>
-          <div class="tp-field" style="margin-bottom:12px;">
-            <label style="font-size:.76rem;font-weight:700;color:var(--text2);display:block;margin-bottom:6px;">Message</label>
-            <textarea id="tm-text" rows="4" placeholder="What would you like to ask or share?" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;color:var(--text);resize:vertical;outline:none;"></textarea>
-          </div>
-          <button class="tp-btn tp-btn-primary" id="tm-submit-btn">Send</button>
-          <span id="tm-submit-err" style="color:var(--red);font-size:.78rem;margin-left:10px;"></span>
-        </div>
-        <div class="tp-section-hdr"><div><h3 style="font-size:13px;">Your messages to teachers</h3></div></div>
-        <div class="tp-announce-list" id="tm-list"></div>
       </div>
 
       <!-- ── CONTACT SCHOOL / INQUIRIES ── -->
@@ -1168,12 +1099,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
           <button class="tp-btn tp-btn-primary" id="pf-add-child-btn">➕ Link another child</button>
           <div class="tp-err" id="pf-add-child-err" style="margin-top:.8rem;"></div>
         </div>
-
-        <div class="tp-card" style="padding:20px;margin-top:16px;">
-          <div class="tp-section-hdr"><h3>Notifications (free)</h3><p>Get a background check for new grades, announcements and replies — no cost, no server billing</p></div>
-          <div id="bg-sync-status" style="font-size:.82rem;color:var(--text2);margin-bottom:10px;">Checking support…</div>
-          <button class="tp-btn tp-btn-primary" id="bg-sync-enable-btn" style="display:none;">🔔 Enable background checks</button>
-        </div>
       </div>
 
     </div>
@@ -1189,8 +1114,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signOut, sendPasswordResetEmail, updateProfile, GoogleAuthProvider, signInWithPopup,
-  signInWithCredential
+  signOut, sendPasswordResetEmail, updateProfile, GoogleAuthProvider, signInWithPopup
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot,
@@ -1199,7 +1123,6 @@ import {
 import {
   getDatabase, ref, get, update, push, onValue
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-import { PATHS } from './js/config.js';
 
 /* ── Same Firebase project as the Results Portal ── */
 const FB_CONFIG = {
@@ -1211,26 +1134,12 @@ const FB_CONFIG = {
   messagingSenderId:"409708360032",
 };
 const DB_PATH = 'Results/default-app-id/students';
-const CALENDAR_PATH = PATHS.CALENDAR_PATH;
 
 const app  = getApps().length === 0 ? initializeApp(FB_CONFIG) : getApps()[0];
 const auth = getAuth(app);
 const db   = getDatabase(app);
 const fs   = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-
-/* ══════════════════════════════════════════
-   Bridge for google-one-tap.js (loaded in <head>, before this module
-   runs). Its onSuccess handler calls window._KTP.googleCredentialSignIn(idToken)
-   to exchange the One Tap credential for a real Firebase session. Once
-   that resolves, onAuthStateChanged below takes over as normal.
-══════════════════════════════════════════ */
-window._KTP = {
-  googleCredentialSignIn: (idToken) => {
-    const credential = GoogleAuthProvider.credential(idToken);
-    return signInWithCredential(auth, credential);
-  },
-};
 
 /* ══════════════════════════════════════════
    TOAST
@@ -1438,9 +1347,7 @@ const viewTitles = {
   gradebook: ['Grades', 'Full subject breakdown'],
   students: ['Attendance', "Your child's attendance record"],
   admission: ['Request Admission', 'Apply to enroll a new child'],
-  calendar: ['School Calendar', 'Term dates, exams & school events'],
   announcements: ['Announcements', 'Updates from the school'],
-  teachermsg: ['Message a Teacher', "Reach your child's class teacher directly"],
   inquiries: ['Contact School', 'Send feedback or ask a question'],
   profile: ['Profile', 'Your account details'],
 };
@@ -1878,7 +1785,6 @@ function renderEverythingForActiveChild(){
   renderAttendanceView(record);
   renderLatestAnnouncementPreview();
   filterAnnouncementsForChild();
-  renderTeacherSelect();
 }
 
 function renderOverview(record){
@@ -1977,74 +1883,6 @@ function renderGradesView(record){
 }
 
 /* ══════════════════════════════════════════
-   REPORT CARD PDF EXPORT — client-side, jsPDF + autotable,
-   same libraries the Admin Portal uses for its own exports.
-   Builds one section per exam record in the child's history.
-══════════════════════════════════════════ */
-document.getElementById('gr-download-btn')?.addEventListener('click', () => {
-  const record = activeChildRecord();
-  if(!record){
-    if(window.Swal) Swal.fire({ title:'No child linked', text:'Link your child above before downloading a report card.', icon:'info' });
-    return;
-  }
-  if(!window.jspdf){
-    if(window.Swal) Swal.fire({ title:'Still loading', text:'The PDF library is still loading — please try again in a moment.', icon:'info' });
-    return;
-  }
-  const history = examHistoryFor(record);
-  if(!history.length){
-    if(window.Swal) Swal.fire({ title:'No scores yet', text:'No scores have been published for this child yet.', icon:'info' });
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('portrait');
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const childName = record['Official Student Name'] || 'Student';
-
-  history.forEach((rec, i) => {
-    if(i > 0) doc.addPage();
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Kanyadet Primary & Junior School', pageWidth/2, 18, { align:'center' });
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text('Student Report Card', pageWidth/2, 25, { align:'center' });
-
-    doc.setFontSize(10);
-    doc.text(`Name: ${childName}`, 14, 38);
-    doc.text(`Assessment No: ${record['Assessment No']||'—'}`, 14, 44);
-    doc.text(`Grade / Term: ${rec['Grade']||'—'}`, 14, 50);
-    doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}`, pageWidth-14, 38, { align:'right' });
-
-    const subs = subjectEntries(rec).sort((a,b)=>a.subject.localeCompare(b.subject));
-    const rows = subs.map(s => {
-      const band = cbcBand(s.score);
-      const classAvg = classAverageFor(s.subject, rec);
-      return [s.subject, String(s.score), classAvg !== null ? classAvg.toFixed(1) : '—', band.label];
-    });
-    const avg = subs.length ? (subs.reduce((a,b)=>a+b.score,0)/subs.length) : null;
-
-    if(doc.autoTable){
-      doc.autoTable({
-        startY: 58,
-        head: [['Subject','Score','Class Average','Level']],
-        body: rows.length ? rows : [['No scores published for this exam yet.','','','']],
-        theme: 'grid',
-        headStyles: { fillColor: [41,128,185] },
-        styles: { fontSize: 9 }
-      });
-      const endY = doc.lastAutoTable.finalY + 10;
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.text(`Overall Average: ${avg !== null ? avg.toFixed(1) : '—'}`, 14, endY);
-    }
-  });
-
-  const fileName = `${childName.replace(/[^a-z0-9]+/gi,'_')}_Report_Card.pdf`;
-  doc.save(fileName);
-});
-
-/* ══════════════════════════════════════════
    ATTENDANCE VIEW — Firestore-backed, real query (empty until the
    school starts publishing records)
 ══════════════════════════════════════════ */
@@ -2122,56 +1960,6 @@ function renderLatestAnnouncementPreview(){
   holder.className = '';
   holder.innerHTML = `<div class="tp-announce-title" style="margin-bottom:4px;">${(a.title||'Untitled').replace(/</g,'&lt;')}</div>
     <div class="tp-announce-msg">${(a.message||'').replace(/</g,'&lt;')}</div>`;
-}
-
-/* ══════════════════════════════════════════
-   SCHOOL CALENDAR — RTDB, same CALENDAR_PATH the Admin Portal's
-   Calendar view writes to. Read-only here: term dates, exams,
-   meetings, holidays. Past events are hidden; upcoming shown soonest-first.
-══════════════════════════════════════════ */
-let unsubCalendar = null;
-const CAL_TYPE_META = {
-  exam:     { icon:'📝', label:'Exam' },
-  holiday:  { icon:'🏖️', label:'Holiday' },
-  meeting:  { icon:'🗣️', label:'Meeting' },
-  deadline: { icon:'⏰', label:'Deadline' },
-  event:    { icon:'📌', label:'Event' }
-};
-function startCalendarListener(){
-  if(unsubCalendar) return;
-  unsubCalendar = onValue(ref(db, CALENDAR_PATH), (snap) => {
-    const data = snap.exists() ? snap.val() : {};
-    const today = new Date(); today.setHours(0,0,0,0);
-    const events = Object.entries(data)
-      .map(([key,v]) => ({key, ...v}))
-      .filter(ev => {
-        if(!ev.date) return false;
-        const d = new Date(ev.date + 'T00:00:00');
-        return !isNaN(d) && d >= today;
-      })
-      .sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
-    renderCalendar(events);
-  }, () => {
-    document.getElementById('cal-list').innerHTML = '<div class="tp-card tp-empty">Could not load the school calendar.</div>';
-  });
-}
-function renderCalendar(events){
-  const box = document.getElementById('cal-list');
-  if(!box) return;
-  if(!events.length){ box.innerHTML = '<div class="tp-card tp-empty">No upcoming events on the calendar yet.</div>'; return; }
-  box.innerHTML = events.map(ev => {
-    const meta = CAL_TYPE_META[ev.type] || CAL_TYPE_META.event;
-    const d = new Date(ev.date + 'T00:00:00');
-    const dayLabel = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    return `<div class="tp-card tp-announce-item">
-      <div class="tp-announce-top">
-        <div class="tp-announce-title">${meta.icon} ${escapeHtml(ev.title||'Untitled')}</div>
-        <span class="tp-announce-tag">${meta.label}</span>
-      </div>
-      <div class="tp-announce-meta">${dayLabel}</div>
-      ${ev.notes ? `<div class="tp-announce-msg">${escapeHtml(ev.notes)}</div>` : ''}
-    </div>`;
-  }).join('');
 }
 
 /* ══════════════════════════════════════════
@@ -2322,178 +2110,6 @@ document.getElementById('inq-submit-btn')?.addEventListener('click', async () =>
     });
     textEl.value = '';
     if(window.Swal) Swal.fire({ title:'Sent', text:'The admin office has received your message.', icon:'success', confirmButtonColor:'#2980b9' });
-  }catch(err){
-    errEl.textContent = "Couldn't send that — please try again.";
-  }finally{
-    btn.disabled = false;
-    btn.textContent = originalLabel;
-  }
-});
-
-/* ══════════════════════════════════════════
-   MESSAGE A TEACHER — teacher list from Firestore 'users' (role:'Teacher'),
-   messages written into the same RTDB "activities" node Contact School
-   uses, tagged type:'parent_teacher_message' + teacherUid so a teacher's
-   own portal can filter to just messages addressed to them.
-══════════════════════════════════════════ */
-let allTeachers = [];
-async function loadTeachersList(){
-  const sel = document.getElementById('tm-teacher-select');
-  if(!sel) return;
-  try{
-    const q = query(collection(fs, 'users'), where('role', '==', 'Teacher'));
-    const snap = await getDocs(q);
-    allTeachers = [];
-    snap.forEach(d => allTeachers.push({ uid: d.id, ...d.data() }));
-  }catch(e){
-    allTeachers = [];
-  }
-  renderTeacherSelect();
-}
-function renderTeacherSelect(){
-  const sel = document.getElementById('tm-teacher-select');
-  if(!sel) return;
-  const record = activeChildRecord();
-  const grade = record ? record['Grade'] : null;
-  const label = t => t.name || t.displayName || t.email || 'Teacher';
-  const teachesGrade = t => {
-    const grades = Array.isArray(t.assignedGrades) ? t.assignedGrades : (t.assignedGrade ? [t.assignedGrade] : []);
-    return grade && grades.includes(grade);
-  };
-  const mine = allTeachers.filter(teachesGrade);
-  const others = allTeachers.filter(t => !teachesGrade(t));
-  const current = sel.value;
-  let html = '<option value="">Select a teacher…</option>';
-  if(mine.length){
-    html += `<optgroup label="Your child's teachers">${mine.map(t=>`<option value="${t.uid}">${escapeHtml(label(t))}</option>`).join('')}</optgroup>`;
-  }
-  if(others.length){
-    html += `<optgroup label="All teachers">${others.map(t=>`<option value="${t.uid}">${escapeHtml(label(t))}</option>`).join('')}</optgroup>`;
-  }
-  sel.innerHTML = html;
-  if(current) sel.value = current;
-}
-let unsubTeacherMessages = null;
-function startTeacherMessagesListener(){
-  if(unsubTeacherMessages) return;
-  const user = auth.currentUser;
-  if(!user) return;
-  unsubTeacherMessages = onValue(ref(db, 'activities'), (snap) => {
-    const data = snap.exists() ? snap.val() : {};
-    const mine = Object.entries(data)
-      .map(([key,v]) => ({key, ...v}))
-      .filter(f => f.type === 'parent_teacher_message' && f.userId === user.uid)
-      .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-    renderTeacherMessages(mine);
-  }, () => {
-    document.getElementById('tm-list').innerHTML = '<div class="tp-card tp-empty">Could not load your messages.</div>';
-  });
-}
-function renderTeacherMessages(list){
-  const box = document.getElementById('tm-list');
-  if(!box) return;
-  if(!list.length){ box.innerHTML = '<div class="tp-card tp-empty">No messages sent to teachers yet.</div>'; return; }
-  box.innerHTML = list.map(f => {
-    const when = f.timestamp ? new Date(f.timestamp).toLocaleString('en-GB') : 'Just now';
-    const replies = f.replies ? Object.entries(f.replies).map(([rk,r]) => ({rk, ...r})).sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)) : [];
-    const answered = replies.some(r => r.from === 'teacher');
-    const statusBadge = answered
-      ? '<span class="tp-announce-tag" style="background:rgba(39,174,96,.15);color:#27ae60;">Replied</span>'
-      : '<span class="tp-announce-tag">Sent</span>';
-    const threadHtml = replies.length ? `
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
-        ${replies.map(r => `
-          <div style="padding:8px 12px;border-radius:10px;font-size:.82rem;${r.from==='teacher'
-            ? 'background:rgba(41,128,185,.08);border:1px solid rgba(41,128,185,.18);'
-            : 'background:var(--surface2);border:1px solid var(--border);'}">
-            <strong style="display:block;font-size:.74rem;margin-bottom:2px;">${escapeHtml(r.byName || (r.from==='teacher' ? 'Teacher' : 'You'))}</strong>
-            <span>${escapeHtml(r.text||'')}</span>
-            <div style="font-size:.7rem;color:var(--text3);margin-top:3px;">${r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB') : ''}</div>
-          </div>`).join('')}
-      </div>` : '';
-    return `<div class="tp-card tp-announce-item" data-tm-key="${f.key}">
-      <div class="tp-announce-top">
-        <div class="tp-announce-title">To: ${escapeHtml(f.teacherName || 'Teacher')}</div>
-        ${statusBadge}
-      </div>
-      <div class="tp-announce-msg">${escapeHtml(f.message)}</div>
-      <div class="tp-announce-meta">Sent ${when}</div>
-      ${threadHtml}
-      <div style="margin-top:10px;display:none;" id="tm-reply-box-${f.key}">
-        <textarea id="tm-reply-text-${f.key}" rows="2" placeholder="Add to this message…" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:inherit;font-size:.82rem;color:var(--text);resize:vertical;outline:none;"></textarea>
-        <button class="tp-btn tp-btn-primary" style="margin-top:6px;padding:.5rem .9rem;font-size:.76rem;" data-send-tm-reply="${f.key}">Send</button>
-      </div>
-      <button class="tp-btn tp-btn-outline" style="margin-top:8px;padding:.45rem .85rem;font-size:.76rem;" data-toggle-tm-reply="${f.key}">↩ Follow up</button>
-    </div>`;
-  }).join('');
-
-  box.querySelectorAll('[data-toggle-tm-reply]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.toggleTmReply;
-      const replyBox = document.getElementById('tm-reply-box-'+key);
-      replyBox.style.display = replyBox.style.display === 'none' ? 'block' : 'none';
-      if(replyBox.style.display === 'block') document.getElementById('tm-reply-text-'+key).focus();
-    });
-  });
-  box.querySelectorAll('[data-send-tm-reply]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const key = btn.dataset.sendTmReply;
-      const textEl = document.getElementById('tm-reply-text-'+key);
-      const text = textEl.value.trim();
-      if(!text) return;
-      const user = auth.currentUser;
-      if(!user) return;
-      btn.disabled = true;
-      try{
-        await push(ref(db, `activities/${key}/replies`), {
-          text,
-          from: 'parent',
-          byName: user.displayName || user.email || 'You',
-          byUid: user.uid,
-          timestamp: Date.now()
-        });
-        textEl.value = '';
-      }catch(err){
-        if(window.Swal) Swal.fire({ title:'Could not send', text:err.message, icon:'error' });
-      }finally{
-        btn.disabled = false;
-      }
-    });
-  });
-}
-document.getElementById('tm-submit-btn')?.addEventListener('click', async () => {
-  const sel = document.getElementById('tm-teacher-select');
-  const textEl = document.getElementById('tm-text');
-  const errEl = document.getElementById('tm-submit-err');
-  const btn = document.getElementById('tm-submit-btn');
-  errEl.textContent = '';
-  const teacherUid = sel.value;
-  const message = textEl.value.trim();
-  if(!teacherUid){ errEl.textContent = 'Please select a teacher.'; return; }
-  if(!message){ errEl.textContent = 'Please write a message.'; return; }
-  const user = auth.currentUser;
-  if(!user){ errEl.textContent = 'Please sign in again.'; return; }
-  const teacher = allTeachers.find(t => t.uid === teacherUid);
-  btn.disabled = true;
-  const originalLabel = btn.textContent;
-  btn.textContent = 'Sending…';
-  try{
-    const record = activeChildRecord();
-    await push(ref(db, 'activities'), {
-      type: 'parent_teacher_message',
-      message,
-      teacherUid,
-      teacherName: teacher ? (teacher.name || teacher.displayName || teacher.email || 'Teacher') : 'Teacher',
-      userEmail: user.email || '',
-      userName: user.displayName || user.email || 'Parent',
-      userId: user.uid,
-      childName: record ? (record['Official Student Name'] || record['Full Name'] || '') : '',
-      childGrade: record ? (record['Grade'] || '') : '',
-      timestamp: Date.now()
-    });
-    textEl.value = '';
-    sel.value = '';
-    if(window.Swal) Swal.fire({ title:'Sent', text:'Your message has been sent to the teacher.', icon:'success', confirmButtonColor:'#2980b9' });
   }catch(err){
     errEl.textContent = "Couldn't send that — please try again.";
   }finally{
@@ -2759,10 +2375,6 @@ async function enterApprovedApp(user){
   startAnnouncementsListener();
   startInquiriesListener();
   startAdmissionListener();
-  startCalendarListener();
-  startTeacherMessagesListener();
-  loadTeachersList();
-  initBackgroundSync(user);
   document.getElementById('tp-auth-screen').style.display = 'none';
   document.getElementById('tp-shell').style.display = 'flex';
   document.querySelector('.tp-theme-toggle').style.display = 'none';
@@ -2771,114 +2383,12 @@ async function enterApprovedApp(user){
 function exitApprovedApp(){
   isInsideApp = false;
   if(unsubAnnouncements){ unsubAnnouncements(); unsubAnnouncements = null; }
-  if(unsubCalendar){ unsubCalendar(); unsubCalendar = null; }
-  if(unsubTeacherMessages){ unsubTeacherMessages(); unsubTeacherMessages = null; }
   document.getElementById('tp-shell').style.display = 'none';
 }
-
-/* ══════════════════════════════════════════
-   FREE BACKGROUND NOTIFICATIONS — Periodic Background Sync (same
-   free approach used in the Teacher Portal: no Cloud Functions, no
-   Blaze billing plan, no push server — the browser itself wakes the
-   installed PWA's service worker on its own schedule to check for
-   updates). Chrome/Edge, installed-PWA only; silently unsupported
-   elsewhere (Safari/Firefox), so the UI always explains the status.
-══════════════════════════════════════════ */
-const BG_SYNC_TAG = 'parent-check-updates';
-async function bgSyncSupportState(){
-  if(!('serviceWorker' in navigator)) return 'unsupported';
-  if(!window.isSecureContext) return 'unsupported';
-  const isInstalledPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  if(!isInstalledPWA) return 'not-installed';
-  const reg = await navigator.serviceWorker.ready.catch(()=>null);
-  if(!reg || !('periodicSync' in reg)) return 'unsupported';
-  if('permissions' in navigator){
-    try{
-      const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-      if(status.state === 'denied') return 'denied';
-    }catch(e){ /* some browsers don't know this permission name — fall through */ }
-  }
-  return 'available';
-}
-async function bgSyncIsRegistered(){
-  const reg = await navigator.serviceWorker.ready.catch(()=>null);
-  if(!reg || !('periodicSync' in reg)) return false;
-  try{
-    const tags = await reg.periodicSync.getTags();
-    return tags.includes(BG_SYNC_TAG);
-  }catch(e){ return false; }
-}
-async function enableBackgroundSync(){
-  const reg = await navigator.serviceWorker.ready.catch(()=>null);
-  if(!reg || !('periodicSync' in reg)) return false;
-  try{
-    await reg.periodicSync.register(BG_SYNC_TAG, { minInterval: 12 * 60 * 60 * 1000 }); // ~twice a day, browser-controlled
-    return true;
-  }catch(e){ return false; }
-}
-async function pushFreshTokenToServiceWorker(user){
-  if(!user || !('serviceWorker' in navigator)) return;
-  try{
-    const reg = await navigator.serviceWorker.ready;
-    if(!reg.active) return;
-    const token = await user.getIdToken();
-    reg.active.postMessage({ type: 'PARENT_AUTH', token, uid: user.uid });
-  }catch(e){ /* non-fatal — background check just won't have a fresh token yet */ }
-}
-async function refreshBgSyncCard(){
-  const statusEl = document.getElementById('bg-sync-status');
-  const btn = document.getElementById('bg-sync-enable-btn');
-  if(!statusEl) return;
-  const state = await bgSyncSupportState();
-  if(state === 'unsupported'){
-    statusEl.textContent = 'Not supported in this browser — try Chrome or Edge.';
-    btn.style.display = 'none';
-  } else if(state === 'not-installed'){
-    statusEl.textContent = 'Install this app to your home screen / desktop to enable free background checks.';
-    btn.style.display = 'none';
-  } else if(state === 'denied'){
-    statusEl.textContent = 'Background checks were blocked for this site in your browser settings.';
-    btn.style.display = 'none';
-  } else {
-    const on = await bgSyncIsRegistered();
-    if(on){
-      statusEl.textContent = '✅ Background checks are on — your browser will periodically check for updates.';
-      btn.style.display = 'none';
-    } else {
-      statusEl.textContent = 'Get a quiet background check for new grades, announcements and replies.';
-      btn.style.display = '';
-    }
-  }
-}
-async function initBackgroundSync(user){
-  try{
-    if('serviceWorker' in navigator){
-      await navigator.serviceWorker.register('./parent-sw.js');
-      await pushFreshTokenToServiceWorker(user);
-    }
-  }catch(e){ /* SW registration failing shouldn't block the rest of the app */ }
-  refreshBgSyncCard();
-}
-document.getElementById('bg-sync-enable-btn')?.addEventListener('click', async () => {
-  const btn = document.getElementById('bg-sync-enable-btn');
-  btn.disabled = true;
-  const ok = await enableBackgroundSync();
-  btn.disabled = false;
-  if(ok){
-    await pushFreshTokenToServiceWorker(auth.currentUser);
-    refreshBgSyncCard();
-  } else if(window.Swal){
-    Swal.fire({ title:'Could not enable', text:'Your browser did not allow background checks to be turned on.', icon:'info' });
-  }
-});
 
 onAuthStateChanged(auth, async (user)=>{
   try{
     if(user){
-      // Confirmed session is active — release/cancel the deferred One Tap
-      // silent prompt so it never flashes for an already-logged-in user.
-      window._oneTap?.notifySignedIn();
-
       // Staff who are Advanced Admins on the main school system (same flag
       // authorized-teachers-admin.html gates on) should never be stuck
       // waiting on the parent-approval queue, even if they also sign in
@@ -2962,10 +2472,6 @@ onAuthStateChanged(auth, async (user)=>{
       showPendingScreen();
       startAuthorizationWatch(user.email, user.uid);
     } else {
-      // Confirmed no active session — this is what actually releases the
-      // deferred One Tap silent prompt for a logged-out visitor.
-      window._oneTap?.notifySignedOut();
-
       stopAuthorizationWatch();
       isInsideApp = false;
       document.getElementById('tp-shell').style.display = 'none';
