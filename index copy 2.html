@@ -399,7 +399,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 /* Student cards */
 .tp-student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
 .tp-student-card{padding:14px;display:flex;align-items:center;gap:10px;}
-.tp-s-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--teal),#0e7a67);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;position:relative;overflow:hidden;}
+.tp-s-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--teal),#0e7a67);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
 .tp-s-name{font-size:.82rem;font-weight:700;color:var(--text);}
 .tp-s-upi{font-size:.68rem;color:var(--text2);font-family:'JetBrains Mono',monospace;}
 .tp-s-score{margin-left:auto;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;}
@@ -429,9 +429,7 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 
 /* Profile */
 .tp-profile-hdr{display:flex;align-items:center;gap:16px;padding:22px;margin-bottom:16px;}
-.tp-profile-av{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#6c3483);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;position:relative;overflow:hidden;}
-.tp-s-avatar img,.tp-profile-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .3s;}
-.tp-s-avatar.has-photo,.tp-profile-av.has-photo{cursor:pointer;}
+.tp-profile-av{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#6c3483);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;}
 .tp-profile-name{font-size:1.15rem;font-weight:900;color:var(--text);}
 .tp-profile-email{font-size:.78rem;color:var(--text2);font-weight:600;}
 .tp-profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:20px;}
@@ -459,75 +457,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 @media(max-width:520px){
   .tp-row2{flex-direction:column;}
   .tp-tt-grid{grid-template-columns:50px repeat(5,minmax(46px,1fr));font-size:.6rem;overflow-x:auto;}
-}
-
-/* ══════════════════════════════════════════
-   ADMISSION REQUEST FORM — same paper/gold
-   document look as the Admin Biodata Editor
-══════════════════════════════════════════ */
-.adm-wrap{
-  --adm-paper:#F5F1E8; --adm-gold:#B8860B; --adm-gold-dark:#8B6914; --adm-gold-darker:#A67C00;
-  --adm-ink:#2b2620; --adm-line:#4b5563;
-  background:var(--adm-paper); color:var(--adm-ink);
-  border-radius:var(--radius-lg); box-shadow:0 10px 34px rgba(0,0,0,.18);
-  overflow:hidden; position:relative; margin-bottom:20px;
-}
-.adm-content{padding:36px 40px 40px;position:relative;z-index:2;}
-.adm-top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
-.adm-brand{display:flex;align-items:center;gap:10px;}
-.adm-brand-badge{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--adm-gold),var(--adm-gold-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;font-family:Georgia,'Times New Roman',serif;flex-shrink:0;}
-.adm-brand-text{line-height:1.2;}
-.adm-brand-text strong{display:block;color:var(--adm-gold-dark);font-size:14px;letter-spacing:.03em;}
-.adm-brand-text span{font-size:10.5px;color:#7a7262;letter-spacing:.08em;text-transform:uppercase;}
-.adm-org-info{text-align:right;font-size:12px;line-height:1.5;color:var(--adm-ink);}
-.adm-org-info .name{font-weight:700;font-size:13px;}
-.adm-rule{height:3px;width:100%;background:var(--adm-gold-darker);margin-bottom:8px;}
-.adm-form-code{color:var(--adm-gold);font-weight:700;font-size:12px;margin-bottom:4px;}
-.adm-title{text-align:center;font-size:20px;letter-spacing:.05em;color:var(--adm-gold);font-weight:700;margin:4px 0 16px;}
-.adm-tag{font-size:10px;background:#8b0000;color:#fff;padding:1px 7px;border-radius:20px;font-weight:700;letter-spacing:.03em;margin-left:6px;vertical-align:2px;}
-.adm-divider{border-bottom:1px solid #33302a;margin:0 0 22px;}
-.adm-section{text-align:center;font-size:16.5px;font-weight:700;color:var(--adm-gold);margin:26px 0 16px;}
-.adm-section:first-of-type{margin-top:0;}
-.adm-note{display:flex;align-items:flex-start;gap:8px;background:#fdf8e8;border:1px dashed var(--adm-gold);border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:12.5px;color:#6b5b1e;line-height:1.5;}
-.adm-field-row{display:flex;gap:24px;margin-bottom:15px;flex-wrap:wrap;}
-.adm-field{display:flex;align-items:flex-end;gap:8px;flex:1;min-width:160px;font-size:14.5px;}
-.adm-field.wide{flex:1 1 100%;}
-.adm-field label{white-space:nowrap;color:var(--adm-ink);}
-.adm-field input,.adm-field select,.adm-field textarea{
-  flex:1;background:transparent;border:none;border-bottom:1.5px dotted var(--adm-line);
-  outline:none;padding:2px 4px 6px;font-size:14.5px;font-family:inherit;color:var(--adm-ink);min-width:80px;
-}
-.adm-field textarea{resize:vertical;min-height:34px;}
-.adm-field input:focus,.adm-field select:focus,.adm-field textarea:focus{border-bottom-color:var(--adm-gold);}
-.adm-field input.adm-filled,.adm-field select.adm-filled{color:#1a1a1a;}
-.adm-declaration{font-size:13.5px;line-height:1.6;margin:4px 0 18px;text-align:justify;}
-.adm-checkline{display:flex;align-items:flex-start;gap:8px;font-size:13px;margin-bottom:20px;}
-.adm-checkline input{margin-top:3px;}
-.adm-submit-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
-.adm-submit-btn{background:#8b0000;color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(139,0,0,.35);display:inline-flex;align-items:center;gap:8px;}
-.adm-submit-btn:hover{background:#a30000;}
-.adm-submit-btn:disabled{opacity:.55;cursor:not-allowed;}
-.adm-err{color:#c0392b;font-size:12.5px;margin-top:8px;display:none;}
-.adm-err.on{display:block;}
-.adm-waves{position:absolute;left:0;bottom:0;width:100%;height:70px;z-index:1;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 C320,120 420,0 720,40 C1020,80 1120,20 1440,60 L1440,120 L0,120 Z' fill='%23A67C00' opacity='0.9'/%3E%3Cpath d='M0,80 C400,140 600,20 900,60 C1200,100 1300,40 1440,80 L1440,120 L0,120 Z' fill='%238B6914'/%3E%3C/svg%3E");
-  background-size:100% 100%;background-repeat:no-repeat;
-}
-.adm-req-list{display:flex;flex-direction:column;gap:10px;}
-.adm-req-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
-.adm-req-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
-.adm-req-name{font-weight:700;font-size:.88rem;color:var(--text);}
-.adm-req-meta{font-size:.76rem;color:var(--text2);margin-top:3px;}
-.adm-status{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.02em;}
-.adm-status.pending{background:rgba(243,156,18,.15);color:var(--orange-dk);}
-.adm-status.approved{background:rgba(39,174,96,.15);color:var(--green-dk);}
-.adm-status.rejected{background:rgba(231,76,60,.15);color:var(--red-dk);}
-@media(max-width:600px){
-  .adm-content{padding:24px 18px 30px;}
-  .adm-field-row{flex-direction:column;gap:12px;}
-  .adm-org-info{font-size:10.5px;}
-  .adm-submit-row{justify-content:stretch;}
-  .adm-submit-btn{width:100%;justify-content:center;}
 }
 </style>
 </head>
@@ -776,8 +705,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
       <div class="tp-nav-label">Your Child</div>
       <div class="tp-nav-item" data-view="gradebook"><span class="tp-nav-icon">📊</span> Grades</div>
       <div class="tp-nav-item" data-view="students"><span class="tp-nav-icon">🗓️</span> Attendance</div>
-      <div class="tp-nav-label">Admissions</div>
-      <div class="tp-nav-item" data-view="admission"><span class="tp-nav-icon">📝</span> Request Admission</div>
       <div class="tp-nav-label">School</div>
       <div class="tp-nav-item" data-view="announcements"><span class="tp-nav-icon">📣</span> Announcements</div>
       <div class="tp-nav-item" data-view="inquiries"><span class="tp-nav-icon">💬</span> Contact School <span class="tp-nav-badge" id="nav-inq-badge" style="display:none;">0</span></div>
@@ -878,147 +805,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- ── REQUEST ADMISSION ── -->
-      <div class="tp-view" id="view-admission">
-        <div class="adm-wrap">
-          <div class="adm-content">
-            <div class="adm-top-row">
-              <div class="adm-brand">
-                <div class="adm-brand-badge">KS</div>
-                <div class="adm-brand-text">
-                  <strong>KANYADET PRI &amp; JUNIOR SCHOOL</strong>
-                  <span>Parent Portal</span>
-                </div>
-              </div>
-              <div class="adm-org-info">
-                <div class="name">Kanyadet Primary &amp; Junior School</div>
-                <div>P.O. Box 45, 40139 Akala</div>
-                <div>Kenya</div>
-              </div>
-            </div>
-            <div class="adm-rule"></div>
-            <div class="adm-form-code">KPJS.2</div>
-            <h1 class="adm-title">STUDENT ADMISSION REQUEST FORM <span class="adm-tag">PARENT</span></h1>
-            <div class="adm-divider"></div>
-
-            <form id="admForm">
-              <h2 class="adm-section">SECTION A: CHILD'S PARTICULARS</h2>
-              <div class="adm-note">
-                <span>Fill in your child's details below. The admin office will review your request and contact you once a decision is made.</span>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field wide">
-                  <label>Full Name:</label>
-                  <input type="text" id="adm-childName" required>
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field">
-                  <label>Assessment No:</label>
-                  <input type="text" id="adm-assessmentNo" required>
-                </div>
-                <div class="adm-field">
-                  <label>ULI:</label>
-                  <input type="text" id="adm-uli" required>
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field">
-                  <label>Date of Birth:</label>
-                  <input type="date" id="adm-dob" required>
-                </div>
-                <div class="adm-field">
-                  <label>Gender:</label>
-                  <select id="adm-gender" required>
-                    <option value="">Select…</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field">
-                  <label>Grade Applying For:</label>
-                  <select id="adm-grade" required>
-                    <option value="">Select…</option>
-                    <option>Playgroup</option><option>PP1</option><option>PP2</option>
-                    <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
-                    <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
-                    <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
-                  </select>
-                </div>
-                <div class="adm-field">
-                  <label>Previous School (if any):</label>
-                  <input type="text" id="adm-prevSchool">
-                </div>
-              </div>
-
-              <h2 class="adm-section">SECTION B: PARENT/GUARDIAN &amp; CONTACT DETAILS</h2>
-
-              <div class="adm-field-row">
-                <div class="adm-field">
-                  <label>Parent/Guardian Name:</label>
-                  <input type="text" id="adm-guardianName" required>
-                </div>
-                <div class="adm-field">
-                  <label>Relationship:</label>
-                  <select id="adm-relationship">
-                    <option value="Parent">Parent</option>
-                    <option value="Guardian">Guardian</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field">
-                  <label>Phone Number:</label>
-                  <input type="tel" id="adm-phone" required>
-                </div>
-                <div class="adm-field">
-                  <label>Email Address:</label>
-                  <input type="email" id="adm-email">
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field wide">
-                  <label>Home Address:</label>
-                  <input type="text" id="adm-address">
-                </div>
-              </div>
-
-              <div class="adm-field-row">
-                <div class="adm-field wide">
-                  <label>Additional Notes:</label>
-                  <textarea id="adm-notes" rows="2" placeholder="Anything else the admin office should know (optional)"></textarea>
-                </div>
-              </div>
-
-              <h2 class="adm-section">SECTION C: DECLARATION</h2>
-              <p class="adm-declaration">I declare that the information provided above is true and correct to the best of my knowledge, and I am requesting admission for the above-named child at Kanyadet Primary &amp; Junior School. I understand this is a request only and does not guarantee a place until confirmed by the admin office.</p>
-              <label class="adm-checkline">
-                <input type="checkbox" id="adm-declare" required>
-                <span>I confirm the details above are accurate and I wish to submit this admission request.</span>
-              </label>
-
-              <div class="adm-submit-row">
-                <button type="button" class="adm-submit-btn" id="adm-submit-btn">📨 Submit Admission Request</button>
-              </div>
-              <div class="adm-err" id="adm-err"></div>
-            </form>
-          </div>
-          <div class="adm-waves"></div>
-        </div>
-
-        <div class="tp-section-hdr"><div><h3 style="font-size:13px;">Your admission requests</h3></div></div>
-        <div class="adm-req-list" id="adm-req-list"></div>
       </div>
 
       <!-- ── GRADES ── -->
@@ -1346,7 +1132,6 @@ const viewTitles = {
   today: ['Overview', "Your child's progress at a glance"],
   gradebook: ['Grades', 'Full subject breakdown'],
   students: ['Attendance', "Your child's attendance record"],
-  admission: ['Request Admission', 'Apply to enroll a new child'],
   announcements: ['Announcements', 'Updates from the school'],
   inquiries: ['Contact School', 'Send feedback or ask a question'],
   profile: ['Profile', 'Your account details'],
@@ -1400,120 +1185,6 @@ function cbcBand(score){
   if(score >= 40) return { label:'Approaching Expectation', color:'var(--gold)' };
   return { label:'Below Expectation', color:'var(--red)' };
 }
-
-/* ══════════════════════════════════════════
-   STUDENT PHOTO LOADING — ported from the Admin Portal (index_admin.html)
-   Priority: 1) ./Report-Cards/student_images/{Grade}/{Name}.jpg
-             2) Default avatar (silently falls back to initials if missing)
-══════════════════════════════════════════ */
-const _imgCache = {};
-function _loadImg(src){
-  return new Promise(resolve=>{
-    if(_imgCache[src]!==undefined){resolve(_imgCache[src]);return;}
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    const timer=setTimeout(()=>{_imgCache[src]=null;resolve(null);},2500);
-    img.onload=()=>{clearTimeout(timer);_imgCache[src]=img.src;resolve(img.src);};
-    img.onerror=()=>{clearTimeout(timer);_imgCache[src]=null;resolve(null);};
-    img.src=src;
-  });
-}
-async function loadStudentPhoto(name, grade){
-  const g=(grade||'').match(/Grade\s*\d+/i)?.[0]||grade||'';
-  const cleanName=(name||'').trim();
-  const encGrade=encodeURIComponent(g);
-  const encName=encodeURIComponent(cleanName);
-  const paths=[
-    `https://kanyadet-school-admin.web.app/Report-Cards/student_images/${g}/${cleanName}.jpg`,
-    `https://kanyadet-school-admin.web.app/Report-Cards/student_images/${encGrade}/${encName}.jpg`,
-    `https://kanyadet-school-admin.web.app/Report-Cards/student_images/${g}/${encName}.jpg`,
-    `https://kanyadet-school-admin.web.app/Report-Cards/student_images/${g}/${cleanName}.jpg`,
-    `https://kanyadet-school-admin.web.app/student_images/${encGrade}/${encName}.jpg`,
-  ];
-  for(const p of paths){
-    const src=await _loadImg(p);
-    if(src) return src;
-  }
-  // Fallback: default avatar (ok if missing — caller keeps initials)
-  return await _loadImg('https://kanyadet-school-admin.web.app/Report-Cards/student_images/default.jpg');
-}
-function _applyPhotoToAvatar(el, src, name, grade){
-  if(!el || !src) return;
-  let img = el.querySelector('img');
-  if(!img){
-    img = document.createElement('img');
-    img.loading = 'lazy';
-    el.appendChild(img);
-  }
-  if(img.src !== src) img.src = src;
-  // Real photo loaded (not just initials) — make it clickable to view large.
-  el.classList.add('has-photo');
-  el.title = (name ? name+' — ' : '') + 'click to view photo';
-  el.onclick = (e) => { e.stopPropagation(); openStudentPhotoLightbox(src, name, grade); };
-}
-// Loads a child's real photo into an existing, already-rendered avatar
-// element (e.g. the fixed #child-avatar div) — keeps whatever initials
-// are already showing if no photo is found.
-function loadChildPhotoIntoEl(el, name, grade){
-  if(!el) return;
-  loadStudentPhoto(name, grade).then(src=>{
-    if(!src) return;
-    _applyPhotoToAvatar(el, src, name, grade);
-  });
-}
-// Build a photo avatar element and async-load the image — for list items
-// generated fresh from a template string (e.g. the linked-children list).
-// wrapClass: CSS class(es) for the wrapper div
-function makePhotoAvatar(name, grade, wrapClass){
-  const uid='av_'+Math.random().toString(36).slice(2,8);
-  const init=(name||'?').split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
-  const html=`<div class="${wrapClass}" id="${uid}">${escapeHtml(init)}</div>`;
-  requestAnimationFrame(()=>{
-    loadStudentPhoto(name, grade).then(src=>{
-      if(!src) return;
-      const el=document.getElementById(uid);
-      if(el) _applyPhotoToAvatar(el, src, name, grade);
-    });
-  });
-  return html;
-}
-
-/* ── Student photo lightbox — click any student avatar to view it large ── */
-function _ensurePhotoLightbox(){
-  let lb = document.getElementById('student-photo-lightbox');
-  if(lb) return lb;
-  lb = document.createElement('div');
-  lb.id = 'student-photo-lightbox';
-  lb.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:flex-start;justify-content:center;padding:30px;overflow-y:auto;cursor:zoom-out';
-  lb.innerHTML = `
-    <div style="position:relative;max-width:min(90vw,560px);width:100%;margin:auto 0;display:flex;flex-direction:column;align-items:center;gap:12px" onclick="event.stopPropagation()">
-      <button onclick="closeStudentPhotoLightbox()" title="Close" style="position:absolute;top:-16px;right:-16px;width:34px;height:34px;border-radius:50%;border:none;background:#fff;color:#111;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:1">✕</button>
-      <img id="student-photo-lightbox-img" src="" alt="" style="max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);object-fit:contain;background:#fff">
-      <div id="student-photo-lightbox-name" style="color:#fff;font-size:14px;font-weight:700;text-align:center"></div>
-      <div id="student-photo-lightbox-meta" style="color:rgba(255,255,255,.75);font-size:12px;font-weight:600;text-align:center;letter-spacing:.3px"></div>
-    </div>`;
-  lb.addEventListener('click', closeStudentPhotoLightbox);
-  document.body.appendChild(lb);
-  return lb;
-}
-function openStudentPhotoLightbox(src, name, grade){
-  if(!src) return;
-  const lb = _ensurePhotoLightbox();
-  document.getElementById('student-photo-lightbox-img').src = src;
-  document.getElementById('student-photo-lightbox-img').alt = name || '';
-  document.getElementById('student-photo-lightbox-name').textContent = name || '';
-  document.getElementById('student-photo-lightbox-meta').textContent = grade || '';
-  lb.style.display = 'flex';
-  document.addEventListener('keydown', _photoLightboxEscHandler);
-}
-window.openStudentPhotoLightbox = openStudentPhotoLightbox;
-function closeStudentPhotoLightbox(){
-  const lb = document.getElementById('student-photo-lightbox');
-  if(lb) lb.style.display = 'none';
-  document.removeEventListener('keydown', _photoLightboxEscHandler);
-}
-window.closeStudentPhotoLightbox = closeStudentPhotoLightbox;
-function _photoLightboxEscHandler(e){ if(e.key==='Escape') closeStudentPhotoLightbox(); }
 
 /* ══════════════════════════════════════════
    PROFILE + LINKED CHILDREN
@@ -1704,8 +1375,9 @@ function renderChildrenManageList(){
   const holder = document.getElementById('pf-children-list');
   if(!linkedChildren.length){ holder.innerHTML = '<div class="tp-empty">No children linked yet.</div>'; return; }
   holder.innerHTML = linkedChildren.map(c=>{
+    const initials = (c.name||'?').split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
     return `<div class="tp-card tp-student-card">
-      ${makePhotoAvatar(c.name||'?', c.grade||'', 'tp-s-avatar')}
+      <div class="tp-s-avatar">${initials}</div>
       <div>
         <div class="tp-s-name">${(c.name||'—').replace(/</g,'&lt;')}</div>
         <div class="tp-s-upi">${(c.upi||'—').replace(/</g,'&lt;')} · ${(c.grade||'—').replace(/</g,'&lt;')}</div>
@@ -1788,13 +1460,10 @@ function renderEverythingForActiveChild(){
 }
 
 function renderOverview(record){
-  const avatarEl = document.getElementById('child-avatar');
   if(!record){
     document.getElementById('child-name').textContent = '—';
     document.getElementById('child-upi').textContent = '—';
-    avatarEl.textContent = '?';
-    avatarEl.classList.remove('has-photo');
-    avatarEl.onclick = null;
+    document.getElementById('child-avatar').textContent = '?';
     document.getElementById('stat-avg').textContent = '—';
     document.getElementById('stat-best').textContent = '—';
     document.getElementById('stat-done').textContent = '—';
@@ -1806,10 +1475,7 @@ function renderOverview(record){
   const initials = name.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase() || '?';
   document.getElementById('child-name').textContent = name;
   document.getElementById('child-upi').textContent = (record['UPI']||'—') + ' · ' + (record['Grade']||'—');
-  avatarEl.textContent = initials;
-  avatarEl.classList.remove('has-photo');
-  avatarEl.onclick = null;
-  loadChildPhotoIntoEl(avatarEl, name, record['Grade']);
+  document.getElementById('child-avatar').textContent = initials;
 
   const subs = subjectEntries(record);
   const avg = subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null;
@@ -2119,105 +1785,6 @@ document.getElementById('inq-submit-btn')?.addEventListener('click', async () =>
 });
 
 /* ══════════════════════════════════════════
-   ADMISSION REQUESTS — writes into RTDB "admissionRequests",
-   one push-node per request, tagged with the parent's uid so
-   this portal only ever shows their own requests back to them.
-══════════════════════════════════════════ */
-let unsubAdmission = null;
-function startAdmissionListener(){
-  if(unsubAdmission) return;
-  const user = auth.currentUser;
-  if(!user) return;
-  unsubAdmission = onValue(ref(db, 'admissionRequests'), (snap) => {
-    const data = snap.exists() ? snap.val() : {};
-    const mine = Object.entries(data)
-      .map(([key,v]) => ({key, ...v}))
-      .filter(r => r.parentUid === user.uid)
-      .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-    renderAdmissionRequests(mine);
-  }, (err) => {
-    document.getElementById('adm-req-list').innerHTML = '<div class="tp-card tp-empty">Could not load your requests.</div>';
-  });
-}
-function renderAdmissionRequests(list){
-  const box = document.getElementById('adm-req-list');
-  if(!box) return;
-  if(!list.length){ box.innerHTML = '<div class="tp-card tp-empty">No admission requests submitted yet.</div>'; return; }
-  box.innerHTML = list.map(r => {
-    const when = r.timestamp ? new Date(r.timestamp).toLocaleString('en-GB') : 'Just now';
-    const status = (r.status || 'pending').toLowerCase();
-    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-    return `<div class="adm-req-item">
-      <div class="adm-req-top">
-        <div class="adm-req-name">${escapeHtml(r.childName || 'Child')}</div>
-        <span class="adm-status ${status}">${statusLabel}</span>
-      </div>
-      <div class="adm-req-meta">${escapeHtml(r.gradeApplyingFor || '')}${r.assessmentNo ? ' · Assessment No: ' + escapeHtml(r.assessmentNo) : ''}${r.uli ? ' · ULI: ' + escapeHtml(r.uli) : ''} · Submitted ${when}</div>
-      ${r.adminNote ? `<div class="adm-req-meta" style="margin-top:6px;">Admin note: ${escapeHtml(r.adminNote)}</div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-document.getElementById('adm-submit-btn')?.addEventListener('click', async () => {
-  const errEl = document.getElementById('adm-err');
-  errEl.classList.remove('on');
-  const user = auth.currentUser;
-  if(!user){ errEl.textContent = 'Please sign in again.'; errEl.classList.add('on'); return; }
-
-  const childName = document.getElementById('adm-childName').value.trim();
-  const assessmentNo = document.getElementById('adm-assessmentNo').value.trim();
-  const uli = document.getElementById('adm-uli').value.trim();
-  const dob = document.getElementById('adm-dob').value;
-  const gender = document.getElementById('adm-gender').value;
-  const gradeApplyingFor = document.getElementById('adm-grade').value;
-  const prevSchool = document.getElementById('adm-prevSchool').value.trim();
-  const guardianName = document.getElementById('adm-guardianName').value.trim();
-  const relationship = document.getElementById('adm-relationship').value;
-  const phone = document.getElementById('adm-phone').value.trim();
-  const email = document.getElementById('adm-email').value.trim();
-  const address = document.getElementById('adm-address').value.trim();
-  const notes = document.getElementById('adm-notes').value.trim();
-  const declared = document.getElementById('adm-declare').checked;
-
-  if(!childName || !assessmentNo || !uli || !dob || !gender || !gradeApplyingFor || !guardianName || !phone){
-    errEl.textContent = 'Please fill in all required fields marked above.';
-    errEl.classList.add('on');
-    return;
-  }
-  if(!declared){
-    errEl.textContent = 'Please confirm the declaration checkbox before submitting.';
-    errEl.classList.add('on');
-    return;
-  }
-
-  const btn = document.getElementById('adm-submit-btn');
-  btn.disabled = true;
-  const originalLabel = btn.innerHTML;
-  btn.innerHTML = 'Submitting…';
-  try{
-    await push(ref(db, 'admissionRequests'), {
-      childName, assessmentNo, uli, dob, gender, gradeApplyingFor, prevSchool,
-      guardianName, relationship, phone,
-      email: email || user.email || '',
-      address, notes,
-      parentUid: user.uid,
-      parentEmail: user.email || '',
-      status: 'pending',
-      timestamp: Date.now()
-    });
-    document.getElementById('admForm').reset();
-    if(window.Swal) Swal.fire({ title:'Request submitted', text:'The admin office has received your admission request and will be in touch.', icon:'success', confirmButtonColor:'#8B6914' });
-    else notify('Admission request submitted.', 'success');
-  }catch(err){
-    errEl.textContent = "Couldn't submit that — please try again.";
-    errEl.classList.add('on');
-  }finally{
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-  }
-});
-
-/* ══════════════════════════════════════════
    PARENT AUTHORIZATION — checked against the 'authorizedParents'
    configuration collection, which the school admin manages (add an
    email there ahead of time to pre-approve it). Any parent who signs
@@ -2374,7 +1941,6 @@ async function enterApprovedApp(user){
   await autoLinkFromSignup();
   startAnnouncementsListener();
   startInquiriesListener();
-  startAdmissionListener();
   document.getElementById('tp-auth-screen').style.display = 'none';
   document.getElementById('tp-shell').style.display = 'flex';
   document.querySelector('.tp-theme-toggle').style.display = 'none';
