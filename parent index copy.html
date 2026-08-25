@@ -914,36 +914,6 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
               </div>
             </div>
           </div>
-
-          <div class="tp-section-hdr" style="margin-top:22px;">
-            <h3>Performance Analytics</h3>
-            <p>A closer look at trend, subject mix, and attendance</p>
-          </div>
-          <div class="tp-2col">
-            <div class="tp-card" style="padding:18px;">
-              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Score Trend</h3><p>Tap a point to view that exam below</p></div>
-              <div id="tp-trend-bars"></div>
-              <div id="tp-viewing-exam" style="font-size:.72rem;font-weight:700;color:var(--text2);margin-top:2px;min-height:16px;"></div>
-              <div id="tp-trend-delta" class="tp-empty" style="padding:10px 0 0;"></div>
-            </div>
-            <div class="tp-card" style="padding:18px;">
-              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>CBC Band Breakdown</h3><p>Where subjects sit this exam</p></div>
-              <div class="tp-donut-row">
-                <div class="tp-donut" id="tp-band-donut"><span id="tp-band-donut-lbl">—</span></div>
-                <div id="tp-band-legend" style="flex:1;display:flex;flex-direction:column;gap:7px;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="tp-2col" style="margin-top:16px;">
-            <div class="tp-card" style="padding:18px;">
-              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Strengths &amp; Growth Areas</h3><p>Vs. class average, this exam</p></div>
-              <div id="tp-strengths-growth"></div>
-            </div>
-            <div class="tp-card" style="padding:18px;">
-              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Attendance Snapshot</h3><p id="tp-att-snap-sub">This term</p></div>
-              <div id="tp-att-snapshot"><div class="tp-empty">Loading…</div></div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1646,7 +1616,6 @@ let currentUid = null;
 let allStudentRecords = {};      // key -> record (full Realtime DB student table)
 let linkedChildren = [];         // [{key, name, upi, grade}]
 let activeChildKey = '';
-let selectedExamKey = null; // null = follow the current/active exam; set when a parent clicks a point on the trend line
 
 async function loadAllStudents(){
   const snap = await get(ref(db, DB_PATH));
@@ -1891,17 +1860,8 @@ function examHistoryFor(record){
     .map(([k,r]) => ({ key:k, ...r }));
   return matches.sort((a,b) => (b['Grade']||'').localeCompare(a['Grade']||''));
 }
-let lastOverviewChildKey = null;
 function renderEverythingForActiveChild(){
   const record = activeChildRecord();
-
-  // Drop any pinned "viewing an older exam" selection when the parent
-  // switches to a different child — it shouldn't carry over.
-  if(activeChildKey !== lastOverviewChildKey){
-    selectedExamKey = null;
-    lastOverviewChildKey = activeChildKey;
-  }
-
   const noChildCard = document.getElementById('tp-no-child-card');
   const overviewBody = document.getElementById('tp-overview-body');
 
@@ -1934,9 +1894,6 @@ function renderOverview(record){
     document.getElementById('stat-done').textContent = '—';
     document.getElementById('stat-class').textContent = '—';
     document.getElementById('tp-report-bars').innerHTML = '<div class="tp-empty">Link a child above to see their report.</div>';
-    renderScoreTrend(null);
-    renderBandDonut(null);
-    renderStrengthsGrowth(null);
     return;
   }
   const name = record['Official Student Name'] || 'Your child';
@@ -1978,220 +1935,6 @@ function renderOverview(record){
       </div>`;
     }).join('');
   }
-
-  renderScoreTrend(record); // also drives the CBC/Strengths cards for whichever exam is selected
-}
-
-/* ══════════════════════════════════════════
-   OVERVIEW ANALYTICS — trend, CBC band mix, strengths/growth.
-   All derived client-side from the same student record data the
-   rest of the Overview tab already uses (subjectEntries, examHistoryFor,
-   classAverageFor, cbcBand) — no extra reads.
-══════════════════════════════════════════ */
-function renderScoreTrend(record){
-  const holder = document.getElementById('tp-trend-bars');
-  const deltaEl = document.getElementById('tp-trend-delta');
-  if(!holder) return;
-  if(!record){
-    holder.innerHTML = '<div class="tp-empty">Link a child to see their trend.</div>';
-    if(deltaEl){ deltaEl.textContent = ''; deltaEl.className = ''; }
-    renderViewingLabel(null, null);
-    renderBandDonut(null);
-    renderStrengthsGrowth(null);
-    return;
-  }
-
-  const history = examHistoryFor(record).slice().reverse(); // oldest → newest
-  const points = history
-    .map(rec => {
-      const subs = subjectEntries(rec);
-      const avg = subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null;
-      return { key: rec.key, label: rec['Grade'] || 'Exam', avg, rec };
-    })
-    .filter(p => p.avg !== null);
-
-  if(!points.length){
-    holder.innerHTML = '<div class="tp-empty">No scores published for this exam yet.</div>';
-    if(deltaEl){ deltaEl.textContent = ''; deltaEl.className = ''; }
-    renderViewingLabel(null, null);
-    renderBandDonut(null);
-    renderStrengthsGrowth(null);
-    return;
-  }
-
-  // Default to the latest exam unless the parent has pinned an older one
-  // that's still present in this history.
-  if(!selectedExamKey || !points.some(p => p.key === selectedExamKey)){
-    selectedExamKey = points[points.length - 1].key;
-  }
-
-  // ── Build the line graph as an inline, responsive SVG ──
-  const W = 560, H = 148, padX = 26, padTop = 26, padBottom = 22;
-  const avgs = points.map(p => p.avg);
-  const max = Math.max(...avgs, 100);
-  const min = Math.min(...avgs, 0);
-  const range = Math.max(1, max - min);
-  const innerW = W - padX * 2;
-  const innerH = H - padTop - padBottom;
-  const stepX = points.length > 1 ? innerW / (points.length - 1) : 0;
-
-  const coords = points.map((p, i) => ({
-    ...p,
-    x: points.length > 1 ? padX + i * stepX : W / 2,
-    y: padTop + (1 - (p.avg - min) / range) * innerH,
-  }));
-
-  const linePath = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-  const areaPath = `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${(H - padBottom).toFixed(1)} `
-    + `L${coords[0].x.toFixed(1)},${(H - padBottom).toFixed(1)} Z`;
-
-  const valueLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${(c.y - 12).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="800" font-family="'JetBrains Mono',monospace" fill="${c.key === selectedExamKey ? 'var(--blue-dk)' : 'var(--text2)'}">${c.avg.toFixed(1)}</text>`).join('');
-  const xLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="9" font-weight="700" fill="${c.key === selectedExamKey ? 'var(--text)' : 'var(--text3)'}">${(c.label || '').replace(/</g, '&lt;').slice(0, 12)}</text>`).join('');
-  const dots = coords.map(c => {
-    const sel = c.key === selectedExamKey;
-    return `<g class="tp-trend-pt" data-key="${c.key}" tabindex="0" role="button" aria-label="View ${(c.label||'this exam').replace(/</g,'&lt;')}" style="cursor:pointer;outline:none;">
-      <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="13" fill="transparent"></circle>
-      ${sel ? `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="9" fill="var(--blue)" opacity=".18"></circle>` : ''}
-      <circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${sel ? 6 : 4.5}" fill="${sel ? 'var(--blue-dk)' : 'var(--surface)'}" stroke="var(--blue-dk)" stroke-width="2.2"></circle>
-    </g>`;
-  }).join('');
-
-  holder.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;overflow:visible;" preserveAspectRatio="xMidYMid meet">
-    <defs>
-      <linearGradient id="tpTrendFill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--blue-lt)" stop-opacity=".3"></stop>
-        <stop offset="100%" stop-color="var(--blue-lt)" stop-opacity="0"></stop>
-      </linearGradient>
-    </defs>
-    <path d="${areaPath}" fill="url(#tpTrendFill)"></path>
-    <path d="${linePath}" fill="none" stroke="var(--blue-dk)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
-    ${valueLabels}
-    ${dots}
-    ${xLabels}
-  </svg>`;
-
-  const selectPoint = (key) => {
-    selectedExamKey = key;
-    renderScoreTrend(record); // redraw so the picked point highlights, then cascades below
-  };
-  holder.querySelectorAll('.tp-trend-pt').forEach(el => {
-    el.addEventListener('click', () => selectPoint(el.getAttribute('data-key')));
-    el.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectPoint(el.getAttribute('data-key')); } });
-  });
-
-  if(deltaEl){
-    if(points.length >= 2){
-      const delta = points[points.length - 1].avg - points[points.length - 2].avg;
-      const up = delta >= 0;
-      deltaEl.className = '';
-      deltaEl.innerHTML = `<span style="font-weight:800;color:${up ? 'var(--green-dk)' : 'var(--red-dk)'};">${up ? '▲' : '▼'} ${Math.abs(delta).toFixed(1)} pts</span> vs the previous exam on record`;
-    } else {
-      deltaEl.className = 'tp-empty';
-      deltaEl.textContent = 'One exam on record so far — the trend fills in as more are published.';
-    }
-  }
-
-  // Whichever point is selected drives the CBC breakdown and strengths/growth cards below.
-  const selected = points.find(p => p.key === selectedExamKey) || points[points.length - 1];
-  const isLatest = selected.key === points[points.length - 1].key;
-  renderViewingLabel(selected, isLatest);
-  renderBandDonut(selected.rec);
-  renderStrengthsGrowth(selected.rec);
-}
-
-function renderViewingLabel(point, isLatest){
-  const el = document.getElementById('tp-viewing-exam');
-  if(!el) return;
-  if(!point || isLatest){
-    el.innerHTML = '';
-    return;
-  }
-  el.innerHTML = `Viewing <b style="color:var(--text);">${(point.label || 'this exam').replace(/</g, '&lt;')}</b> — the CBC breakdown and strengths/growth cards below reflect it.
-    <button type="button" id="tp-viewing-reset" style="background:none;border:none;color:var(--blue);font-weight:800;cursor:pointer;font-size:inherit;padding:0;text-decoration:underline;">Back to current exam</button>`;
-  document.getElementById('tp-viewing-reset')?.addEventListener('click', () => {
-    selectedExamKey = null;
-    renderScoreTrend(activeChildRecord());
-  });
-}
-
-function renderBandDonut(record){
-  const donut = document.getElementById('tp-band-donut');
-  const lbl = document.getElementById('tp-band-donut-lbl');
-  const legend = document.getElementById('tp-band-legend');
-  if(!donut || !legend) return;
-
-  const subs = record ? subjectEntries(record) : [];
-  if(!subs.length){
-    donut.style.background = 'var(--surface3)';
-    if(lbl) lbl.textContent = '—';
-    legend.innerHTML = `<div class="tp-empty">${record ? 'No scores published for this exam yet.' : 'Link a child to see this.'}</div>`;
-    return;
-  }
-
-  const bands = [
-    { key:'Exceeding Expectation', color:'var(--green)' },
-    { key:'Meeting Expectation',   color:'var(--blue)'  },
-    { key:'Approaching Expectation', color:'var(--gold)' },
-    { key:'Below Expectation', color:'var(--red)' },
-  ];
-  bands.forEach(b => b.count = 0);
-  subs.forEach(s => {
-    const band = cbcBand(s.score);
-    const match = bands.find(b => b.key === band.label);
-    if(match) match.count++;
-  });
-
-  const total = subs.length;
-  let cursor = 0;
-  const active = bands.filter(b => b.count > 0);
-  const segments = active.map(b => {
-    const pct = (b.count/total)*100;
-    const seg = `${b.color} ${cursor}% ${cursor+pct}%`;
-    cursor += pct;
-    return seg;
-  });
-  donut.style.background = segments.length ? `conic-gradient(${segments.join(',')})` : 'var(--surface3)';
-  if(lbl) lbl.textContent = total + (total===1?' subj':' subj');
-
-  legend.innerHTML = active.map(b => `
-    <div style="display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:700;color:var(--text2);">
-      <span style="width:9px;height:9px;border-radius:3px;background:${b.color};flex-shrink:0;"></span>
-      <span style="flex:1;">${b.key}</span>
-      <span class="mono" style="color:var(--text);">${b.count}</span>
-    </div>`).join('');
-}
-
-function renderStrengthsGrowth(record){
-  const holder = document.getElementById('tp-strengths-growth');
-  if(!holder) return;
-  if(!record){ holder.innerHTML = '<div class="tp-empty">Link a child to see this.</div>'; return; }
-
-  const subs = subjectEntries(record).map(s => {
-    const classAvg = classAverageFor(s.subject, record);
-    return { ...s, classAvg, delta: classAvg !== null ? (s.score - classAvg) : null };
-  }).filter(s => s.delta !== null);
-
-  if(!subs.length){
-    holder.innerHTML = '<div class="tp-empty">Not enough class data to compare yet.</div>';
-    return;
-  }
-
-  const strengths = subs.slice().sort((a,b)=>b.delta-a.delta).slice(0,3);
-  const growth = subs.slice().sort((a,b)=>a.delta-b.delta).slice(0,3);
-  const row = (s, positive) => `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
-    <span style="font-size:.78rem;font-weight:700;">${s.subject.replace(/</g,'&lt;')}</span>
-    <span class="mono" style="font-size:.72rem;font-weight:800;color:${positive?'var(--green-dk)':'var(--red-dk)'};">${s.delta>=0?'+':''}${s.delta.toFixed(1)}</span>
-  </div>`;
-
-  holder.innerHTML = `
-    <div style="margin-bottom:14px;">
-      <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Strongest vs. class</div>
-      ${strengths.map(s=>row(s,true)).join('')}
-    </div>
-    <div>
-      <div style="font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;">Most room to grow</div>
-      ${growth.map(s=>row(s,false)).join('')}
-    </div>`;
 }
 
 /* ══════════════════════════════════════════
@@ -2311,7 +2054,6 @@ async function renderAttendanceView(record){
   if(!record){
     holder.innerHTML = '<div class="tp-card tp-empty">Link your child to see attendance here.</div>';
     sub.textContent = "Attendance records for your child";
-    renderAttendanceSnapshot([]);
     return;
   }
   sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
@@ -2321,62 +2063,19 @@ async function renderAttendanceView(record){
     const snap = await getDocs(q);
     if(!snap || snap.empty){
       holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
-      renderAttendanceSnapshot([]);
       return;
     }
-    const entries = [];
     let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
     snap.forEach(d=>{
       const a = d.data();
-      entries.push(a);
       const color = a.status === 'Present' ? 'var(--green-dk)' : a.status === 'Late' ? 'var(--orange-dk)' : 'var(--red-dk)';
       html += `<tr><td>${a.date||'—'}</td><td style="color:${color};font-weight:700;">${a.status||'—'}</td><td>${(a.note||'').replace(/</g,'&lt;')}</td></tr>`;
     });
     html += '</tbody></table></div>';
     holder.innerHTML = html;
-    renderAttendanceSnapshot(entries);
   }catch(e){
     holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
-    renderAttendanceSnapshot([]);
   }
-}
-
-function renderAttendanceSnapshot(entries){
-  const holder = document.getElementById('tp-att-snapshot');
-  const sub = document.getElementById('tp-att-snap-sub');
-  if(!holder) return;
-  if(!entries || !entries.length){
-    holder.innerHTML = '<div class="tp-empty">No attendance records published yet.</div>';
-    if(sub) sub.textContent = 'This term';
-    return;
-  }
-  const total = entries.length;
-  const present = entries.filter(a=>a.status==='Present').length;
-  const late = entries.filter(a=>a.status==='Late').length;
-  const absent = Math.max(0, total - present - late);
-  const pct = n => total ? Math.round((n/total)*100) : 0;
-
-  if(sub) sub.textContent = `${total} recorded day${total===1?'':'s'} this term`;
-  holder.innerHTML = `
-    <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin-bottom:12px;background:var(--surface3);">
-      <div style="width:${pct(present)}%;background:var(--green);"></div>
-      <div style="width:${pct(late)}%;background:var(--gold);"></div>
-      <div style="width:${pct(absent)}%;background:var(--red);"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:7px;">
-      <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:700;">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--green);"></span>Present</span>
-        <span class="mono">${present} · ${pct(present)}%</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:700;">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--gold);"></span>Late</span>
-        <span class="mono">${late} · ${pct(late)}%</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:700;">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--red);"></span>Absent</span>
-        <span class="mono">${absent} · ${pct(absent)}%</span>
-      </div>
-    </div>`;
 }
 /* ══════════════════════════════════════════
    ANNOUNCEMENTS — Firestore, real-time, read-only for parents
