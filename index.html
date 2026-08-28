@@ -351,11 +351,21 @@ button,input,select,textarea{font-family:inherit;}
 .tp-section-hdr h3{font-size:15px;font-weight:800;color:var(--text);}
 .tp-section-hdr p{font-size:.76rem;color:var(--text2);font-weight:500;margin-top:2px;}
 
-/* Today view — greeting */
-.tp-greet{margin-bottom:20px;}
-.tp-greet h2{font-size:1.5rem;font-weight:900;color:var(--text);letter-spacing:-.01em;}
-.tp-greet .tp-greet-sub{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:.83rem;color:var(--text2);font-weight:600;}
+/* Today view — hero banner (greeting + child snapshot combined) */
+.tp-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;padding:26px 28px;margin-bottom:20px;position:relative;overflow:hidden;background:linear-gradient(120deg,var(--surface) 55%,var(--surface2) 100%);}
+.tp-hero::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 120% at 100% 0%,var(--blue-glow),transparent 70%);opacity:.55;}
+[data-theme="light"] .tp-hero::before{background:radial-gradient(ellipse 55% 120% at 100% 0%,rgba(243,156,18,.22),transparent 70%);}
+.tp-hero-greet{position:relative;z-index:1;min-width:0;}
+.tp-hero-greet h2{font-size:1.55rem;font-weight:900;color:var(--text);letter-spacing:-.01em;}
+.tp-hero-greet .tp-greet-sub{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:.83rem;color:var(--text2);font-weight:600;}
 .tp-clock{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:700;}
+.tp-hero-child{display:flex;align-items:center;gap:14px;position:relative;z-index:1;flex-shrink:0;padding-left:22px;border-left:1.5px solid var(--border);}
+.tp-hero-child .tp-profile-av{width:56px;height:56px;border-radius:15px;font-size:21px;}
+.tp-hero-child .tp-profile-name{font-size:1rem;}
+@media(max-width:640px){
+  .tp-hero{padding:20px;}
+  .tp-hero-child{padding-left:0;border-left:none;padding-top:16px;border-top:1.5px solid var(--border);width:100%;}
+}
 
 .tp-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px;}
 .tp-stat-card{padding:18px;position:relative;overflow:hidden;}
@@ -854,12 +864,26 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 
       <!-- ── OVERVIEW ── -->
       <div class="tp-view active" id="view-today">
-        <div class="tp-greet">
-          <h2 id="tp-greeting">Good day 👋</h2>
-          <div class="tp-greet-sub"><span id="tp-today-date">—</span> · <span class="tp-clock" id="tp-clock">--:--:--</span></div>
+        <div class="tp-card tp-hero">
+          <div class="tp-hero-greet">
+            <h2 id="tp-greeting">Good day 👋</h2>
+            <div class="tp-greet-sub"><span id="tp-today-date">—</span> · <span class="tp-clock" id="tp-clock">--:--:--</span></div>
+          </div>
+          <div class="tp-hero-child">
+            <div class="tp-profile-av" id="child-avatar">?</div>
+            <div>
+              <div class="tp-profile-name" id="child-name">—</div>
+              <div class="tp-profile-email" id="child-upi">—</div>
+            </div>
+          </div>
         </div>
 
         <div id="tp-child-switcher" class="tp-toolbar" style="display:none;margin-bottom:18px;"></div>
+
+        <div id="tp-exam-switcher-wrap" class="tp-toolbar" style="display:none;margin-bottom:18px;">
+          <label for="tp-exam-switcher" style="font-size:.72rem;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;">Viewing exam</label>
+          <select id="tp-exam-switcher" style="flex:1;min-width:220px;padding:.65rem .9rem;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.82rem;font-weight:700;outline:none;"></select>
+        </div>
 
         <div id="tp-no-child-card" class="tp-card" style="display:none;padding:22px;margin-bottom:20px;">
           <div class="tp-section-hdr"><h3>Link your child</h3><p>Add your child using their admission details to see their grades</p></div>
@@ -872,6 +896,10 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
         </div>
 
         <div id="tp-overview-body" style="display:none;">
+          <div class="tp-section-hdr">
+            <h3>Performance Analytics</h3>
+            <p>Quick snapshot, then the full trend, subject mix, and attendance picture</p>
+          </div>
           <div class="tp-stat-grid">
             <div class="tp-card tp-stat-card">
               <div class="tp-stat-icon" style="background:rgba(142,68,173,.12);color:var(--purple);">📊</div>
@@ -893,35 +921,22 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
               <div class="tp-stat-val" id="stat-class" style="font-size:1.05rem;">—</div>
               <div class="tp-stat-lbl">Class / exam</div>
             </div>
-          </div>
-
-          <div class="tp-2col">
-            <div class="tp-card tp-day-rail">
-              <div class="tp-section-hdr"><h3>Report Card at a Glance</h3><p>Score vs. class average, per subject</p></div>
-              <div id="tp-report-bars"></div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(22,160,133,.12);color:var(--teal);">🥇</div>
+              <div class="tp-stat-val" id="stat-rank" style="font-size:1.05rem;">—</div>
+              <div class="tp-stat-lbl" id="stat-rank-lbl">Class position</div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <div class="tp-card tp-profile-hdr" style="padding:18px;">
-                <div class="tp-profile-av" id="child-avatar">?</div>
-                <div>
-                  <div class="tp-profile-name" id="child-name" style="font-size:1rem;">—</div>
-                  <div class="tp-profile-email" id="child-upi">—</div>
-                </div>
-              </div>
-              <div class="tp-card tp-donut-wrap" style="padding:18px;">
-                <div class="tp-section-hdr" style="margin-bottom:8px;"><h3>Latest Announcement</h3></div>
-                <div id="tp-latest-announce" class="tp-empty" style="padding:6px 0;">Nothing posted yet.</div>
-              </div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(231,76,60,.12);color:var(--red-dk);">⚖️</div>
+              <div class="tp-stat-val" id="stat-consistency" style="font-size:1.05rem;">—</div>
+              <div class="tp-stat-lbl">Consistency</div>
             </div>
           </div>
 
-          <div class="tp-section-hdr" style="margin-top:22px;">
-            <h3>Performance Analytics</h3>
-            <p>A closer look at trend, subject mix, and attendance</p>
-          </div>
-          <div class="tp-2col">
+
+ <div class="tp-2col">
             <div class="tp-card" style="padding:18px;">
-              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Score Trend</h3><p>Tap a point to view that exam below</p></div>
+              <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Score Trend</h3><p>Tap a point on the graph, or use the exam switcher above</p></div>
               <div id="tp-trend-bars"></div>
               <div id="tp-viewing-exam" style="font-size:.72rem;font-weight:700;color:var(--text2);margin-top:2px;min-height:16px;"></div>
               <div id="tp-trend-delta" class="tp-empty" style="padding:10px 0 0;"></div>
@@ -934,6 +949,25 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
               </div>
             </div>
           </div>
+          <br>
+
+
+          <div class="tp-2col">
+            <div class="tp-card tp-day-rail">
+              <div class="tp-section-hdr"><h3>Report Card at a Glance</h3><p>Score vs. class average, per subject</p></div>
+              <div id="tp-report-bars"></div>
+            </div>
+            <div class="tp-card tp-donut-wrap" style="padding:18px;">
+              <div class="tp-section-hdr" style="margin-bottom:8px;"><h3>Recent Announcements</h3></div>
+              <div id="tp-latest-announce" class="tp-empty" style="padding:6px 0;">Nothing posted yet.</div>
+            </div>
+          </div>
+
+          <div class="tp-card" style="padding:18px;margin-top:16px;">
+            <div class="tp-section-hdr"><h3>Subject History</h3><p>Every subject, across every exam on record — colour shows the CBC band</p></div>
+            <div id="tp-subject-matrix"></div>
+          </div>
+         
           <div class="tp-2col" style="margin-top:16px;">
             <div class="tp-card" style="padding:18px;">
               <div class="tp-section-hdr" style="margin-bottom:10px;"><h3>Strengths &amp; Growth Areas</h3><p>Vs. class average, this exam</p></div>
@@ -1933,10 +1967,15 @@ function renderOverview(record){
     document.getElementById('stat-best').textContent = '—';
     document.getElementById('stat-done').textContent = '—';
     document.getElementById('stat-class').textContent = '—';
+    document.getElementById('stat-rank').textContent = '—';
+    document.getElementById('stat-rank-lbl').textContent = 'Class position';
+    document.getElementById('stat-consistency').textContent = '—';
+    document.getElementById('stat-consistency').style.color = '';
     document.getElementById('tp-report-bars').innerHTML = '<div class="tp-empty">Link a child above to see their report.</div>';
     renderScoreTrend(null);
     renderBandDonut(null);
     renderStrengthsGrowth(null);
+    renderSubjectHistoryMatrix(null);
     return;
   }
   const name = record['Official Student Name'] || 'Your child';
@@ -1948,38 +1987,61 @@ function renderOverview(record){
   avatarEl.onclick = null;
   loadChildPhotoIntoEl(avatarEl, name, record['Grade']);
 
-  const subs = subjectEntries(record);
-  const avg = subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null;
-  const best = subs.length ? subs.reduce((a,b)=> b.score > a.score ? b : a) : null;
+  // Full subject-by-subject history across every exam on record — shown
+  // once per child, independent of which single exam the switcher above
+  // has pinned (that switcher only drives the "current snapshot" cards).
+  renderSubjectHistoryMatrix(record);
 
-  document.getElementById('stat-avg').textContent = avg !== null ? avg.toFixed(1) : '—';
-  document.getElementById('stat-best').textContent = best ? best.subject : '—';
-  document.getElementById('stat-done').textContent = subs.length;
-  document.getElementById('stat-class').textContent = record['Grade'] || '—';
+  // Stat cards, Report Card bars, trend graph, CBC/strengths/attendance are
+  // all driven from here, per whichever exam is selected (defaults to the
+  // latest) — see renderScoreTrend's cascade below.
+  renderScoreTrend(record);
+}
 
-  const barsHolder = document.getElementById('tp-report-bars');
-  if(!subs.length){
-    barsHolder.innerHTML = '<div class="tp-empty">No scores published for this exam yet.</div>';
-  } else {
-    barsHolder.innerHTML = subs.map(s=>{
-      const band = cbcBand(s.score);
-      const classAvg = classAverageFor(s.subject, record);
-      const delta = classAvg !== null ? (s.score - classAvg) : null;
-      const deltaTxt = delta === null ? '' : (delta >= 0 ? `+${delta.toFixed(1)} vs class` : `${delta.toFixed(1)} vs class`);
-      const deltaColor = delta === null ? 'var(--text3)' : (delta >= 0 ? 'var(--green-dk)' : 'var(--red-dk)');
-      return `<div style="margin-bottom:14px;">
-        <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:5px;">
-          <span>${s.subject.replace(/</g,'&lt;')}</span>
-          <span class="mono">${s.score} <span style="color:${deltaColor};font-weight:800;font-size:.7rem;">${deltaTxt}</span></span>
-        </div>
-        <div style="width:100%;height:9px;border-radius:5px;background:var(--surface3);overflow:hidden;">
-          <div style="width:${Math.min(100,s.score)}%;height:100%;border-radius:5px;background:${band.color};"></div>
-        </div>
-      </div>`;
-    }).join('');
+// "Subject History" card — every subject the child has ever been scored
+// on, across every exam sitting on record (examHistoryFor), colour-coded
+// by CBC band. Independent of the exam switcher above: this is the
+// full timeline, not a single-exam snapshot.
+function renderSubjectHistoryMatrix(record){
+  const holder = document.getElementById('tp-subject-matrix');
+  if(!holder) return;
+  if(!record){
+    holder.innerHTML = '<div class="tp-empty">Link a child above to see their subject history.</div>';
+    return;
+  }
+  const history = examHistoryFor(record).slice().reverse(); // oldest → newest
+  const exams = history
+    .map(rec => ({ rec, subs: subjectEntries(rec) }))
+    .filter(e => e.subs.length);
+
+  if(!exams.length){
+    holder.innerHTML = '<div class="tp-empty">No scores published yet.</div>';
+    return;
   }
 
-  renderScoreTrend(record); // also drives the CBC/Strengths cards for whichever exam is selected
+  const subjectOrder = [];
+  exams.forEach(e => e.subs.forEach(s => { if(!subjectOrder.includes(s.subject)) subjectOrder.push(s.subject); }));
+
+  let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Subject</th>';
+  exams.forEach(e => {
+    html += `<th style="text-align:center;">${(e.rec['Grade']||'Exam').replace(/</g,'&lt;').slice(0,16)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  subjectOrder.forEach(subj => {
+    html += `<tr><td style="font-weight:700;white-space:nowrap;">${subj.replace(/</g,'&lt;')}</td>`;
+    exams.forEach(e => {
+      const entry = e.subs.find(s => s.subject === subj);
+      if(!entry){
+        html += '<td style="text-align:center;color:var(--text3);">—</td>';
+        return;
+      }
+      const band = cbcBand(entry.score);
+      html += `<td style="text-align:center;"><span class="mono" style="display:inline-block;min-width:34px;font-weight:800;padding:3px 8px;border-radius:7px;background:${band.color};color:#fff;font-size:.72rem;">${entry.score}</span></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  holder.innerHTML = html;
 }
 
 /* ══════════════════════════════════════════
@@ -1995,9 +2057,13 @@ function renderScoreTrend(record){
   if(!record){
     holder.innerHTML = '<div class="tp-empty">Link a child to see their trend.</div>';
     if(deltaEl){ deltaEl.textContent = ''; deltaEl.className = ''; }
+    const sw = document.getElementById('tp-exam-switcher'); if(sw){ sw.innerHTML = ''; }
+    const swWrap = document.getElementById('tp-exam-switcher-wrap'); if(swWrap){ swWrap.style.display = 'none'; }
     renderViewingLabel(null, null);
     renderBandDonut(null);
     renderStrengthsGrowth(null);
+    renderStatsAndBars(null);
+    renderAttendanceForExam(null);
     return;
   }
 
@@ -2013,9 +2079,13 @@ function renderScoreTrend(record){
   if(!points.length){
     holder.innerHTML = '<div class="tp-empty">No scores published for this exam yet.</div>';
     if(deltaEl){ deltaEl.textContent = ''; deltaEl.className = ''; }
+    const sw = document.getElementById('tp-exam-switcher'); if(sw){ sw.innerHTML = ''; }
+    const swWrap = document.getElementById('tp-exam-switcher-wrap'); if(swWrap){ swWrap.style.display = 'none'; }
     renderViewingLabel(null, null);
     renderBandDonut(null);
     renderStrengthsGrowth(null);
+    renderStatsAndBars(record);
+    renderAttendanceForExam(record);
     return;
   }
 
@@ -2025,7 +2095,8 @@ function renderScoreTrend(record){
     selectedExamKey = points[points.length - 1].key;
   }
 
-  // ── Build the line graph as an inline, responsive SVG ──
+  // ── Build the line graph as a responsive inline SVG that scales to the
+  // card's width (no horizontal scrolling — it shrinks/grows to fit).
   const W = 560, H = 148, padX = 26, padTop = 26, padBottom = 22;
   const avgs = points.map(p => p.avg);
   const max = Math.max(...avgs, 100);
@@ -2072,12 +2143,30 @@ function renderScoreTrend(record){
 
   const selectPoint = (key) => {
     selectedExamKey = key;
-    renderScoreTrend(record); // redraw so the picked point highlights, then cascades below
+    renderScoreTrend(record); // redraw so the picked point/dropdown highlights, then cascades below
   };
   holder.querySelectorAll('.tp-trend-pt').forEach(el => {
     el.addEventListener('click', () => selectPoint(el.getAttribute('data-key')));
     el.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectPoint(el.getAttribute('data-key')); } });
   });
+
+  // Dropdown switcher — lives at the top of the Overview tab now, above
+  // everything it drives. Same selection as clicking a point on the graph,
+  // just easier to hit on mobile / with many exams on record. Changing it
+  // re-renders the whole Overview (stats, report bars, trend, CBC mix,
+  // strengths/growth, and the attendance snapshot) for that exam.
+  const switcher = document.getElementById('tp-exam-switcher');
+  const swWrap = document.getElementById('tp-exam-switcher-wrap');
+  if(switcher){
+    switcher.innerHTML = points.map((p, i) => {
+      const isLatestPt = i === points.length - 1;
+      const label = (p.label || 'Exam') + (isLatestPt ? ' (current)' : '');
+      return `<option value="${p.key}">${label.replace(/</g,'&lt;')}</option>`;
+    }).join('');
+    switcher.value = selectedExamKey;
+    switcher.onchange = () => selectPoint(switcher.value);
+  }
+  if(swWrap){ swWrap.style.display = points.length > 1 ? '' : 'none'; }
 
   if(deltaEl){
     if(points.length >= 2){
@@ -2091,12 +2180,108 @@ function renderScoreTrend(record){
     }
   }
 
-  // Whichever point is selected drives the CBC breakdown and strengths/growth cards below.
+  // Whichever point is selected drives everything else on the Overview tab.
   const selected = points.find(p => p.key === selectedExamKey) || points[points.length - 1];
   const isLatest = selected.key === points[points.length - 1].key;
   renderViewingLabel(selected, isLatest);
   renderBandDonut(selected.rec);
   renderStrengthsGrowth(selected.rec);
+  renderStatsAndBars(selected.rec);
+  renderAttendanceForExam(selected.rec);
+}
+
+// Stat cards + "Report Card at a Glance" bars — driven by whichever exam
+// record is currently selected (see renderScoreTrend's cascade above).
+// Where this exam's overall average sits vs. classmates sitting the same
+// exam (same Grade/Term cohort) — every exam sitting is its own record in
+// allStudentRecords, so classmatesFor() already gives the right peer group.
+function computeClassRank(examRec){
+  if(!examRec) return null;
+  const mates = classmatesFor(examRec)
+    .map(m => {
+      const subs = subjectEntries(m);
+      return { key: m.key, avg: subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null };
+    })
+    .filter(m => m.avg !== null);
+  const mySubs = subjectEntries(examRec);
+  const myAvg = mySubs.length ? mySubs.reduce((a,b)=>a+b.score,0)/mySubs.length : null;
+  if(myAvg === null || !mates.length) return null;
+  const total = mates.length;
+  const rank = 1 + mates.filter(m => m.avg > myAvg).length;
+  const beats = total > 1 ? Math.round(((total - rank) / (total - 1)) * 100) : 100;
+  return { rank, total, beats };
+}
+
+// Spread of this exam's subject scores — a quick read on whether the child
+// is even across subjects or has a wide gap between their best and worst.
+function computeConsistency(examRec){
+  const subs = subjectEntries(examRec);
+  if(subs.length < 2) return null;
+  const avg = subs.reduce((a,b)=>a+b.score,0)/subs.length;
+  const variance = subs.reduce((a,b)=>a + Math.pow(b.score - avg, 2), 0) / subs.length;
+  const sd = Math.sqrt(variance);
+  if(sd < 8)  return { sd, label: 'Very steady',  color: 'var(--green-dk)' };
+  if(sd < 15) return { sd, label: 'Fairly steady', color: 'var(--blue-dk)' };
+  return { sd, label: 'Mixed by subject', color: 'var(--orange-dk)' };
+}
+
+function renderStatsAndBars(examRec){
+  const subs = subjectEntries(examRec);
+  const avg = subs.length ? subs.reduce((a,b)=>a+b.score,0)/subs.length : null;
+  const best = subs.length ? subs.reduce((a,b)=> b.score > a.score ? b : a) : null;
+
+  document.getElementById('stat-avg').textContent = avg !== null ? avg.toFixed(1) : '—';
+  document.getElementById('stat-best').textContent = best ? best.subject : '—';
+  document.getElementById('stat-done').textContent = examRec ? subs.length : '—';
+  document.getElementById('stat-class').textContent = examRec ? (examRec['Grade'] || '—') : '—';
+
+  const rank = computeClassRank(examRec);
+  const rankEl = document.getElementById('stat-rank');
+  const rankLblEl = document.getElementById('stat-rank-lbl');
+  if(rank){
+    rankEl.textContent = `${rank.rank} / ${rank.total}`;
+    rankLblEl.textContent = `Class position · beats ${rank.beats}%`;
+  } else {
+    rankEl.textContent = '—';
+    rankLblEl.textContent = 'Class position';
+  }
+
+  const consistency = computeConsistency(examRec);
+  const consEl = document.getElementById('stat-consistency');
+  if(consistency){
+    consEl.textContent = consistency.label;
+    consEl.style.color = consistency.color;
+  } else {
+    consEl.textContent = '—';
+    consEl.style.color = '';
+  }
+
+  const barsHolder = document.getElementById('tp-report-bars');
+  if(!examRec){
+    barsHolder.innerHTML = '<div class="tp-empty">Link a child above to see their report.</div>';
+    return;
+  }
+  if(!subs.length){
+    barsHolder.innerHTML = '<div class="tp-empty">No scores published for this exam yet.</div>';
+  } else {
+    barsHolder.innerHTML = subs.map(s=>{
+      const band = cbcBand(s.score);
+      const classAvg = classAverageFor(s.subject, examRec);
+      const delta = classAvg !== null ? (s.score - classAvg) : null;
+      const deltaTxt = delta === null ? '' : (delta >= 0 ? `+${delta.toFixed(1)} vs class` : `${delta.toFixed(1)} vs class`);
+      const deltaColor = delta === null ? 'var(--text3)' : (delta >= 0 ? 'var(--green-dk)' : 'var(--red-dk)');
+      return `<div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:5px;">
+          <span>${s.subject.replace(/</g,'&lt;')}</span>
+          <span class="mono">${s.score} <span style="color:${deltaColor};font-weight:800;font-size:.7rem;">${deltaTxt}</span></span>
+        </div>
+        <div style="width:100%;height:9px;border-radius:5px;background:var(--surface3);overflow:hidden;">
+          <div style="width:${Math.min(100,s.score)}%;height:100%;border-radius:5px;background:${band.color};"></div>
+        </div>
+      </div>`;
+
+    }).join('');
+  }
 }
 
 function renderViewingLabel(point, isLatest){
@@ -2311,7 +2496,6 @@ async function renderAttendanceView(record){
   if(!record){
     holder.innerHTML = '<div class="tp-card tp-empty">Link your child to see attendance here.</div>';
     sub.textContent = "Attendance records for your child";
-    renderAttendanceSnapshot([]);
     return;
   }
   sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
@@ -2321,22 +2505,34 @@ async function renderAttendanceView(record){
     const snap = await getDocs(q);
     if(!snap || snap.empty){
       holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
-      renderAttendanceSnapshot([]);
       return;
     }
-    const entries = [];
     let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
     snap.forEach(d=>{
       const a = d.data();
-      entries.push(a);
       const color = a.status === 'Present' ? 'var(--green-dk)' : a.status === 'Late' ? 'var(--orange-dk)' : 'var(--red-dk)';
       html += `<tr><td>${a.date||'—'}</td><td style="color:${color};font-weight:700;">${a.status||'—'}</td><td>${(a.note||'').replace(/</g,'&lt;')}</td></tr>`;
     });
     html += '</tbody></table></div>';
     holder.innerHTML = html;
-    renderAttendanceSnapshot(entries);
   }catch(e){
     holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
+  }
+}
+
+// Overview's "Attendance Snapshot" card — kept independent of the dedicated
+// Attendance tab above so it can follow whichever exam is currently
+// selected in the Overview's exam switcher (each exam sitting has its own
+// attendance record, keyed the same way as the exam record itself).
+async function renderAttendanceForExam(examRec){
+  if(!examRec){ renderAttendanceSnapshot([]); return; }
+  try{
+    const q = query(collection(fs, 'attendance', examRec.key, 'entries'), orderBy('date','desc'));
+    const snap = await getDocs(q);
+    const entries = [];
+    if(snap && !snap.empty){ snap.forEach(d => entries.push(d.data())); }
+    renderAttendanceSnapshot(entries);
+  }catch(e){
     renderAttendanceSnapshot([]);
   }
 }
@@ -2419,10 +2615,15 @@ function renderLatestAnnouncementPreview(){
   const grade = record ? record['Grade'] : null;
   const relevant = allAnnouncements.filter(a => a.classGrade === 'All' || !a.classGrade || a.classGrade === grade);
   if(!relevant.length){ holder.innerHTML = 'Nothing posted yet.'; holder.className = 'tp-empty'; return; }
-  const a = relevant[0];
   holder.className = '';
-  holder.innerHTML = `<div class="tp-announce-title" style="margin-bottom:4px;">${(a.title||'Untitled').replace(/</g,'&lt;')}</div>
-    <div class="tp-announce-msg">${(a.message||'').replace(/</g,'&lt;')}</div>`;
+  holder.innerHTML = relevant.slice(0, 3).map((a, i) => {
+    const when = a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short' }) : '';
+    return `<div style="padding:${i === 0 ? '0' : '10px'} 0 10px;${i < 2 ? 'border-bottom:1px solid var(--border);' : ''}margin-bottom:${i < 2 ? '2px' : '0'};">
+      <div class="tp-announce-title" style="margin-bottom:3px;font-size:.82rem;">${(a.title||'Untitled').replace(/</g,'&lt;')}</div>
+      <div class="tp-announce-msg" style="font-size:.76rem;">${(a.message||'').replace(/</g,'&lt;')}</div>
+      <div class="tp-announce-meta" style="margin-top:3px;">${when}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ══════════════════════════════════════════
