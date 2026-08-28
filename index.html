@@ -435,6 +435,22 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 .tp-score-badge.filled{background:rgba(39,174,96,.14);color:var(--green-dk);}
 .tp-score-badge.empty{background:rgba(231,76,60,.1);color:var(--red-dk);}
 
+/* Subject History — exam column hover/active state. Header cells are
+   ellipsis-truncated by default and expand to show the full exam name
+   only while that column (header or any score cell in it) is hovered or
+   tapped; the whole column gets a light highlight so it's clear which
+   exam the expanded name belongs to. */
+.tp-exam-col{
+  max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-align:center;cursor:default;transition:background .15s ease;
+}
+.tp-exam-col.tp-col-active{
+  max-width:none;overflow:visible;white-space:normal;
+  background:var(--surface3);color:var(--text);
+}
+td.tp-col-active{background:var(--surface3);}
+
+
 /* Student cards */
 .tp-student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
 .tp-student-card{padding:14px;display:flex;align-items:center;gap:10px;}
@@ -471,6 +487,9 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
 .tp-profile-av{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--purple),#6c3483);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;position:relative;overflow:hidden;}
 .tp-s-avatar img,.tp-profile-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .3s;}
 .tp-s-avatar.has-photo,.tp-profile-av.has-photo{cursor:pointer;}
+.tp-switch-avatar{width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0e7a67);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;position:relative;overflow:hidden;}
+.tp-switch-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.tp-switch-avatar.has-photo{cursor:pointer;}
 .tp-profile-name{font-size:1.15rem;font-weight:900;color:var(--text);}
 .tp-profile-email{font-size:.78rem;color:var(--text2);font-weight:600;}
 .tp-profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:20px;}
@@ -930,6 +949,11 @@ table.tp-table tbody tr.tp-row-dirty{background:rgba(243,156,18,.08);}
               <div class="tp-stat-icon" style="background:rgba(231,76,60,.12);color:var(--red-dk);">⚖️</div>
               <div class="tp-stat-val" id="stat-consistency" style="font-size:1.05rem;">—</div>
               <div class="tp-stat-lbl">Consistency</div>
+            </div>
+            <div class="tp-card tp-stat-card">
+              <div class="tp-stat-icon" style="background:rgba(39,174,96,.12);color:var(--green-dk);">✅</div>
+              <div class="tp-stat-val" id="stat-attendance" style="font-size:1.05rem;">—</div>
+              <div class="tp-stat-lbl" id="stat-attendance-lbl">Attendance rate</div>
             </div>
           </div>
 
@@ -1847,7 +1871,7 @@ function renderChildSwitcher(){
   wrap.style.display = 'flex';
   wrap.innerHTML = linkedChildren.map(c=>{
     const active = c.key === activeChildKey;
-    return `<button class="tp-btn ${active?'tp-btn-primary':'tp-btn-outline'}" data-childkey="${c.key}" style="font-size:.76rem;">${(c.name||'Child').split(' ')[0]}</button>`;
+    return `<button class="tp-btn ${active?'tp-btn-primary':'tp-btn-outline'}" data-childkey="${c.key}" style="font-size:.76rem;">${makePhotoAvatar(c.name||'Child', c.grade||'', 'tp-switch-avatar')}<span>${((c.name||'Child').split(' ')[0]).replace(/</g,'&lt;')}</span></button>`;
   }).join('');
   wrap.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -1971,6 +1995,9 @@ function renderOverview(record){
     document.getElementById('stat-rank-lbl').textContent = 'Class position';
     document.getElementById('stat-consistency').textContent = '—';
     document.getElementById('stat-consistency').style.color = '';
+    document.getElementById('stat-attendance').textContent = '—';
+    document.getElementById('stat-attendance').style.color = '';
+    document.getElementById('stat-attendance-lbl').textContent = 'Attendance rate';
     document.getElementById('tp-report-bars').innerHTML = '<div class="tp-empty">Link a child above to see their report.</div>';
     renderScoreTrend(null);
     renderBandDonut(null);
@@ -2022,26 +2049,53 @@ function renderSubjectHistoryMatrix(record){
   const subjectOrder = [];
   exams.forEach(e => e.subs.forEach(s => { if(!subjectOrder.includes(s.subject)) subjectOrder.push(s.subject); }));
 
-  let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Subject</th>';
-  exams.forEach(e => {
-    html += `<th style="text-align:center;">${(e.rec['Grade']||'Exam').replace(/</g,'&lt;').slice(0,16)}</th>`;
+  let html = '<div class="tp-table-wrap"><table class="tp-table tp-subj-matrix"><thead><tr><th>Subject</th>';
+  exams.forEach((e, i) => {
+    const fullExam = (e.rec['Grade']||'Exam').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    html += `<th class="tp-exam-col" data-col="${i}">${fullExam}</th>`;
   });
   html += '</tr></thead><tbody>';
   subjectOrder.forEach(subj => {
     html += `<tr><td style="font-weight:700;white-space:nowrap;">${subj.replace(/</g,'&lt;')}</td>`;
-    exams.forEach(e => {
+    exams.forEach((e, i) => {
       const entry = e.subs.find(s => s.subject === subj);
       if(!entry){
-        html += '<td style="text-align:center;color:var(--text3);">—</td>';
+        html += `<td style="text-align:center;color:var(--text3);" data-col="${i}">—</td>`;
         return;
       }
       const band = cbcBand(entry.score);
-      html += `<td style="text-align:center;"><span class="mono" style="display:inline-block;min-width:34px;font-weight:800;padding:3px 8px;border-radius:7px;background:${band.color};color:#fff;font-size:.72rem;">${entry.score}</span></td>`;
+      html += `<td style="text-align:center;" data-col="${i}"><span class="mono" style="display:inline-block;min-width:34px;font-weight:800;padding:3px 8px;border-radius:7px;background:${band.color};color:#fff;font-size:.72rem;">${entry.score}</span></td>`;
     });
     html += '</tr>';
   });
   html += '</tbody></table></div>';
   holder.innerHTML = html;
+  wireSubjectMatrixColumnHover(holder);
+}
+
+// Hovering (or tapping, on touch) any score in an exam's column highlights
+// the whole column and expands that column's header out of its ellipsis so
+// the full exam name shows once, above the column — instead of a tooltip
+// repeating on every individual score cell.
+function wireSubjectMatrixColumnHover(holder){
+  const table = holder.querySelector('table.tp-subj-matrix');
+  if(!table) return;
+  let activeCol = null;
+  function setActive(col){
+    if(activeCol === col) return;
+    if(activeCol !== null) table.querySelectorAll(`[data-col="${activeCol}"]`).forEach(el=>el.classList.remove('tp-col-active'));
+    activeCol = col;
+    if(activeCol !== null) table.querySelectorAll(`[data-col="${activeCol}"]`).forEach(el=>el.classList.add('tp-col-active'));
+  }
+  table.addEventListener('mouseover', e => {
+    const cell = e.target.closest('[data-col]');
+    setActive(cell ? cell.getAttribute('data-col') : null);
+  });
+  table.addEventListener('mouseleave', () => setActive(null));
+  table.addEventListener('click', e => {
+    const cell = e.target.closest('[data-col]');
+    setActive(cell ? (cell.getAttribute('data-col') === activeCol ? null : cell.getAttribute('data-col')) : null);
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -2487,9 +2541,37 @@ document.getElementById('gr-download-btn')?.addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════
-   ATTENDANCE VIEW — Firestore-backed, real query (empty until the
-   school starts publishing records)
+   ATTENDANCE — RTDB-backed, reads the real records teachers.html writes
+   at attendance/{grade}/{yyyy-mm-dd} = {studentKey:'present'|'late'|'absent'}.
+   (Previously queried an unwritten Firestore 'attendance' collection, so
+   this card and the Attendance tab were always empty.)
 ══════════════════════════════════════════ */
+const ATT_STATUS_LABEL = { present:'Present', late:'Late', absent:'Absent' };
+// Student records store a compound Grade field (e.g. "Grade 9-Term 1-2024-
+// Opener-IND01"), but teachers.html buckets attendance under just the short
+// "Grade N" part (same extraction it uses before writing) — normalize the
+// same way here or every lookup misses.
+function gShortAtt(raw){
+  const m = String(raw||'').match(/Grade\s*\d+/i);
+  return m ? m[0].replace(/\s+/g,' ').trim() : '';
+}
+async function fetchAttendanceEntries(rec){
+  if(!rec || !rec['Grade'] || !rec.key) return [];
+  const grade = gShortAtt(rec['Grade']);
+  if(!grade) return [];
+  const snap = await get(ref(db, `attendance/${encodeURIComponent(grade)}`));
+  if(!snap.exists()) return [];
+  const byDate = snap.val();
+  const entries = [];
+  Object.keys(byDate).forEach(dateKey=>{
+    const dayRec = byDate[dateKey] || {};
+    const raw = dayRec[rec.key];
+    if(raw){ entries.push({ date: dateKey, status: ATT_STATUS_LABEL[raw] || raw }); }
+  });
+  entries.sort((a,b)=> b.date.localeCompare(a.date));
+  return entries;
+}
+
 async function renderAttendanceView(record){
   const holder = document.getElementById('st-grid');
   const sub = document.getElementById('st-sub');
@@ -2501,15 +2583,13 @@ async function renderAttendanceView(record){
   sub.textContent = `${record['Official Student Name']||''} · ${record['Grade']||''}`;
   holder.innerHTML = '<div class="tp-card tp-empty">Loading…</div>';
   try{
-    const q = query(collection(fs, 'attendance', record.key, 'entries'), orderBy('date','desc'));
-    const snap = await getDocs(q);
-    if(!snap || snap.empty){
+    const entries = await fetchAttendanceEntries(record);
+    if(!entries.length){
       holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
       return;
     }
     let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
-    snap.forEach(d=>{
-      const a = d.data();
+    entries.forEach(a=>{
       const color = a.status === 'Present' ? 'var(--green-dk)' : a.status === 'Late' ? 'var(--orange-dk)' : 'var(--red-dk)';
       html += `<tr><td>${a.date||'—'}</td><td style="color:${color};font-weight:700;">${a.status||'—'}</td><td>${(a.note||'').replace(/</g,'&lt;')}</td></tr>`;
     });
@@ -2525,16 +2605,37 @@ async function renderAttendanceView(record){
 // selected in the Overview's exam switcher (each exam sitting has its own
 // attendance record, keyed the same way as the exam record itself).
 async function renderAttendanceForExam(examRec){
-  if(!examRec){ renderAttendanceSnapshot([]); return; }
+  if(!examRec){ renderAttendanceSnapshot([]); renderAttendanceStat([]); return; }
   try{
-    const q = query(collection(fs, 'attendance', examRec.key, 'entries'), orderBy('date','desc'));
-    const snap = await getDocs(q);
-    const entries = [];
-    if(snap && !snap.empty){ snap.forEach(d => entries.push(d.data())); }
+    const entries = await fetchAttendanceEntries(examRec);
     renderAttendanceSnapshot(entries);
+    renderAttendanceStat(entries);
   }catch(e){
     renderAttendanceSnapshot([]);
+    renderAttendanceStat([]);
   }
+}
+
+// "Attendance rate" KPI card at the top of the Overview — same thresholds
+// as the teacher dashboard's "Ahead of target / Steady / Needs focus" read,
+// so the colour language matches across portals.
+function renderAttendanceStat(entries){
+  const el = document.getElementById('stat-attendance');
+  const lbl = document.getElementById('stat-attendance-lbl');
+  if(!el || !lbl) return;
+  if(!entries || !entries.length){
+    el.textContent = '—'; el.style.color = '';
+    lbl.textContent = 'Attendance rate';
+    return;
+  }
+  const total = entries.length;
+  const present = entries.filter(a=>a.status==='Present').length;
+  const late = entries.filter(a=>a.status==='Late').length;
+  const pct = Math.round(((present+late)/total)*100);
+  const color = pct >= 85 ? 'var(--green-dk)' : pct >= 70 ? 'var(--blue-dk)' : 'var(--red-dk)';
+  el.textContent = pct + '%';
+  el.style.color = color;
+  lbl.textContent = `Attendance rate · ${pct>=85?'ahead of target':pct>=70?'steady':'needs focus'}`;
 }
 
 function renderAttendanceSnapshot(entries){
