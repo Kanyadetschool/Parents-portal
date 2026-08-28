@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 
 
@@ -336,6 +337,17 @@ button,input,select,textarea{font-family:inherit;}
 .tp-topbar-right{display:flex;align-items:center;gap:10px;}
 .tp-icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:var(--transition);}
 .tp-icon-btn:hover{border-color:var(--blue-lt);color:var(--blue-lt);}
+.tp-bell-wrap{position:relative;}
+.tp-bell-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;min-width:15px;text-align:center;line-height:1.4;}
+.tp-bell-panel{display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;max-width:calc(100vw - 32px);max-height:440px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--card-shadow);padding:12px;z-index:200;}
+.tp-bell-panel.show{display:block;}
+.tp-bell-sec-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin:12px 0 6px;}
+.tp-bell-sec-title:first-child{margin-top:0;}
+.tp-bell-item{padding:8px 0;border-top:1px solid var(--border);}
+.tp-bell-item:first-of-type{border-top:none;}
+.tp-bell-item-title{font-size:.78rem;font-weight:700;color:var(--text);}
+.tp-bell-item-sub{font-size:.7rem;color:var(--text2);margin-top:2px;}
+.tp-bell-empty{font-size:.76rem;color:var(--text2);padding:8px 0;}
 .tp-hamburger{display:none;}
 .tp-sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:590;}
 .tp-sidebar-backdrop.show{display:block;}
@@ -361,6 +373,18 @@ button,input,select,textarea{font-family:inherit;}
 .tp-clock{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:700;}
 .tp-hero-child{display:flex;align-items:center;gap:14px;position:relative;z-index:1;flex-shrink:0;padding-left:22px;border-left:1.5px solid var(--border);}
 .tp-hero-child .tp-profile-av{width:56px;height:56px;border-radius:15px;font-size:21px;}
+.tp-photo-req-wrap{position:relative;flex-shrink:0;}
+.tp-photo-req-badge{position:absolute;bottom:-4px;right:-4px;width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);background:var(--gold);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.tp-photo-req-badge:hover{transform:scale(1.1);}
+.tp-mc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+.tp-mc-card{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:var(--transition);}
+.tp-mc-card:hover{border-color:var(--blue-lt);}
+.tp-mc-card.active{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);}
+.tp-mc-name{font-size:.86rem;font-weight:800;color:var(--text);}
+.tp-mc-grade{font-size:.7rem;color:var(--text2);}
+.tp-mc-stats{display:flex;gap:14px;margin-top:4px;}
+.tp-mc-stat-val{font-size:.9rem;font-weight:900;}
+.tp-mc-stat-lbl{font-size:.62rem;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;}
 .tp-hero-child .tp-profile-name{font-size:1rem;}
 @media(max-width:640px){
   .tp-hero{padding:20px;}
@@ -500,6 +524,21 @@ td.tp-col-active{background:var(--surface3);}
 
 /* Toast */
 #tp-toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+
+#tp-palette-backdrop{display:none;position:fixed;inset:0;background:rgba(10,14,20,.55);backdrop-filter:blur(2px);z-index:1000;align-items:flex-start;justify-content:center;padding:14vh 16px 16px;}
+#tp-palette-backdrop.show{display:flex;}
+#tp-palette{width:100%;max-width:480px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-md);box-shadow:var(--card-shadow);overflow:hidden;}
+#tp-palette-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
+#tp-palette-icon{font-size:15px;opacity:.7;}
+#tp-palette-input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:.92rem;color:var(--text);}
+#tp-palette-hint{font-size:.65rem;font-weight:800;color:var(--text3);border:1px solid var(--border);border-radius:5px;padding:2px 6px;text-transform:uppercase;}
+#tp-palette-results{max-height:48vh;overflow-y:auto;padding:6px;}
+.tp-palette-row{display:flex;align-items:center;gap:12px;padding:10px 10px;border-radius:9px;cursor:pointer;}
+.tp-palette-row:hover,.tp-palette-row.active{background:var(--surface2);}
+.tp-palette-row-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.tp-palette-row-title{font-size:.84rem;font-weight:700;color:var(--text);}
+.tp-palette-row-sub{font-size:.72rem;color:var(--text2);}
+.tp-palette-empty{padding:16px;text-align:center;font-size:.8rem;color:var(--text2);}
 .tp-toast{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--blue);box-shadow:0 12px 30px rgba(0,0,0,.18);border-radius:12px;padding:12px 16px;font-size:.8rem;font-weight:600;color:var(--text);max-width:320px;animation:tpToastIn .25s ease;}
 .tp-toast.success{border-left-color:var(--green);}
 .tp-toast.error{border-left-color:var(--red);}
@@ -875,6 +914,10 @@ td.tp-col-active{background:var(--surface3);}
         </div>
       </div>
       <div class="tp-topbar-right">
+        <div class="tp-bell-wrap" id="tp-bell-wrap">
+          <button class="tp-icon-btn" id="tp-bell-btn" title="Notifications">🔔<span class="tp-bell-badge" id="tp-bell-badge" style="display:none;">0</span></button>
+          <div class="tp-bell-panel" id="tp-bell-panel"></div>
+        </div>
         <button class="tp-icon-btn" id="tp-theme-toggle-app" title="Toggle theme">🌙</button>
       </div>
     </div>
@@ -889,7 +932,10 @@ td.tp-col-active{background:var(--surface3);}
             <div class="tp-greet-sub"><span id="tp-today-date">—</span> · <span class="tp-clock" id="tp-clock">--:--:--</span></div>
           </div>
           <div class="tp-hero-child">
-            <div class="tp-profile-av" id="child-avatar">?</div>
+            <div class="tp-photo-req-wrap">
+              <div class="tp-profile-av" id="child-avatar">?</div>
+              <button class="tp-photo-req-badge" id="child-photo-req-btn" title="No photo on file — tap to ask the school to add one" style="display:none;">📷</button>
+            </div>
             <div>
               <div class="tp-profile-name" id="child-name">—</div>
               <div class="tp-profile-email" id="child-upi">—</div>
@@ -898,6 +944,8 @@ td.tp-col-active{background:var(--surface3);}
         </div>
 
         <div id="tp-child-switcher" class="tp-toolbar" style="display:none;margin-bottom:18px;"></div>
+
+        <div id="tp-multi-child-summary" style="display:none;margin-bottom:18px;"></div>
 
         <div id="tp-exam-switcher-wrap" class="tp-toolbar" style="display:none;margin-bottom:18px;">
           <label for="tp-exam-switcher" style="font-size:.72rem;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;">Viewing exam</label>
@@ -1262,6 +1310,11 @@ td.tp-col-active{background:var(--surface3);}
           <div id="bg-sync-status" style="font-size:.82rem;color:var(--text2);margin-bottom:10px;">Checking support…</div>
           <button class="tp-btn tp-btn-primary" id="bg-sync-enable-btn" style="display:none;">🔔 Enable background checks</button>
         </div>
+
+        <div class="tp-card" style="padding:20px;margin-top:16px;">
+          <div class="tp-section-hdr"><h3>Your Data</h3><p>Download everything linked to your account and children as a single file</p></div>
+          <button class="tp-btn tp-btn-outline" id="pf-export-btn">⬇ Export My Data</button>
+        </div>
       </div>
 
     </div>
@@ -1269,6 +1322,18 @@ td.tp-col-active{background:var(--surface3);}
 </div>
 
 <div id="tp-toast-wrap"></div>
+
+<!-- ══════════════ COMMAND PALETTE (Ctrl/⌘+K) ══════════════ -->
+<div id="tp-palette-backdrop">
+  <div id="tp-palette">
+    <div id="tp-palette-input-row">
+      <span id="tp-palette-icon">🔎</span>
+      <input type="text" id="tp-palette-input" placeholder="Jump to Grades, Attendance, Calendar…" autocomplete="off">
+      <span id="tp-palette-hint">esc</span>
+    </div>
+    <div id="tp-palette-results"></div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════
      JS — Firebase (Auth + Firestore + Realtime DB)
@@ -1544,6 +1609,9 @@ function showView(name){
   if(name === 'inquiries' && typeof markInquiriesSeen === 'function'){
     markInquiriesSeen(latestInquiries);
   }
+  if(name === 'teachermsg' && typeof markThreadsSeen === 'function'){
+    markThreadsSeen(latestTeacherMsgs, 'teacher');
+  }
 }
 document.querySelectorAll('.tp-nav-item').forEach(item=>{
   item.addEventListener('click', ()=>showView(item.dataset.view));
@@ -1558,6 +1626,82 @@ document.getElementById('tp-sidebar-backdrop').addEventListener('click', ()=>{
 });
 document.getElementById('tp-logout-btn').addEventListener('click', doSignOut);
 document.getElementById('pf-signout-btn').addEventListener('click', doSignOut);
+
+/* ══════════════════════════════════════════
+   COMMAND PALETTE — Ctrl/⌘+K jumps straight to any section by name,
+   without hunting through the sidebar. Reuses viewTitles for labels.
+══════════════════════════════════════════ */
+const paletteIcons = {
+  today:'🏠', gradebook:'📊', students:'✅', admission:'📝',
+  calendar:'📅', announcements:'📣', teachermsg:'💬', inquiries:'✉️', profile:'👤'
+};
+function paletteEntries(){
+  return Object.keys(viewTitles).map(key => ({
+    key, icon: paletteIcons[key]||'📄', title: viewTitles[key][0], sub: viewTitles[key][1]
+  }));
+}
+// When there's a search term, also surface matching announcements and
+// calendar events by their own title — not just the section they live
+// in — so "Sports Day" finds the actual event, not just "Calendar".
+function paletteSearchExtras(q){
+  if(!q) return [];
+  const extras = [];
+  allAnnouncements.forEach(a=>{
+    const title = a.title || 'Untitled';
+    if(title.toLowerCase().includes(q) || (a.message||'').toLowerCase().includes(q)){
+      extras.push({ key:'announcements', icon:'📣', title, sub:'Announcement · '+(a.createdByName||'School') });
+    }
+  });
+  latestCalendarEvents.forEach(ev=>{
+    const title = ev.title || 'Untitled';
+    if(title.toLowerCase().includes(q)){
+      const meta = CAL_TYPE_META[ev.type] || CAL_TYPE_META.event;
+      const d = new Date(ev.date+'T00:00:00');
+      extras.push({ key:'calendar', icon:meta.icon, title, sub:'Calendar · '+d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) });
+    }
+  });
+  return extras.slice(0, 6);
+}
+let paletteActiveIdx = 0;
+function openPalette(){
+  const backdrop = document.getElementById('tp-palette-backdrop');
+  const input = document.getElementById('tp-palette-input');
+  backdrop.classList.add('show');
+  input.value = '';
+  paletteActiveIdx = 0;
+  renderPaletteResults('');
+  setTimeout(()=>input.focus(), 30);
+}
+function closePalette(){
+  document.getElementById('tp-palette-backdrop').classList.remove('show');
+}
+function renderPaletteResults(term){
+  const q = term.trim().toLowerCase();
+  const entries = paletteEntries().filter(e => !q || e.title.toLowerCase().includes(q) || e.sub.toLowerCase().includes(q));
+  entries.push(...paletteSearchExtras(q));
+  const box = document.getElementById('tp-palette-results');
+  if(!entries.length){ box.innerHTML = '<div class="tp-palette-empty">No matching section.</div>'; return; }
+  paletteActiveIdx = Math.min(paletteActiveIdx, entries.length-1);
+  box.innerHTML = entries.map((e,i) => `<div class="tp-palette-row${i===paletteActiveIdx?' active':''}" data-view="${e.key}">
+    <span class="tp-palette-row-icon">${e.icon}</span>
+    <div><div class="tp-palette-row-title">${e.title}</div><div class="tp-palette-row-sub">${e.sub}</div></div>
+  </div>`).join('');
+  box.querySelectorAll('.tp-palette-row').forEach(row => {
+    row.addEventListener('click', () => { showView(row.dataset.view); closePalette(); });
+  });
+}
+document.getElementById('tp-palette-input').addEventListener('input', (e) => { paletteActiveIdx = 0; renderPaletteResults(e.target.value); });
+document.getElementById('tp-palette-input').addEventListener('keydown', (e) => {
+  const rows = () => Array.from(document.querySelectorAll('.tp-palette-row'));
+  if(e.key === 'Escape'){ closePalette(); }
+  else if(e.key === 'ArrowDown'){ e.preventDefault(); paletteActiveIdx = Math.min(paletteActiveIdx+1, rows().length-1); renderPaletteResults(document.getElementById('tp-palette-input').value); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); paletteActiveIdx = Math.max(paletteActiveIdx-1, 0); renderPaletteResults(document.getElementById('tp-palette-input').value); }
+  else if(e.key === 'Enter'){ const r = rows()[paletteActiveIdx]; if(r){ showView(r.dataset.view); closePalette(); } }
+});
+document.getElementById('tp-palette-backdrop').addEventListener('click', (e) => { if(e.target.id === 'tp-palette-backdrop') closePalette(); });
+document.addEventListener('keydown', (e) => {
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); openPalette(); }
+});
 async function doSignOut(){
   try{ await signOut(auth); }catch(e){}
 }
@@ -1634,11 +1778,14 @@ function _applyPhotoToAvatar(el, src, name, grade){
 }
 // Loads a child's real photo into an existing, already-rendered avatar
 // element (e.g. the fixed #child-avatar div) — keeps whatever initials
-// are already showing if no photo is found.
-function loadChildPhotoIntoEl(el, name, grade){
+// are already showing if no photo is found. onNoPhoto fires only once
+// every fallback path (including the shared default.jpg) has failed —
+// i.e. genuinely nothing on file, not just "still loading" — so a caller
+// can offer a "request a photo" affordance instead of leaving it silent.
+function loadChildPhotoIntoEl(el, name, grade, onNoPhoto){
   if(!el) return;
   loadStudentPhoto(name, grade).then(src=>{
-    if(!src) return;
+    if(!src){ if(onNoPhoto) onNoPhoto(); return; }
     _applyPhotoToAvatar(el, src, name, grade);
   });
 }
@@ -1865,8 +2012,49 @@ async function unlinkChild(key){
   notify('Child removed from your account.', 'success', 2500);
 }
 
+/* ══════════════════════════════════════════
+   EXPORT MY DATA — downloads a single JSON file with the parent's
+   profile fields, every linked child, and each child's full exam
+   history + attendance record (same sources the portal itself reads:
+   examHistoryFor() and fetchAttendanceEntries()).
+══════════════════════════════════════════ */
+document.getElementById('pf-export-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('pf-export-btn');
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  try{
+    const profile = {
+      firstName: document.getElementById('pf-fname').value.trim(),
+      lastName: document.getElementById('pf-lname').value.trim(),
+      phone: document.getElementById('pf-phone').value.trim(),
+      relationship: document.getElementById('pf-relationship').value,
+      email: document.getElementById('pf-email2').value.trim()
+    };
+    const children = [];
+    for(const c of linkedChildren){
+      const record = allStudentRecords[c.key] ? { key:c.key, ...allStudentRecords[c.key] } : null;
+      const examHistory = record ? examHistoryFor(record) : [];
+      const attendance = record ? await fetchAttendanceEntries(record) : [];
+      children.push({ name: c.name, assessmentNo: c.upi, grade: c.grade, examHistory, attendance });
+    }
+    const payload = { exportedAt: new Date().toISOString(), profile, children };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kanyadet-parent-data-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    notify('Your data has been downloaded.', 'success', 2500);
+  }catch(e){
+    notify('Could not export your data. Try again.', 'error', 3000);
+  }finally{
+    btn.disabled = false; btn.textContent = '⬇ Export My Data';
+  }
+});
+
 function renderChildSwitcher(){
   const wrap = document.getElementById('tp-child-switcher');
+  renderMultiChildSummary();
   if(linkedChildren.length <= 1){ wrap.style.display = 'none'; wrap.innerHTML=''; return; }
   wrap.style.display = 'flex';
   wrap.innerHTML = linkedChildren.map(c=>{
@@ -1876,6 +2064,59 @@ function renderChildSwitcher(){
   wrap.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       activeChildKey = btn.dataset.childkey;
+      renderChildSwitcher();
+      renderEverythingForActiveChild();
+    });
+  });
+}
+
+// Compact multi-child comparison row (Overview, 2+ linked children only) —
+// average score + attendance rate per child in one glance, so a parent
+// with several kids doesn't have to tab through the switcher one by one
+// just to see who needs attention.
+async function renderMultiChildSummary(){
+  const wrap = document.getElementById('tp-multi-child-summary');
+  if(!wrap) return;
+  if(linkedChildren.length <= 1){ wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+  wrap.style.display = 'block';
+  const thisRunKey = linkedChildren.map(c=>c.key).join(',') + '|' + activeChildKey;
+  wrap.dataset.run = thisRunKey;
+  const cards = await Promise.all(linkedChildren.map(async c=>{
+    const record = allStudentRecords[c.key] ? { key:c.key, ...allStudentRecords[c.key] } : null;
+    let avg = null, rate = null;
+    if(record){
+      const subs = subjectEntries(record);
+      if(subs.length) avg = subs.reduce((a,b)=>a+b.score,0)/subs.length;
+      try{
+        const entries = await fetchAttendanceEntries(record);
+        if(entries.length){
+          const ok = entries.filter(a=>a.status==='Present'||a.status==='Late').length;
+          rate = Math.round((ok/entries.length)*100);
+        }
+      }catch(e){ /* leave rate as — */ }
+    }
+    return { c, avg, rate };
+  }));
+  if(wrap.dataset.run !== thisRunKey) return; // active child/list changed mid-fetch — stale, drop it
+  wrap.innerHTML = `<div class="tp-mc-grid">${cards.map(({c,avg,rate})=>{
+    const active = c.key === activeChildKey;
+    const avgColor = avg===null?'var(--text3)':avg>=80?'var(--green-dk)':avg>=60?'var(--blue-dk)':avg>=40?'var(--orange-dk)':'var(--red-dk)';
+    const rateColor = rate===null?'var(--text3)':rate>=85?'var(--green-dk)':rate>=70?'var(--blue-dk)':'var(--red-dk)';
+    return `<div class="tp-card tp-mc-card${active?' active':''}" data-childkey="${c.key}">
+      ${makePhotoAvatar(c.name||'Child', c.grade||'', 'tp-switch-avatar')}
+      <div style="flex:1;min-width:0;">
+        <div class="tp-mc-name">${(c.name||'Child').replace(/</g,'&lt;')}</div>
+        <div class="tp-mc-grade">${(c.grade||'').replace(/</g,'&lt;')}</div>
+        <div class="tp-mc-stats">
+          <div><div class="tp-mc-stat-val" style="color:${avgColor};">${avg===null?'—':avg.toFixed(0)}</div><div class="tp-mc-stat-lbl">Avg</div></div>
+          <div><div class="tp-mc-stat-val" style="color:${rateColor};">${rate===null?'—':rate+'%'}</div><div class="tp-mc-stat-lbl">Attend.</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  wrap.querySelectorAll('.tp-mc-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      activeChildKey = card.dataset.childkey;
       renderChildSwitcher();
       renderEverythingForActiveChild();
     });
@@ -1987,6 +2228,8 @@ function renderOverview(record){
     avatarEl.textContent = '?';
     avatarEl.classList.remove('has-photo');
     avatarEl.onclick = null;
+    const photoReqBtn0 = document.getElementById('child-photo-req-btn');
+    if(photoReqBtn0) photoReqBtn0.style.display = 'none';
     document.getElementById('stat-avg').textContent = '—';
     document.getElementById('stat-best').textContent = '—';
     document.getElementById('stat-done').textContent = '—';
@@ -2012,7 +2255,19 @@ function renderOverview(record){
   avatarEl.textContent = initials;
   avatarEl.classList.remove('has-photo');
   avatarEl.onclick = null;
-  loadChildPhotoIntoEl(avatarEl, name, record['Grade']);
+  const photoReqBtn = document.getElementById('child-photo-req-btn');
+  if(photoReqBtn){
+    photoReqBtn.style.display = 'none';
+    photoReqBtn.onclick = () => {
+      showView('inquiries');
+      const ta = document.getElementById('inq-text');
+      if(ta && !ta.value.trim()) ta.value = `Hi, could you please add a photo for ${name} (${record['Grade']||'—'})? Thank you!`;
+      if(ta) ta.focus();
+    };
+  }
+  loadChildPhotoIntoEl(avatarEl, name, record['Grade'], () => {
+    if(photoReqBtn) photoReqBtn.style.display = 'flex';
+  });
 
   // Full subject-by-subject history across every exam on record — shown
   // once per child, independent of which single exam the switcher above
@@ -2054,7 +2309,7 @@ function renderSubjectHistoryMatrix(record){
     const fullExam = (e.rec['Grade']||'Exam').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     html += `<th class="tp-exam-col" data-col="${i}">${fullExam}</th>`;
   });
-  html += '</tr></thead><tbody>';
+  html += '<th style="text-align:center;">Trend</th></tr></thead><tbody>';
   subjectOrder.forEach(subj => {
     html += `<tr><td style="font-weight:700;white-space:nowrap;">${subj.replace(/</g,'&lt;')}</td>`;
     exams.forEach((e, i) => {
@@ -2066,6 +2321,18 @@ function renderSubjectHistoryMatrix(record){
       const band = cbcBand(entry.score);
       html += `<td style="text-align:center;" data-col="${i}"><span class="mono" style="display:inline-block;min-width:34px;font-weight:800;padding:3px 8px;border-radius:7px;background:${band.color};color:#fff;font-size:.72rem;">${entry.score}</span></td>`;
     });
+    // Trend: first vs last recorded score for this subject across the
+    // history shown (already oldest→newest), so parents get a rising/
+    // falling read without having to scan every column themselves.
+    const scored = exams.map(e => e.subs.find(s => s.subject === subj)).filter(Boolean);
+    if(scored.length >= 2){
+      const delta = scored[scored.length-1].score - scored[0].score;
+      const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '▬';
+      const color = delta > 0 ? 'var(--green-dk)' : delta < 0 ? 'var(--red-dk)' : 'var(--text3)';
+      html += `<td style="text-align:center;color:${color};font-weight:800;font-size:.78rem;">${arrow} ${delta>0?'+':''}${delta}</td>`;
+    }else{
+      html += '<td style="text-align:center;color:var(--text3);">—</td>';
+    }
     html += '</tr>';
   });
   html += '</tbody></table></div>';
@@ -2477,7 +2744,7 @@ function renderGradesView(record){
    same libraries the Admin Portal uses for its own exports.
    Builds one section per exam record in the child's history.
 ══════════════════════════════════════════ */
-document.getElementById('gr-download-btn')?.addEventListener('click', () => {
+document.getElementById('gr-download-btn')?.addEventListener('click', async () => {
   const record = activeChildRecord();
   if(!record){
     if(window.Swal) Swal.fire({ title:'No child linked', text:'Link your child above before downloading a report card.', icon:'info' });
@@ -2492,6 +2759,8 @@ document.getElementById('gr-download-btn')?.addEventListener('click', () => {
     if(window.Swal) Swal.fire({ title:'No scores yet', text:'No scores have been published for this child yet.', icon:'info' });
     return;
   }
+  const btn = document.getElementById('gr-download-btn');
+  btn.disabled = true; btn.textContent = 'Preparing…';
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('portrait');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -2536,8 +2805,46 @@ document.getElementById('gr-download-btn')?.addEventListener('click', () => {
     }
   });
 
+  // Final page — attendance summary, from the same RTDB records the
+  // Attendance tab reads (attendance/{grade}/{date}).
+  try{
+    const attEntries = await fetchAttendanceEntries(record);
+    if(attEntries.length){
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Kanyadet Primary & Junior School', pageWidth/2, 18, { align:'center' });
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('Attendance Summary', pageWidth/2, 25, { align:'center' });
+      doc.text(`Name: ${childName}`, 14, 38);
+      doc.text(`Grade: ${gShortAtt(record['Grade']) || record['Grade'] || '—'}`, 14, 44);
+
+      const present = attEntries.filter(a=>a.status==='Present').length;
+      const late = attEntries.filter(a=>a.status==='Late').length;
+      const absent = attEntries.filter(a=>a.status==='Absent').length;
+      const rate = Math.round(((present+late)/attEntries.length)*100);
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Attendance rate: ${rate}%  (Present ${present} · Late ${late} · Absent ${absent} · Recorded days ${attEntries.length})`, 14, 54);
+      doc.setFont(undefined, 'normal');
+
+      if(doc.autoTable){
+        doc.autoTable({
+          startY: 60,
+          head: [['Date','Status']],
+          body: attEntries.slice(0, 40).map(a => [a.date||'—', a.status||'—']),
+          theme: 'grid',
+          headStyles: { fillColor: [41,128,185] },
+          styles: { fontSize: 9 }
+        });
+      }
+    }
+  }catch(e){ /* PDF still saves with the grades pages if attendance fetch fails */ }
+
   const fileName = `${childName.replace(/[^a-z0-9]+/gi,'_')}_Report_Card.pdf`;
   doc.save(fileName);
+  btn.disabled = false; btn.textContent = '⬇ Download Report Card';
 });
 
 /* ══════════════════════════════════════════
@@ -2588,16 +2895,50 @@ async function renderAttendanceView(record){
       holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
       return;
     }
-    let html = '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
+    let html = '<div class="tp-card" style="padding:18px 18px 6px;margin-bottom:16px;"><div style="font-size:.78rem;font-weight:800;color:var(--text2);margin-bottom:10px;">Weekly attendance trend</div><div style="position:relative;height:190px;"><canvas id="pt-att-chart"></canvas></div></div>';
+    html += '<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Date</th><th>Status</th><th>Note</th></tr></thead><tbody>';
     entries.forEach(a=>{
       const color = a.status === 'Present' ? 'var(--green-dk)' : a.status === 'Late' ? 'var(--orange-dk)' : 'var(--red-dk)';
       html += `<tr><td>${a.date||'—'}</td><td style="color:${color};font-weight:700;">${a.status||'—'}</td><td>${(a.note||'').replace(/</g,'&lt;')}</td></tr>`;
     });
     html += '</tbody></table></div>';
     holder.innerHTML = html;
+    renderAttendanceChart(entries);
   }catch(e){
     holder.innerHTML = '<div class="tp-card tp-empty">No attendance records published for your child yet.</div>';
   }
+}
+
+// Weekly % present+late trend, built from the same entries the table
+// shows — buckets by ISO week (Mon–Sun) rather than a fixed last-7-days
+// window like teachers.html's per-class chart, since a single child's
+// records can be sparse and span months.
+function isoWeekStart(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = (d.getDay() + 6) % 7; // Mon=0..Sun=6
+  d.setDate(d.getDate() - day);
+  return d.toISOString().slice(0,10);
+}
+function renderAttendanceChart(entries){
+  const canvas = document.getElementById('pt-att-chart');
+  if(!canvas || typeof Chart === 'undefined') return;
+  const byWeek = {};
+  entries.forEach(a=>{
+    if(!a.date) return;
+    const wk = isoWeekStart(a.date);
+    if(!byWeek[wk]) byWeek[wk] = { total:0, ok:0 };
+    byWeek[wk].total++;
+    if(a.status === 'Present' || a.status === 'Late') byWeek[wk].ok++;
+  });
+  const weeks = Object.keys(byWeek).sort().slice(-10);
+  const labels = weeks.map(wk => new Date(wk+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
+  const rates = weeks.map(wk => Math.round((byWeek[wk].ok / byWeek[wk].total) * 100));
+  if(window._parentAttChart) window._parentAttChart.destroy();
+  window._parentAttChart = new Chart(canvas, {
+    type:'line',
+    data:{ labels, datasets:[{ label:'% Present', data:rates, borderColor:'#2980b9', backgroundColor:'rgba(41,128,185,.15)', tension:.35, fill:true, spanGaps:true, pointRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ min:0, max:100, ticks:{callback:v=>v+'%'} } } }
+  });
 }
 
 // Overview's "Attendance Snapshot" card — kept independent of the dedicated
@@ -2709,6 +3050,7 @@ function filterAnnouncementsForChild(){
       <div class="tp-announce-meta">${(a.createdByName||'School').replace(/</g,'&lt;')} · ${when}</div>
     </div>`;
   }).join('');
+  renderBellPanel();
 }
 function renderLatestAnnouncementPreview(){
   const holder = document.getElementById('tp-latest-announce');
@@ -2733,6 +3075,7 @@ function renderLatestAnnouncementPreview(){
    meetings, holidays. Past events are hidden; upcoming shown soonest-first.
 ══════════════════════════════════════════ */
 let unsubCalendar = null;
+let latestCalendarEvents = [];
 const CAL_TYPE_META = {
   exam:     { icon:'📝', label:'Exam' },
   holiday:  { icon:'🏖️', label:'Holiday' },
@@ -2753,7 +3096,9 @@ function startCalendarListener(){
         return !isNaN(d) && d >= today;
       })
       .sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
+    latestCalendarEvents = events;
     renderCalendar(events);
+    renderBellPanel();
   }, () => {
     document.getElementById('cal-list').innerHTML = '<div class="tp-card tp-empty">Could not load the school calendar.</div>';
   });
@@ -2799,14 +3144,16 @@ function startInquiriesListener(){
     latestInquiries = mine;
     renderInquiries(mine);
     updateInquiryBadge(mine);
+    renderBellPanel();
   }, (err) => {
     document.getElementById('inq-list').innerHTML = '<div class="tp-card tp-empty">Could not load your messages.</div>';
   });
 }
-function lastAdminReplyTime(f){
+function lastReplyTimeFrom(f, fromVal){
   if(!f.replies) return 0;
-  return Object.values(f.replies).filter(r => r.from === 'admin').reduce((max,r) => Math.max(max, r.timestamp||0), 0);
+  return Object.values(f.replies).filter(r => r.from === fromVal).reduce((max,r) => Math.max(max, r.timestamp||0), 0);
 }
+function lastAdminReplyTime(f){ return lastReplyTimeFrom(f, 'admin'); }
 function updateInquiryBadge(list){
   const badge = document.getElementById('nav-inq-badge');
   if(!badge) return;
@@ -2827,7 +3174,83 @@ function markInquiriesSeen(list){
       update(ref(db, `activities/${f.key}`), { parentSeenAt: now }).catch(()=>{});
     }
   });
+  renderBellPanel();
 }
+function markThreadsSeen(list, fromVal){
+  const user = auth.currentUser;
+  if(!user) return;
+  const now = Date.now();
+  list.forEach(f => {
+    const lastReply = lastReplyTimeFrom(f, fromVal);
+    if(lastReply > 0 && lastReply > (f.parentSeenAt || 0)){
+      update(ref(db, `activities/${f.key}`), { parentSeenAt: now }).catch(()=>{});
+    }
+  });
+  renderBellPanel();
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICATION BELL — aggregates unread admin/teacher replies (real,
+   trackable via the same 'parentSeenAt' field used by Contact School),
+   plus a quick look at recent announcements and upcoming calendar
+   events, all in one dropdown instead of hunting across separate tabs.
+══════════════════════════════════════════ */
+function bellUnreadCount(){
+  const inqUnread = latestInquiries.filter(f => { const t = lastAdminReplyTime(f); return t > 0 && t > (f.parentSeenAt||0); }).length;
+  const tmUnread = latestTeacherMsgs.filter(f => { const t = lastReplyTimeFrom(f,'teacher'); return t > 0 && t > (f.parentSeenAt||0); }).length;
+  return inqUnread + tmUnread;
+}
+function updateBellBadge(){
+  const badge = document.getElementById('tp-bell-badge');
+  if(!badge) return;
+  const n = bellUnreadCount();
+  badge.textContent = String(n);
+  badge.style.display = n > 0 ? 'inline-block' : 'none';
+}
+function renderBellPanel(){
+  updateBellBadge();
+  const panel = document.getElementById('tp-bell-panel');
+  if(!panel) return;
+  const record = activeChildRecord();
+  const grade = record ? record['Grade'] : null;
+
+  const unreadReplies = [
+    ...latestInquiries.filter(f => { const t = lastAdminReplyTime(f); return t > 0 && t > (f.parentSeenAt||0); }).map(f => ({ f, when: lastAdminReplyTime(f), from: 'School office', view: 'inquiries' })),
+    ...latestTeacherMsgs.filter(f => { const t = lastReplyTimeFrom(f,'teacher'); return t > 0 && t > (f.parentSeenAt||0); }).map(f => ({ f, when: lastReplyTimeFrom(f,'teacher'), from: 'Teacher', view: 'teachermsg' }))
+  ].sort((a,b) => b.when - a.when);
+
+  const recentAnnouncements = allAnnouncements.filter(a => a.classGrade === 'All' || !a.classGrade || a.classGrade === grade).slice(0, 3);
+  const upcomingEvents = latestCalendarEvents.slice(0, 3);
+
+  let html = '';
+  if(unreadReplies.length){
+    html += '<div class="tp-bell-sec-title">New replies</div>';
+    html += unreadReplies.map(r => `<div class="tp-bell-item"><div class="tp-bell-item-title">${escapeHtml(r.from)} replied</div><div class="tp-bell-item-sub">${escapeHtml((r.f.message||'').slice(0,60))}${(r.f.message||'').length>60?'…':''} · ${new Date(r.when).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>`).join('');
+  }
+  html += '<div class="tp-bell-sec-title">Recent announcements</div>';
+  html += recentAnnouncements.length
+    ? recentAnnouncements.map(a => `<div class="tp-bell-item"><div class="tp-bell-item-title">${escapeHtml(a.title||'Untitled')}</div><div class="tp-bell-item-sub">${escapeHtml((a.message||'').slice(0,60))}${(a.message||'').length>60?'…':''}</div></div>`).join('')
+    : '<div class="tp-bell-empty">Nothing posted yet.</div>';
+  html += '<div class="tp-bell-sec-title">Upcoming on the calendar</div>';
+  html += upcomingEvents.length
+    ? upcomingEvents.map(ev => { const meta = CAL_TYPE_META[ev.type] || CAL_TYPE_META.event; const d = new Date(ev.date+'T00:00:00'); return `<div class="tp-bell-item"><div class="tp-bell-item-title">${meta.icon} ${escapeHtml(ev.title||'Untitled')}</div><div class="tp-bell-item-sub">${d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div>`; }).join('')
+    : '<div class="tp-bell-empty">No upcoming events.</div>';
+  panel.innerHTML = html;
+}
+document.getElementById('tp-bell-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('tp-bell-panel');
+  const opening = !panel.classList.contains('show');
+  panel.classList.toggle('show', opening);
+  if(opening){
+    markInquiriesSeen(latestInquiries);
+    markThreadsSeen(latestTeacherMsgs, 'teacher');
+  }
+});
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('tp-bell-wrap');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('tp-bell-panel').classList.remove('show');
+});
 function renderInquiries(list){
   const box = document.getElementById('inq-list');
   if(!list.length){ box.innerHTML = '<div class="tp-card tp-empty">No messages sent yet.</div>'; return; }
@@ -2977,6 +3400,7 @@ function renderTeacherSelect(){
   if(current) sel.value = current;
 }
 let unsubTeacherMessages = null;
+let latestTeacherMsgs = [];
 function startTeacherMessagesListener(){
   if(unsubTeacherMessages) return;
   const user = auth.currentUser;
@@ -2987,7 +3411,9 @@ function startTeacherMessagesListener(){
       .map(([key,v]) => ({key, ...v}))
       .filter(f => f.type === 'parent_teacher_message' && f.userId === user.uid)
       .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    latestTeacherMsgs = mine;
     renderTeacherMessages(mine);
+    renderBellPanel();
   }, () => {
     document.getElementById('tm-list').innerHTML = '<div class="tp-card tp-empty">Could not load your messages.</div>';
   });
