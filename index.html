@@ -166,9 +166,67 @@ button,input,select,textarea{font-family:inherit;}
 
 
 
-.auth-links{text-align:center;margin-top:.3rem;font-size:.79rem;color:var(--orange);font-weight:500}
-    .auth-links a{color:var(--orange);font-weight:700;text-decoration: none; border: #0e7a67;}
-    .auth-links a:hover{text-decoration:dotted underline var(--blue-lt) 1px}
+/* ── Portal quick links ── */
+.auth-links{margin-top:1.1rem}
+.auth-links-title{display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .8rem;font-size:.66rem;color:var(--text3);font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+.auth-links-title::before,.auth-links-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.portal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.portal-link{--c:var(--blue);position:relative;display:flex;align-items:center;gap:.65rem;min-width:0;padding:.7rem .75rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);text-decoration:none;overflow:hidden;transition:var(--transition);-webkit-tap-highlight-color:transparent}
+.portal-link::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--c),transparent 70%);opacity:0;transition:opacity .25s}
+.portal-link:hover,.portal-link:focus-visible{transform:translateY(-2px);border-color:var(--c);box-shadow:0 8px 20px -8px var(--c);outline:none}
+.portal-link:hover::before,.portal-link:focus-visible::before{opacity:.08}
+.portal-link:active{transform:translateY(0) scale(.98)}
+.portal-link.current{border-color:var(--c);cursor:default;pointer-events:none}
+.portal-link.current::before{opacity:.1}
+.portal-ico{position:relative;flex:0 0 auto;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 60%,#000));box-shadow:0 4px 10px -3px var(--c)}
+.portal-ico svg{width:18px;height:18px}
+.portal-txt{position:relative;display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.portal-txt strong{font-size:.78rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.portal-txt small{font-size:.64rem;color:var(--text3);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.portal-arrow{position:relative;margin-left:auto;width:14px;height:14px;color:var(--text3);opacity:0;transform:translateX(-4px);transition:var(--transition);flex:0 0 auto}
+.portal-link:hover .portal-arrow,.portal-link:focus-visible .portal-arrow{opacity:1;transform:none;color:var(--c)}
+.portal-here{position:relative;margin-left:auto;flex:0 0 auto;font-size:.56rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);padding:3px 6px;border-radius:6px}
+@media(max-width:360px){.portal-grid{grid-template-columns:1fr}}
+@media(hover:none){.portal-arrow{display:none}}
+
+/* ── Email button + modal ── */
+.tp-email-open{margin-top:0}
+.tp-newline{text-align:center;font-size:.79rem;color:var(--text2);margin:.9rem 0 .2rem}
+.tp-newline a{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:none}
+.tp-newline a:hover{text-decoration:underline}
+.em-overlay{position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,38,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s}
+.em-overlay.open{opacity:1;visibility:visible;transition:opacity .25s ease}
+.em-sheet{position:relative;width:100%;max-width:420px;max-height:calc(100dvh - 32px);overflow-y:auto;scrollbar-width:none;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:2rem 1.7rem 1.4rem;box-shadow:0 40px 100px rgba(6,18,36,.45);transform:translateY(18px) scale(.96);opacity:0;transition:transform .32s cubic-bezier(.2,.9,.3,1.15),opacity .25s ease}
+.em-sheet::-webkit-scrollbar{display:none}
+.em-overlay.open .em-sheet{transform:none;opacity:1}
+.em-grip{display:none;width:42px;height:4px;border-radius:4px;background:var(--border-strong);margin:-.9rem auto 1rem}
+.em-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2);color:var(--text2);display:grid;place-items:center;cursor:pointer;transition:var(--transition)}
+.em-close:hover{background:var(--surface3);color:var(--text);transform:rotate(90deg)}
+.em-head{text-align:center;margin-bottom:1.1rem}
+.em-badge{width:54px;height:54px;margin:0 auto .9rem;border-radius:17px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-dk));box-shadow:0 10px 26px var(--blue-glow)}
+.em-head h2{font-size:1.3rem;font-weight:900;letter-spacing:-.01em;color:var(--text)}
+.em-head p{font-size:.8rem;color:var(--text2);font-weight:500;margin-top:.25rem}
+.em-sheet .tp-field input,.em-sheet .tp-field select{font-size:16px}
+.tp-field-icon .em-eye~*{}
+.tp-field-icon.has-eye input{padding-right:2.7rem !important}
+.em-eye{position:absolute;right:.35rem;top:.35rem;width:34px;height:34px;border:none;background:none;border-radius:10px;color:var(--text3);display:grid;place-items:center;cursor:pointer;z-index:2}
+.em-eye:hover{color:var(--text);background:var(--surface3)}
+.em-eye svg{width:18px;height:18px}
+.em-eye .eye-off{display:none}
+.em-eye[aria-pressed="true"] .eye-on{display:none}
+.em-eye[aria-pressed="true"] .eye-off{display:block}
+.em-back{display:block;width:100%;margin-top:.5rem;padding:.6rem;border:none;background:none;font-size:.78rem;font-weight:700;color:var(--text2);cursor:pointer;border-radius:10px;transition:var(--transition)}
+.em-back:hover{color:var(--blue-lt);background:var(--surface2)}
+.em-sheet.shake{animation:emShake .4s}
+@keyframes emShake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+body.em-lock{overflow:hidden}
+@media(max-width:520px){
+  .em-overlay{align-items:flex-end;padding:0}
+  .em-sheet{max-width:none;max-height:92dvh;border-radius:26px 26px 0 0;padding:1.6rem 1.3rem calc(1.2rem + env(safe-area-inset-bottom));transform:translateY(100%);opacity:1;transition:transform .35s cubic-bezier(.2,.9,.3,1)}
+  .em-overlay.open .em-sheet{transform:none}
+  .em-grip{display:block}
+}
+@media(prefers-reduced-motion:reduce){.em-overlay,.em-sheet{transition:none}.em-sheet.shake{animation:none}}
 
 
 /* ══════════════════════════════════════════
@@ -719,8 +777,67 @@ td.tp-col-active{background:var(--surface3);}
       <div class="tp-logo-badge">🎓</div>
     </div>
 
-    <div class="tp-heading" id="tp-auth-heading">Parent Sign In</div>
-    <div class="tp-subtitle" id="tp-auth-subtitle">See your child's grades, attendance and school updates</div>
+    <div class="tp-heading">Kanyadet School</div>
+    <div class="tp-subtitle">Parent Portal — sign in to continue</div>
+
+    <div class="tp-err" id="tp-card-err" role="alert"></div>
+
+    <button type="button" class="tp-oauth-btn" id="tp-google-btn">
+      <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <span id="tp-google-btn-label">Continue with Google</span>
+    </button>
+
+    <div class="tp-auth-divider">or</div>
+    <button type="button" class="tp-oauth-btn tp-email-open" id="tp-open-email" aria-haspopup="dialog" aria-controls="tp-email-modal">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6 10-6"/></svg>
+      Continue with Email
+    </button>
+    <div class="tp-newline">New parent? <a id="tp-open-signup" role="button" tabindex="0">Create an account</a></div>
+
+ <button  class="Automations"> <a href="./authorized-parent-admin.html" target="_blank" title="Activate Parent Account" > 
+                <img src="./images/authorized.jpg" class="automationimg" alt="">
+               </a>
+   </button>
+
+    <div class="auth-links">
+      <div class="auth-links-title">Other portals</div>
+      <div class="portal-grid">
+      <a class="portal-link" style="--c:#e67e22" href="https://kanyadet-school-admin.web.app/Results-portal.html">
+        <span class="portal-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>
+        <span class="portal-txt"><strong>Results</strong><small>Scores &amp; rankings</small></span>
+        <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+      </a>
+      <a class="portal-link current" aria-current="page" style="--c:#27ae60" href="https://kanyadet-school-parents.web.app/">
+        <span class="portal-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="portal-txt"><strong>Parents</strong><small>Follow your child</small></span>
+        <span class="portal-here">You're here</span>
+      </a>
+      <a class="portal-link" style="--c:#2980b9" href="https://kanyadet-school-portal.web.app">
+        <span class="portal-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span>
+        <span class="portal-txt"><strong>Teachers</strong><small>Classes &amp; marks</small></span>
+        <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+      </a>
+      <a class="portal-link" style="--c:#8e44ad" href="https://kanyadet-school-admin.web.app">
+        <span class="portal-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span class="portal-txt"><strong>Admin</strong><small>School control</small></span>
+        <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+      </a>
+      </div>
+    </div>
+  </div>
+  </div>
+  <!-- ── Email sign-in / sign-up modal ── -->
+  <div class="em-overlay" id="tp-email-modal" role="dialog" aria-modal="true" aria-labelledby="tp-auth-heading" aria-hidden="true">
+    <div class="em-sheet" id="em-sheet">
+      <span class="em-grip" aria-hidden="true"></span>
+      <button class="em-close" id="em-close" type="button" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="em-head">
+        <div class="em-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6 10-6"/></svg></div>
+        <h2 id="tp-auth-heading">Parent Sign In</h2>
+        <p id="tp-auth-subtitle">See your child's grades, attendance and school updates</p>
+      </div>
 
     <div class="tp-tabs" role="tablist">
       <button type="button" class="tp-tab active" id="tp-tab-signin">Sign In</button>
@@ -784,10 +901,10 @@ td.tp-col-active{background:var(--surface3);}
       <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">The school admin checks these against student records before approving your account.</div>
     </div>
 
-    <div class="tp-field tp-field-icon">
+    <div class="tp-field tp-field-icon has-eye">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
       <input type="password" id="tp-password" placeholder=" " autocomplete="current-password">
-      <label class="tp-float-label" for="tp-password">Password</label>
+      <label class="tp-float-label" for="tp-password">Password</label><button type="button" class="em-eye" aria-label="Show password" aria-pressed="false"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg></button>
     </div>
 
     <div class="tp-pwd-strength" id="tp-pwd-strength" style="display:none">
@@ -795,29 +912,19 @@ td.tp-col-active{background:var(--surface3);}
       <div class="tp-pwd-strength-label" id="tp-pwd-strength-label">&nbsp;</div>
     </div>
 
-    <div class="tp-field tp-field-icon" id="tp-confirm-row" style="display:none">
+    <div class="tp-field tp-field-icon has-eye" id="tp-confirm-row" style="display:none">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
       <input type="password" id="tp-confirm" placeholder=" " autocomplete="new-password">
-      <label class="tp-float-label" for="tp-confirm">Confirm password</label>
+      <label class="tp-float-label" for="tp-confirm">Confirm password</label><button type="button" class="em-eye" aria-label="Show password" aria-pressed="false"><svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg></button>
     </div>
 
     <button type="button" class="tp-submit-btn" id="tp-submit-btn">Sign In</button>
 
-    <div class="tp-auth-divider">or</div>
-    <button type="button" class="tp-oauth-btn" id="tp-google-btn">
-      <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      <span id="tp-google-btn-label">Continue with Google</span>
-    </button>
-
- <button  class="Automations"> <a href="./authorized-parent-admin.html" target="_blank" title="Activate Parent Account" > 
-                <img src="./images/authorized.jpg" class="automationimg" alt="">
-               </a>
-   </button>
-
     <div class="tp-switch-line" id="tp-forgot-line">
       <a id="tp-forgot-link">Forgot password?</a>
     </div>
-  </div>
+      <button class="em-back" id="em-back" type="button">← Back to other options</button>
+    </div>
   </div>
 </div>
 
@@ -1490,7 +1597,13 @@ function setMode(m){
 els.tabSignin.addEventListener('click', ()=>setMode('signin'));
 els.tabSignup.addEventListener('click', ()=>setMode('signup'));
 
-function showErr(msg){ els.err.textContent = msg; els.err.classList.add('on'); }
+function showErr(msg){
+  els.err.textContent = msg; els.err.classList.add('on');
+  const open = document.getElementById('tp-email-modal').classList.contains('open');
+  const ce = document.getElementById('tp-card-err');
+  ce.textContent = msg; ce.classList.toggle('on', !open);
+  if(open){ const sh = document.getElementById('em-sheet'); sh.classList.remove('shake'); void sh.offsetWidth; sh.classList.add('shake'); }
+}
 
 /* Password strength meter */
 const pwInput = document.getElementById('tp-password');
@@ -1582,6 +1695,56 @@ document.getElementById('tp-forgot-link').addEventListener('click', async ()=>{
     notify('📧 Password reset email sent to ' + email, 'success', 6000);
   }catch(e){ showErr(e.message || 'Could not send reset email.'); }
 });
+
+/* ── Email modal ── */
+const emModal = document.getElementById('tp-email-modal');
+let emLastFocus = null;
+function openEmailModal(m){
+  if(m) setMode(m);
+  document.getElementById('tp-card-err').classList.remove('on');
+  emLastFocus = document.activeElement;
+  emModal.classList.add('open'); emModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('em-lock');
+  setTimeout(()=>{ const first = mode==='signup' ? document.getElementById('tp-fname') : document.getElementById('tp-email'); first.focus(); }, 140);
+}
+function closeEmailModal(silent){
+  if(!emModal.classList.contains('open')) return;
+  emModal.classList.remove('open'); emModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('em-lock');
+  if(!silent && emLastFocus && emLastFocus.focus) emLastFocus.focus();
+}
+document.getElementById('tp-open-email').addEventListener('click', ()=>openEmailModal('signin'));
+const openSignup = document.getElementById('tp-open-signup');
+openSignup.addEventListener('click', ()=>openEmailModal('signup'));
+openSignup.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openEmailModal('signup'); } });
+document.getElementById('em-close').addEventListener('click', ()=>closeEmailModal());
+document.getElementById('em-back').addEventListener('click', ()=>closeEmailModal());
+emModal.addEventListener('mousedown', e=>{ if(e.target===emModal) closeEmailModal(); });
+document.addEventListener('keydown', e=>{
+  if(!emModal.classList.contains('open')) return;
+  if(e.key==='Escape'){ closeEmailModal(); return; }
+  if(e.key==='Tab'){
+    const f=[...emModal.querySelectorAll('button,input,select,a[href],[tabindex="0"]')].filter(x=>x.offsetParent!==null && !x.disabled);
+    if(!f.length) return;
+    const first=f[0], last=f[f.length-1];
+    if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+  if(e.key==='Enter' && e.target.tagName==='INPUT'){
+    e.preventDefault();
+    const inputs=[...emModal.querySelectorAll('input')].filter(x=>x.offsetParent!==null);
+    const i=inputs.indexOf(e.target);
+    if(i>-1 && i<inputs.length-1) inputs[i+1].focus(); else els.submitBtn.click();
+  }
+});
+emModal.querySelectorAll('.em-eye').forEach(b=>b.addEventListener('click',()=>{
+  const inp=b.parentElement.querySelector('input'); const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  b.setAttribute('aria-pressed',show); b.setAttribute('aria-label',show?'Hide password':'Show password'); inp.focus();
+}));
+/* close the modal automatically once the auth screen goes away (signed in / pending) */
+new MutationObserver(()=>{ if(getComputedStyle(document.getElementById('tp-auth-screen')).display==='none') closeEmailModal(true); })
+  .observe(document.getElementById('tp-auth-screen'),{attributes:true,attributeFilter:['style']});
 
 /* ══════════════════════════════════════════
    VIEW ROUTER
@@ -3730,7 +3893,7 @@ document.getElementById('tp-pending-back-btn').addEventListener('click', async (
 const googleBtn = document.getElementById('tp-google-btn');
 const googleBtnLabel = document.getElementById('tp-google-btn-label');
 googleBtn.addEventListener('click', async ()=>{
-  els.err.classList.remove('on');
+  els.err.classList.remove('on'); document.getElementById('tp-card-err').classList.remove('on');
   googleBtn.disabled = true;
   googleBtnLabel.textContent = 'Connecting…';
   try{
