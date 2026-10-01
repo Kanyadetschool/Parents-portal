@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Graduation Setup — Group of Schools</title>
+  <link rel="icon" type="image/x-icon" href="./images/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue:#2980b9; --blue-dk:#1a5276; --blue-glow:rgba(41,128,185,.35);
+      --orange:#e67e22; --gold:#f39c12; --green:#27ae60; --red:#e74c3c;
+      --bg:linear-gradient(135deg,#eef0f2 0%,#f4f0e6 45%,#fbecc3 100%);
+      --surface:#fff; --surface2:#fdfaf2; --surface3:#f8eed6;
+      --border:rgba(211,164,55,.25); --border-strong:rgba(211,164,55,.5);
+      --text:#0c1e33; --text2:#5a5342; --text3:#a89b7a;
+      --shadow:0 4px 20px rgba(211,164,55,.14);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+    button,input,select,textarea{font-family:inherit}
+    .wrap{max-width:980px;margin:0 auto;padding:clamp(14px,4vw,32px)}
+    .hero{border-radius:26px;padding:clamp(1.2rem,4vw,2rem);color:#fff;background:linear-gradient(135deg,#0c1e33 0%,#1a5276 55%,#2980b9 120%);box-shadow:0 24px 60px rgba(10,30,60,.3);margin-bottom:16px}
+    .hero h1{font-size:clamp(1.4rem,4.4vw,2.1rem);font-weight:900;letter-spacing:-.02em}
+    .hero h1 span{color:#ffc04d}
+    .hero p{margin-top:.4rem;font-size:.85rem;color:rgba(255,255,255,.8);max-width:560px}
+    .hero-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:.7rem;flex-wrap:wrap}
+    .chip{font-size:.7rem;font-weight:800;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;text-decoration:none;cursor:pointer}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:clamp(14px,3vw,22px);box-shadow:var(--shadow);margin-bottom:16px}
+    .card h2{font-size:.95rem;font-weight:900;margin-bottom:.8rem;display:flex;align-items:center;gap:8px}
+    .card h2 i{font-style:normal;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-size:.72rem}
+    .row{display:flex;flex-wrap:wrap;gap:12px}
+    .field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+    label.l{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+    input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],select,textarea{width:100%;border:1.5px solid var(--border-strong);border-radius:14px;padding:.65rem .85rem;font-size:.85rem;font-weight:600;color:var(--text);background:var(--surface2);outline:none;transition:.2s}
+    input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-glow)}
+    textarea{min-height:170px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.5}
+    .seg{display:flex;gap:6px;flex-wrap:wrap}
+    .seg label{flex:1;min-width:140px;cursor:pointer}
+    .seg input{position:absolute;opacity:0;pointer-events:none}
+    .seg span{display:block;text-align:center;padding:.6rem .8rem;border-radius:14px;border:1.5px solid var(--border-strong);font-size:.76rem;font-weight:800;color:var(--text2);background:var(--surface2);transition:.2s}
+    .seg input:checked+span{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 18px var(--blue-glow)}
+    .btn{border:0;border-radius:14px;padding:.7rem 1.1rem;font-size:.8rem;font-weight:800;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-dk));box-shadow:0 8px 18px var(--blue-glow);transition:.2s}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn.ghost{background:var(--surface2);color:var(--text);border:1.5px solid var(--border-strong);box-shadow:none}
+    .btn.green{background:linear-gradient(135deg,#2ecc71,#1d8a4e);box-shadow:0 8px 18px rgba(39,174,96,.35)}
+    .btn.red{background:linear-gradient(135deg,#e74c3c,#c0392b);box-shadow:0 8px 18px rgba(231,76,60,.3)}
+    .btn.sm{padding:.4rem .7rem;font-size:.7rem;border-radius:11px}
+    .hint{font-size:.72rem;font-weight:600;color:var(--text2);line-height:1.55;margin-top:.6rem}
+    .hint code{font-family:'JetBrains Mono',monospace;background:var(--surface3);padding:1px 6px;border-radius:6px}
+    .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+    .grow{flex:1}
+    .stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .stat{font-size:.72rem;font-weight:800;padding:5px 12px;border-radius:99px;background:var(--surface3);border:1px solid var(--border)}
+    .stat.ok{color:var(--green)}.stat.warn{color:var(--orange)}
+    .tbl{max-height:360px;overflow:auto;border:1px solid var(--border);border-radius:16px}
+    table{width:100%;border-collapse:collapse;font-size:.76rem}
+    th{position:sticky;top:0;background:var(--surface3);text-align:left;font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);padding:.55rem .7rem}
+    td{padding:.5rem .7rem;border-top:1px solid var(--border);font-weight:600}
+    td.n{text-transform:capitalize;font-weight:800}
+    td.m{font-family:'JetBrains Mono',monospace;font-size:.72rem}
+    .x{border:0;background:none;color:var(--red);font-weight:900;cursor:pointer;font-size:.9rem}
+    .batches{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+    .batch{border:1px solid var(--border);border-radius:18px;padding:12px 14px;background:var(--surface2)}
+    .batch b{font-size:.9rem;font-weight:900}
+    .batch p{font-size:.7rem;font-weight:600;color:var(--text2);margin:.25rem 0 .6rem}
+    .empty{font-size:.78rem;font-weight:700;color:var(--text2);text-align:center;padding:1rem}
+    #gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);overflow-y:auto}
+    .gate-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:2rem 1.8rem;box-shadow:0 30px 90px rgba(10,30,60,.25);display:flex;flex-direction:column;gap:10px;text-align:center}
+    .gate-card h1{font-size:1.3rem;font-weight:900}
+    .gate-card p{font-size:.78rem;font-weight:600;color:var(--text2)}
+    .err{font-size:.74rem;font-weight:700;color:var(--red);min-height:1em}
+    #app{display:none}#app.show{display:block}
+    .toast-host{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+    .toast{background:#0c1e33;color:#fff;padding:.65rem 1.1rem;border-radius:14px;font-size:.78rem;font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.35)}
+    .toast.err{background:#c0392b}.toast.ok{background:#1d8a4e}
+  </style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div style="font-size:2.2rem">🎓</div>
+    <h1>Graduation Setup</h1>
+    <p>Restricted to Advanced Admins. Sign in with your admin account.</p>
+    <button class="btn ghost" id="g-google" type="button">Continue with Google</button>
+    <input type="email" id="g-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="g-pass" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="g-login" type="button">Sign in</button>
+    <div class="err" id="g-err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <span class="chip" id="user-chip"></span>
+        <span>
+          <a class="chip" href="./graduation.html">← Graduation portal</a>
+          <button class="chip" id="g-out" type="button">Sign out</button>
+        </span>
+      </div>
+      <h1>Set <span>Graduation</span> Dates</h1>
+      <p>Pick the school, class and graduation date. Student names are optional. Everything is saved to the <b>graduation</b> collection the Graduation Portal reads.</p>
+    </section>
+
+    <section class="card">
+      <h2><i>1</i> School, class &amp; graduation date</h2>
+      <div class="row" style="margin-bottom:12px">
+        <div class="field">
+          <label class="l" for="school">School</label>
+          <input type="text" id="school" list="school-list" placeholder="School name" autocomplete="off">
+          <datalist id="school-list"></datalist>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="l" for="grade">Grade</label>
+          <input type="text" id="grade" list="grade-list" value="Grade 9" placeholder="e.g. Grade 9" autocomplete="off">
+          <datalist id="grade-list"><option value="Grade 9"><option value="Grade 8"><option value="Grade 7"><option value="Grade 6"><option value="Grade 3"><option value="PP2"></datalist>
+        </div>
+        <div class="field">
+          <label class="l" for="gdate">Graduation date</label>
+          <input type="date" id="gdate">
+        </div>
+        <div class="field">
+          <label class="l" for="year">Graduation year (from date)</label>
+          <input type="number" id="year" min="2000" max="2100" step="1" readonly>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="field">
+          <label class="l" for="label">Button name in the portal (optional)</label>
+          <input type="text" id="label" placeholder="e.g. Grade 9 · Junior School" autocomplete="off">
+        </div>
+        <div class="field">
+          <label class="l">Graduating class</label>
+          <label class="seg"><input type="checkbox" id="active" checked><span>🎓 Show this class in the Graduation Portal</span></label>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label class="l">If this list already exists</label>
+        <div class="seg">
+          <label><input type="radio" name="mode" value="add" checked><span>➕ Add to existing list</span></label>
+          <label><input type="radio" name="mode" value="replace"><span>♻️ Replace the whole list</span></label>
+        </div>
+        <p class="hint">This choice only applies when you also import names below.</p>
+      </div>
+      <div class="bar">
+        <span class="grow"></span>
+        <button class="btn green" id="save-date" type="button">💾 Save school, class &amp; date</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><i>2</i> Add the names <span class="stat">optional</span></h2>
+      <textarea id="raw" spellcheck="false" placeholder="Paste names here, one per line&#10;&#10;Or with details:&#10;Name, Gender, Class, Assessment No&#10;Jane Wanjiru Otieno, F, 9A, 1234567"></textarea>
+      <div class="bar">
+        <input type="file" id="file" accept=".csv,.txt,.tsv,text/plain,text/csv" hidden>
+        <button class="btn ghost" id="pick" type="button">📂 Upload CSV / TXT</button>
+        <button class="btn ghost" id="tpl" type="button">⬇️ Template</button>
+        <span class="grow"></span>
+        <button class="btn ghost" id="clear" type="button">Clear</button>
+      </div>
+      <p class="hint">Only names are required. Optional columns, in order: <code>gender</code> (M/F), <code>class</code>, <code>assessment no</code>. Paste straight from Excel (tab-separated) or CSV. A header row and list numbers like <code>1.</code> are handled automatically.</p>
+    </section>
+
+    <section class="card" id="prev-card" hidden>
+      <h2><i>3</i> Check &amp; import</h2>
+      <div class="stats" id="stats"></div>
+      <div class="tbl"><table><thead><tr><th>#</th><th>Name</th><th>Gender</th><th>Class</th><th>Assessment No</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="bar">
+        <span class="hint" id="target" style="margin:0"></span>
+        <span class="grow"></span>
+        <button class="btn green" id="go" type="button">Save names &amp; date</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>📚 Saved graduation lists</h2>
+      <p class="hint" style="margin:-.3rem 0 .8rem">Only lists marked <b>Showing in portal</b> appear as buttons in the Graduation Portal. You decide which classes graduate.</p>
+      <div class="batches" id="batches"><div class="empty">Loading…</div></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast-host" id="toasts"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signInWithCredential, GoogleAuthProvider, signOut, setPersistence, indexedDBLocalPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { FIREBASE_CONFIG, GOOGLE_CLIENT_ID } from './js/config.js';
+import { GoogleOneTap } from './js/google-one-tap.js';
+
+const GRAD_PATH = 'graduation';   // Firestore collection the Graduation Portal reads
+const $ = id => document.getElementById(id);
+const app = initializeApp(FIREBASE_CONFIG), auth = getAuth(app), fs = getFirestore(app);
+setPersistence(auth, indexedDBLocalPersistence).catch(()=>setPersistence(auth, browserLocalPersistence).catch(()=>{}));
+
+/* ── Google One Tap (silent prompt; held until the session state is known) ── */
+const oneTap = new GoogleOneTap({
+  clientId: GOOGLE_CLIENT_ID,
+  deferAutoPromptUntilSignal: true,
+  debug: false,
+  onSuccess: async (profile) => {
+    try{ await signInWithCredential(auth, GoogleAuthProvider.credential(profile.raw.credential)); }
+    catch(e){ gErr(friendlyErr(e)); }
+  },
+  onError: e => console.warn('[OneTap]', e)
+});
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg, type=''){ const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('toasts').appendChild(t); setTimeout(()=>t.remove(), 3400); }
+function friendlyErr(e){
+  const c = (e && e.code) || '';
+  if(/wrong-password|invalid-credential|invalid-login|user-not-found/.test(c)) return 'Incorrect email or password.';
+  if(c.includes('too-many-requests')) return 'Too many attempts. Try again later.';
+  if(c.includes('popup-closed')||c.includes('cancelled-popup')) return '';
+  if(/permission/i.test(e.message||'') || c.includes('PERMISSION')) return 'Permission denied. Publish the Firestore rule for the graduation collection (Advancedadmin only).';
+  return (e && e.message) || 'Something went wrong.';
+}
+
+/* ── access control: Advanced Admins only (users/{uid}.Advancedadmin === true) ── */
+const DENIED = 'Access denied. Only Advanced Admins can manage graduation.';
+async function isAdvancedAdmin(user){
+  if(!user) return false;
+  try{
+    const snap = await getDoc(doc(fs, 'users', user.uid));
+    if(!snap.exists()) return false;
+    const d = snap.data() || {};
+    return d.disabled !== true && d.Advancedadmin === true;   // same checks as login.html
+  }catch(e){ return false; }   // fail closed
+}
+async function requireAdmin(){
+  if(await isAdvancedAdmin(auth.currentUser)) return true;
+  toast(DENIED, 'err'); await signOut(auth); return false;
+}
+
+/* ── parsing ── */
+let ROWS = [];
+const genderKey = g => { g = String(g||'').trim().toLowerCase(); return (g==='m'||g==='male'||g==='boy') ? 'M' : (g==='f'||g==='female'||g==='girl') ? 'F' : ''; };
+function splitLine(line, d){
+  if(d==='\t') return line.split('\t').map(x=>x.trim());
+  const out = []; let cur = '', q = false;
+  for(const ch of line){
+    if(ch==='"') q = !q;
+    else if(ch===',' && !q){ out.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur.trim()); return out;
+}
+const keyOf = r => (r.an ? 'AN_' + r.an : 'N_' + r.name.toUpperCase()).replace(/[.#$\[\]\/]/g,'_').replace(/\s+/g,' ').slice(0,180);
+function parse(text){
+  const lines = text.replace(/\r/g,'').split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return [];
+  const hasTab = lines.some(l=>l.includes('\t'));
+  const commaLines = lines.filter(l=>l.includes(',')).length;
+  const header = /name/i.test(lines[0]) && /[,\t]/.test(lines[0]);
+  const d = hasTab ? '\t' : (header || commaLines >= lines.length/2) ? ',' : '';
+  let idx = {name:0, gender:1, cls:2, an:3};
+  let body = lines;
+  if(header){
+    const h = splitLine(lines[0], d).map(x=>x.toLowerCase());
+    const f = re => h.findIndex(x=>re.test(x));
+    idx = {name:f(/name/), gender:f(/gender|sex/), cls:f(/class|stream/), an:f(/assess|^an$|upi|uli|adm/)};
+    body = lines.slice(1);
+  }
+  const seen = new Set(), out = [];
+  body.forEach(line=>{
+    const c = d ? splitLine(line, d) : [line];
+    const get = i => i >= 0 && i < c.length ? c[i] : '';
+    const name = get(idx.name).replace(/^\s*\d+\s*[.)\-]\s*/,'').replace(/\s+/g,' ').trim();
+    if(!name) return;
+    const r = { name, gender: genderKey(get(idx.gender)), cls: get(idx.cls).trim(), an: get(idx.an).trim().replace(/^-+$/,'') };
+    r.key = keyOf(r); r.dup = seen.has(r.key); seen.add(r.key);
+    out.push(r);
+  });
+  return out;
+}
+
+/* ── preview ── */
+const slug = s => String(s||'').trim().replace(/[^A-Za-z0-9]+/g,'');
+const batchKey = () => [slug($('school').value), slug($('grade').value), $('year').value].filter(Boolean).join('_');
+function renderPreview(){
+  $('prev-card').hidden = !ROWS.length;
+  if(!ROWS.length) return;
+  const good = ROWS.filter(r=>!r.dup), dups = ROWS.length - good.length;
+  const boys = good.filter(r=>r.gender==='M').length, girls = good.filter(r=>r.gender==='F').length;
+  $('stats').innerHTML = `<span class="stat ok">${good.length} to import</span>` +
+    (dups ? `<span class="stat warn">${dups} duplicate${dups===1?'':'s'} skipped</span>` : '') +
+    (boys||girls ? `<span class="stat">${boys} boys · ${girls} girls</span>` : '');
+  $('rows').innerHTML = ROWS.map((r,i)=>`<tr style="${r.dup?'opacity:.45;text-decoration:line-through':''}"><td class="m">${i+1}</td><td class="n">${esc(r.name.toLowerCase())}</td><td>${esc(r.gender)}</td><td>${esc(r.cls)}</td><td class="m">${esc(r.an)}</td><td><button class="x" data-i="${i}" type="button" title="Remove">✕</button></td></tr>`).join('');
+  $('target').textContent = `Will be saved to ${GRAD_PATH}/${batchKey()}`;
+  $('go').disabled = !good.length;
+}
+function reparse(){
+  ROWS = parse($('raw').value); renderPreview();
+}
+let pT; $('raw').addEventListener('input', ()=>{ clearTimeout(pT); pT = setTimeout(reparse, 200); });
+['school','grade','year'].forEach(id=>$(id).addEventListener('input', renderPreview));
+$('gdate').addEventListener('input', ()=>{ $('year').value = $('gdate').value.slice(0,4); renderPreview(); });
+$('rows').addEventListener('click', e=>{
+  const b = e.target.closest('.x'); if(!b) return;
+  ROWS.splice(+b.dataset.i, 1);
+  // keep the dup flags correct after removing a row
+  const seen = new Set(); ROWS.forEach(r=>{ r.dup = seen.has(r.key); seen.add(r.key); });
+  renderPreview();
+});
+$('pick').addEventListener('click', ()=>$('file').click());
+$('file').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { $('raw').value = String(fr.result || ''); reparse(); toast(`Loaded ${f.name}`, 'ok'); };
+  fr.onerror = () => toast('Could not read that file.', 'err');
+  fr.readAsText(f); e.target.value = '';
+});
+$('clear').addEventListener('click', ()=>{ $('raw').value = ''; ROWS = []; renderPreview(); });
+$('tpl').addEventListener('click', ()=>{
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['Name,Gender,Class,Assessment No\r\nJane Wanjiru Otieno,F,9A,1234567\r\nJohn Kiprop Mutai,M,9B,7654321\r\n'], {type:'text/csv'}));
+  a.download = 'graduands-template.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+});
+
+/* ── write ── */
+async function saveBatch(good){
+  if(!(await requireAdmin())) return;
+  const school = $('school').value.trim().replace(/\s+/g,' '), grade = $('grade').value.trim().replace(/\s+/g,' ');
+  const gdate = $('gdate').value, year = gdate.slice(0,4);
+  if(!school){ toast('Enter the school name.', 'err'); return; }
+  if(!grade){ toast('Enter the grade or class name.', 'err'); return; }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(gdate)){ toast('Pick the graduation date.', 'err'); return; }
+  const mode = good.length ? document.querySelector('input[name=mode]:checked').value : 'add';
+  if(mode==='replace' && !confirm(`Replace the whole ${school} · ${grade} · ${year} list with these ${good.length} students?`)) return;
+  const students = {}; good.forEach(r=>{ students[r.key] = { name:r.name, gender:r.gender, cls:r.cls, an:r.an }; });
+  const bref = doc(fs, GRAD_PATH, batchKey());
+  const meta = { school, grade, year, graduationDate: gdate, updatedAt: Date.now(), updatedBy: auth.currentUser?.email || '' };
+  const label = $('label').value.trim(); if(label) meta.label = label;
+  const btn = good.length ? $('go') : $('save-date'), btnText = btn.textContent;
+  $('go').disabled = true; $('save-date').disabled = true; btn.textContent = 'Saving…';
+  try{
+    const ex = await getDoc(bref);
+    if(mode==='replace' || !ex.exists()) meta.active = $('active').checked;   // existing lists keep their current on/off choice
+    const data = good.length ? { ...meta, students } : meta;
+    if(mode==='replace') await setDoc(bref, data); else await setDoc(bref, data, { merge: true });
+    toast(good.length ? `Saved ${good.length} student${good.length===1?'':'s'} to ${school} · ${grade} · ${gdate}.` : `Saved ${school} · ${grade} · graduation ${gdate}.`, 'ok');
+    if(good.length){ $('raw').value = ''; ROWS = []; renderPreview(); }
+    loadBatches();
+  }catch(e){ toast(friendlyErr(e), 'err'); }
+  btn.textContent = btnText; $('save-date').disabled = false; $('go').disabled = !ROWS.filter(r=>!r.dup).length;
+}
+$('go').addEventListener('click', ()=>saveBatch(ROWS.filter(r=>!r.dup)));
+$('save-date').addEventListener('click', ()=>saveBatch([]));
+
+/* ── saved lists ── */
+async function loadBatches(){
+  try{
+    const snap = await getDocs(collection(fs, GRAD_PATH));
+    const list = snap.docs.map(d => [d.id, d.data()]).filter(([,b])=>b && (b.students || b.graduationDate)).sort((a,b)=>String(b[1].year).localeCompare(String(a[1].year)) || String(a[1].school||'').localeCompare(String(b[1].school||'')) || String(a[1].grade).localeCompare(String(b[1].grade)));
+    $('school-list').innerHTML = [...new Set(list.map(([,b])=>b.school).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('');
+    $('batches').innerHTML = list.length ? list.map(([k,b])=>{
+      const n = Object.keys(b.students || {}).length;
+      const gd = b.graduationDate ? new Date(b.graduationDate + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : 'No date set';
+      const on = b.active !== false;
+      const title = b.label || ((b.school ? b.school + ' · ' : '') + b.grade + ' · ' + b.year);
+      return `<div class="batch" style="${on?'':'opacity:.7'}"><b>${esc(title)}</b><p>${esc(b.school || 'No school set')} · ${esc(b.grade)}<br>🎓 ${esc(gd)} · ${n ? n + ' student' + (n===1?'':'s') : 'date only'}<br><span class="stat ${on?'ok':'warn'}" style="display:inline-block;margin-top:6px">${on ? '🎓 Showing in portal' : '⏸ Hidden from portal'}</span></p><div class="bar" style="margin-top:0"><button class="btn ${on?'ghost':'green'} sm" data-t="${esc(k)}" data-on="${on?1:0}" type="button">${on ? 'Hide from portal' : 'Show in portal'}</button><button class="btn red sm" data-k="${esc(k)}" type="button">Delete</button></div></div>`;
+    }).join('') : '<div class="empty">No graduation lists saved yet.</div>';
+  }catch(e){ $('batches').innerHTML = `<div class="empty">${esc(friendlyErr(e))}</div>`; }
+}
+$('batches').addEventListener('click', async e=>{
+  const t = e.target.closest('button[data-t]');
+  if(t){
+    if(!(await requireAdmin())) return;
+    try{ await updateDoc(doc(fs, GRAD_PATH, t.dataset.t), { active: t.dataset.on !== '1' }); loadBatches(); }
+    catch(err){ toast(friendlyErr(err), 'err'); }
+    return;
+  }
+  const b = e.target.closest('button[data-k]'); if(!b) return;
+  if(!confirm(`Delete the whole list "${b.dataset.k}"? This cannot be undone.`)) return;
+  if(!(await requireAdmin())) return;
+  try{ await deleteDoc(doc(fs, GRAD_PATH, b.dataset.k)); toast('List deleted.', 'ok'); loadBatches(); }
+  catch(err){ toast(friendlyErr(err), 'err'); }
+});
+
+/* ── auth ── */
+$('year').value = new Date().getFullYear();
+const gErr = m => { $('g-err').textContent = m || ''; };
+$('g-google').addEventListener('click', async ()=>{ gErr(''); oneTap.cancel(); try{ await signInWithPopup(auth, new GoogleAuthProvider()); }catch(e){ gErr(friendlyErr(e)); } });
+async function emailLogin(){ gErr(''); try{ await signInWithEmailAndPassword(auth, $('g-email').value.trim(), $('g-pass').value); }catch(e){ gErr(friendlyErr(e)); } }
+$('g-login').addEventListener('click', emailLogin);
+$('g-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') emailLogin(); });
+$('g-out').addEventListener('click', ()=>{ oneTap.disableAutoSelect(); signOut(auth); });
+let authTick = 0;
+onAuthStateChanged(auth, async user=>{
+  const tick = ++authTick;
+  if(!user){ $('app').classList.remove('show'); $('gate').style.display = 'flex'; oneTap.notifySignedOut(); return; }
+  oneTap.notifySignedIn();
+  gErr(''); $('app').classList.remove('show'); $('gate').style.display = 'flex';
+  $('g-err').style.color = 'var(--text2)'; $('g-err').textContent = 'Checking access…';
+  const ok = await isAdvancedAdmin(user);
+  if(tick !== authTick) return;
+  $('g-err').style.color = '';
+  if(!ok){ await signOut(auth); gErr(DENIED); return; }
+  gErr(''); $('gate').style.display = 'none'; $('app').classList.add('show');
+  $('user-chip').textContent = user.displayName || user.email || '';
+  loadBatches();
+});
+oneTap.init();
+</script>
+</body>
+</html>

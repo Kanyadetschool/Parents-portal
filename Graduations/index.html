@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Graduation Portal — Group of Schools</title>
+  <link rel="icon" type="image/x-icon" href="./images/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue:#2980b9; --blue-dk:#1a5276; --blue-lt:#5dade2; --blue-glow:rgba(41,128,185,.35);
+      --orange:#e67e22; --gold:#f39c12; --green:#27ae60; --red:#e74c3c; --purple:#8e44ad; --teal:#16a085;
+      --transition:all .25s cubic-bezier(.4,0,.2,1);
+    }
+    [data-theme="dark"]{
+      --bg:#090f1a; --bg2:#0c1525; --surface:#111d2e; --surface2:#162438; --surface3:#1c2e44;
+      --border:rgba(41,128,185,.18); --border-strong:rgba(41,128,185,.4);
+      --text:#ddeeff; --text2:#7aaec9; --text3:#4a7a9b; --card-shadow:0 8px 32px rgba(0,0,0,.4);
+    }
+    [data-theme="light"]{
+      --bg:linear-gradient(135deg,#eef0f2 0%,#f4f0e6 45%,#fbecc3 100%);
+      --bg2:#f7edd0; --surface:#ffffff; --surface2:#fdfaf2; --surface3:#f8eed6;
+      --border:rgba(211,164,55,.2); --border-strong:rgba(211,164,55,.45);
+      --text:#0c1e33; --text2:#5a5342; --text3:#a89b7a; --card-shadow:0 4px 20px rgba(211,164,55,.14);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(circle at 10% 10%,rgba(41,128,185,.20),transparent 26%),radial-gradient(circle at 88% 92%,rgba(230,126,34,.20),transparent 24%)}
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(41,128,185,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(41,128,185,.045) 1px,transparent 1px);
+      background-size:26px 26px;mask-image:radial-gradient(circle at center,black 50%,transparent 92%)}
+    body.em-lock{overflow:hidden}
+    button{font-family:inherit}
+    ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px}
+
+    /* ── Auth gate (same design as login.html) ── */
+    #auth-gate{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;overflow-y:auto;background:var(--bg);padding:16px}
+    #auth-gate::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.6;
+      background:radial-gradient(ellipse 55% 45% at 90% 88%,rgba(243,156,18,.18) 0%,transparent 65%),radial-gradient(ellipse 45% 40% at 10% 8%,rgba(211,164,55,.08) 0%,transparent 60%)}
+    .auth-card{position:relative;z-index:1;width:100%;max-width:380px;background:var(--surface);border-radius:28px;padding:2.3rem 2.1rem 2.1rem;box-shadow:0 30px 90px rgba(10,30,60,.28),0 0 0 1px rgba(41,128,185,.07);border:1px solid var(--border);animation:fadeUp .5s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes fadeUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+    .auth-logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:grid;place-items:center;font-size:26px;margin:0 auto 1.1rem;box-shadow:0 10px 26px var(--blue-glow)}
+    .auth-card h1{text-align:center;font-size:1.55rem;font-weight:900;letter-spacing:-.01em;margin-bottom:.25rem}
+    .auth-sub{text-align:center;font-size:.83rem;color:var(--text2);font-weight:500;margin-bottom:1.4rem}
+    .auth-err{background:rgba(231,76,60,.12);color:#e25b4b;border:1px solid rgba(231,76,60,.3);padding:9px 12px;border-radius:12px;font-size:12px;font-weight:600;margin-bottom:14px;display:none}
+    .auth-btn{width:100%;padding:.95rem 1.5rem;border:none;border-radius:14px;font-size:.9rem;font-weight:800;cursor:pointer;transition:var(--transition);margin-top:.3rem;margin-bottom:.6rem;display:flex;align-items:center;justify-content:center;gap:.55rem}
+    .auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .auth-btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue-dk));color:#fff;box-shadow:0 12px 28px rgba(20,40,70,.35)}
+    .auth-btn-google{background:linear-gradient(135deg,var(--blue-dk),#0c1e33);color:#fff;box-shadow:0 12px 28px rgba(20,40,70,.35)}
+    .auth-btn-email{background:var(--surface2);color:var(--text);border:1.5px solid var(--border-strong)}
+    .auth-btn-primary:hover,.auth-btn-google:hover{transform:translateY(-2px)}
+    .auth-btn-email:hover{transform:translateY(-2px);border-color:var(--blue-lt);box-shadow:0 10px 24px -10px var(--blue-glow)}
+    .auth-divider{display:flex;align-items:center;gap:.6rem;margin:.9rem 0;font-size:.68rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .auth-foot{text-align:center;font-size:.72rem;color:var(--text3);font-weight:600;margin-top:.6rem;line-height:1.5}
+
+    /* ── Email modal (same as login.html) ── */
+    .em-overlay{position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,38,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s}
+    .em-overlay.open{opacity:1;visibility:visible;transition:opacity .25s ease}
+    .em-sheet{position:relative;width:100%;max-width:400px;max-height:calc(100dvh - 32px);overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:2rem 1.7rem 1.4rem;box-shadow:0 40px 100px rgba(6,18,36,.45);transform:translateY(18px) scale(.96);opacity:0;transition:transform .32s cubic-bezier(.2,.9,.3,1.15),opacity .25s ease}
+    .em-overlay.open .em-sheet{transform:none;opacity:1}
+    .em-grip{display:none;width:42px;height:4px;border-radius:4px;background:var(--border-strong);margin:-.9rem auto 1rem}
+    .em-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2);color:var(--text2);display:grid;place-items:center;cursor:pointer;transition:var(--transition)}
+    .em-close:hover{background:var(--surface3);color:var(--text);transform:rotate(90deg)}
+    .em-head{text-align:center;margin-bottom:1.2rem}
+    .em-badge{width:54px;height:54px;margin:0 auto .9rem;border-radius:17px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-dk));box-shadow:0 10px 26px var(--blue-glow)}
+    .em-head h2{font-size:1.3rem;font-weight:900;letter-spacing:-.01em}
+    .em-head p{font-size:.8rem;color:var(--text2);font-weight:500;margin-top:.25rem}
+    .em-field{margin-bottom:.6rem}
+    .em-field label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    .em-input{position:relative}
+    .em-input input{width:100%;padding:.8rem 2.6rem .8rem 2.5rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);font-family:inherit;font-size:16px;color:var(--text);outline:none;transition:var(--transition)}
+    .em-input input:focus{border-color:var(--blue-lt);box-shadow:0 0 0 3px var(--blue-glow)}
+    .em-lead{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;transition:color .15s}
+    .em-input:focus-within .em-lead{color:var(--blue-lt)}
+    .em-eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:34px;height:34px;border:none;background:none;border-radius:10px;color:var(--text3);display:grid;place-items:center;cursor:pointer}
+    .em-eye:hover{color:var(--text);background:var(--surface3)}
+    .em-eye .eye-off{display:none}
+    .em-eye[aria-pressed="true"] .eye-on{display:none}
+    .em-eye[aria-pressed="true"] .eye-off{display:block}
+    .em-back{display:block;width:100%;margin-top:.2rem;padding:.6rem;border:none;background:none;font-size:.78rem;font-weight:700;color:var(--text2);cursor:pointer;border-radius:10px;transition:var(--transition)}
+    .em-back:hover{color:var(--blue-lt);background:var(--surface2)}
+    .em-sheet.shake{animation:emShake .4s}
+    @keyframes emShake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+    @media(max-width:520px){
+      .em-overlay{align-items:flex-end;padding:0}
+      .em-sheet{max-width:none;max-height:92dvh;border-radius:26px 26px 0 0;padding:1.6rem 1.3rem calc(1.2rem + env(safe-area-inset-bottom));transform:translateY(100%);opacity:1;transition:transform .35s cubic-bezier(.2,.9,.3,1)}
+      .em-overlay.open .em-sheet{transform:none}
+      .em-grip{display:block}
+    }
+    @media(prefers-reduced-motion:reduce){.em-overlay,.em-sheet{transition:none}.em-sheet.shake{animation:none}}
+
+    /* ── App shell ── */
+    #app{position:relative;z-index:1;display:none;min-height:100vh}
+    #app.show{display:block}
+    .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:12px clamp(14px,4vw,36px);background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+    .tb-logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--blue-dk));display:grid;place-items:center;font-size:19px;box-shadow:0 6px 16px var(--blue-glow);flex:none}
+    .tb-title{font-weight:900;font-size:.98rem;letter-spacing:-.01em;line-height:1.1}
+    .tb-title small{display:block;font-size:.66rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+    .tb-sp{flex:1}
+    .icon-btn{height:38px;min-width:38px;padding:0 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:.76rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:var(--transition)}
+    .icon-btn:hover{color:var(--text);border-color:var(--border-strong);transform:translateY(-1px)}
+    .user-chip{font-size:.74rem;font-weight:700;color:var(--text2);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    main{max-width:1180px;margin:0 auto;padding:clamp(14px,3vw,30px) clamp(14px,4vw,36px) 60px}
+
+    .hero{position:relative;overflow:hidden;border-radius:28px;padding:clamp(1.4rem,4vw,2.4rem);color:#fff;background:linear-gradient(135deg,#0c1e33 0%,#1a5276 55%,#2980b9 120%);box-shadow:0 24px 60px rgba(10,30,60,.3)}
+    .hero::before{content:'';position:absolute;right:-60px;top:-70px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(243,156,18,.55),transparent 65%)}
+    .hero::after{content:'🎓';position:absolute;right:clamp(14px,4vw,40px);bottom:-14px;font-size:clamp(70px,14vw,130px);opacity:.16;transform:rotate(-12deg)}
+    .hero-kicker{display:inline-flex;align-items:center;gap:7px;font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:99px;background:rgba(243,156,18,.2);border:1px solid rgba(243,156,18,.45);color:#ffd27a}
+    .hero h1{font-size:clamp(1.6rem,4.6vw,2.6rem);font-weight:900;letter-spacing:-.02em;margin:.7rem 0 .3rem;position:relative}
+    .hero h1 span{color:#ffc04d}
+    .hero p{font-size:.88rem;font-weight:500;color:rgba(255,255,255,.78);max-width:520px;position:relative}
+    .cohorts{display:flex;gap:8px;margin-top:1.1rem;flex-wrap:wrap;position:relative}
+    .cohort-btn{padding:.5rem 1rem;border-radius:99px;border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;font-size:.76rem;font-weight:800;cursor:pointer;transition:var(--transition)}
+    .cohort-btn:hover{background:rgba(255,255,255,.18)}
+    .cohort-btn.on{background:#ffc04d;border-color:#ffc04d;color:#0c1e33}
+
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:14px 16px;box-shadow:var(--card-shadow)}
+    .kpi b{display:block;font-size:1.65rem;font-weight:900;letter-spacing:-.02em;line-height:1.1}
+    .kpi span{font-size:.68rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+    .kpi.k1 b{color:var(--blue)}.kpi.k2 b{color:var(--teal)}.kpi.k3 b{color:var(--orange)}.kpi.k4 b{color:var(--purple)}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:10px;box-shadow:var(--card-shadow)}
+    .search{position:relative;flex:1 1 240px}
+    .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+    .search input{width:100%;padding:.72rem .9rem .72rem 2.4rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);font-family:inherit;font-size:16px;color:var(--text);outline:none;transition:var(--transition)}
+    .search input:focus{border-color:var(--blue-lt);box-shadow:0 0 0 3px var(--blue-glow)}
+    select.sel{padding:.68rem .8rem;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:.78rem;font-weight:700;outline:none;cursor:pointer}
+    .seg{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:3px}
+    .seg button{border:none;background:none;padding:.45rem .8rem;border-radius:11px;font-size:.74rem;font-weight:800;color:var(--text2);cursor:pointer;transition:var(--transition)}
+    .seg button.on{background:linear-gradient(135deg,var(--blue),var(--blue-dk));color:#fff;box-shadow:0 6px 14px var(--blue-glow)}
+    .result-line{display:flex;justify-content:space-between;align-items:center;margin:14px 4px 10px;font-size:.76rem;font-weight:700;color:var(--text3)}
+
+    .list{display:grid;gap:12px}
+    .list.view-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+    .list.view-list{grid-template-columns:1fr;gap:8px}
+    .g-card{position:relative;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:13px 14px;box-shadow:var(--card-shadow);transition:var(--transition);animation:fadeUp .4s both}
+    .g-card:hover{transform:translateY(-3px);border-color:var(--border-strong);box-shadow:0 14px 34px -14px var(--blue-glow)}
+    .g-no{position:absolute;top:8px;right:12px;font:700 .62rem 'JetBrains Mono',monospace;color:var(--text3)}
+    .g-av{flex:none;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-weight:900;font-size:.9rem;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-dk));box-shadow:0 8px 18px var(--blue-glow)}
+    .g-av.f{background:linear-gradient(135deg,#e67e22,#c0392b);box-shadow:0 8px 18px rgba(230,126,34,.35)}
+    .g-av{position:relative;overflow:hidden}
+    .g-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s ease}
+    .g-ph.ok{opacity:1}
+    .cf-photo{position:relative;width:96px;height:96px;margin:0 auto 12px;border-radius:50%;overflow:hidden;display:none;box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--green),0 12px 28px rgba(0,0,0,.25)}
+    .cf-photo.has{display:block}
+    .g-info{min-width:0;padding-right:26px}
+    .g-name{font-weight:800;font-size:.86rem;line-height:1.25;text-transform:capitalize;overflow-wrap:anywhere}
+    .g-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+    .tag{font-size:.64rem;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--surface3);color:var(--text2);border:1px solid var(--border)}
+    .tag.mono{font-family:'JetBrains Mono',monospace;font-weight:600}
+    .tag.m{color:var(--blue-dk);background:rgba(41,128,185,.1)}
+    .tag.f{color:var(--orange);background:rgba(230,126,34,.12)}
+    .view-list .g-card{padding:10px 14px}
+    .view-list .g-info{flex:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-right:40px}
+    .view-list .g-name{flex:1 1 220px}
+    .view-list .g-meta{margin-top:0}
+
+    .state{text-align:center;padding:60px 20px;color:var(--text2);background:var(--surface);border:1px dashed var(--border-strong);border-radius:24px}
+    .state .big{font-size:42px;margin-bottom:10px}
+    .state h3{font-size:1.05rem;font-weight:900;color:var(--text);margin-bottom:6px}
+    .state p{font-size:.82rem;font-weight:500;max-width:380px;margin:0 auto 14px}
+    .skeleton{height:72px;border-radius:20px;background:linear-gradient(90deg,var(--surface2),var(--surface3),var(--surface2));background-size:200% 100%;animation:shine 1.2s linear infinite}
+    @keyframes shine{to{background-position:-200% 0}}
+
+    .toast-host{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:3000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+    .toast{background:#0c1e33;color:#fff;padding:.65rem 1.1rem;border-radius:14px;font-size:.78rem;font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.35);animation:fadeUp .3s both}
+    .toast.err{background:#c0392b}.toast.ok{background:#1d8a4e}
+
+    mark{background:rgba(243,156,18,.35);color:inherit;border-radius:4px;padding:0 2px}
+    .insights{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:14px 16px;box-shadow:var(--card-shadow)}
+    .insights h3{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+    .legend{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-weight:700}
+    .legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+    .legend .b,.trk .b{background:var(--blue)}.legend .g,.trk .g{background:var(--orange)}
+    .ibar{display:grid;grid-template-columns:minmax(100px,170px) 1fr 34px;gap:10px;align-items:center;width:100%;padding:5px 8px;border:none;background:none;border-radius:10px;cursor:pointer;color:var(--text);font-size:.74rem;font-weight:700;text-align:left;transition:var(--transition)}
+    .ibar:hover,.ibar.on{background:var(--surface2)}
+    .ibar.on{box-shadow:inset 0 0 0 1.5px var(--blue-lt)}
+    .trk{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--surface3);min-width:8px}
+    .trk i{display:block;height:100%}
+    .ibar em{font:700 .72rem 'JetBrains Mono',monospace;font-style:normal;color:var(--text2);text-align:right}
+    #roll-line{display:none;align-items:center;gap:8px;color:var(--green)}
+    .chk{display:none;flex:none;position:relative;cursor:pointer}
+    .roll .chk{display:flex}
+    .chk input{position:absolute;opacity:0;inset:0;cursor:pointer}
+    .chk span{width:26px;height:26px;border-radius:9px;border:2px solid var(--border-strong);display:grid;place-items:center;color:transparent;font-weight:900;font-size:.8rem;transition:var(--transition)}
+    .chk input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
+    .chk input:focus-visible+span{box-shadow:0 0 0 3px var(--blue-glow)}
+    .roll .g-card:has(input:checked){border-color:var(--green)}
+    .g-card{scroll-margin-top:120px}
+    .g-card::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:hsl(var(--ch,210) 70% 52%)}
+    .g-av{transition:var(--transition)}.g-card:hover .g-av{transform:rotate(-5deg) scale(1.07)}
+    .ring{position:absolute;right:clamp(16px,5vw,56px);top:50%;transform:translateY(-50%);width:118px;height:118px;border-radius:50%;display:none;place-items:center;align-content:center;background:conic-gradient(#5dade2 var(--bp,50%),#f39c12 0);box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:1}
+    @media(min-width:720px){.ring{display:grid}}
+    .ring::before{content:'';position:absolute;inset:11px;border-radius:50%;background:#0f2a44}
+    .ring b,.ring small{position:relative}.ring b{font-size:1.9rem;font-weight:900;line-height:1}
+    .ring small{font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+    .hero-date{position:relative;margin-left:8px;display:inline-flex;align-items:center;font-family:inherit;font-size:.7rem;font-weight:800;padding:5px 12px;border-radius:99px;border:1px dashed rgba(255,255,255,.4);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:var(--transition)}
+    .hero-date:hover{background:rgba(255,255,255,.18)}
+    .az{display:none;position:sticky;top:62px;z-index:40;gap:4px;overflow-x:auto;margin:0 0 10px;padding:6px;border-radius:14px;background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--border);scrollbar-width:none}
+    .az button{flex:none;min-width:30px;height:30px;border:none;border-radius:9px;background:none;color:var(--text2);font-weight:800;font-size:.76rem;cursor:pointer;transition:var(--transition)}
+    .az button:hover{background:linear-gradient(135deg,var(--blue),var(--blue-dk));color:#fff}
+    .dq{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding:10px 14px;border-radius:16px;background:rgba(243,156,18,.12);border:1px solid rgba(243,156,18,.4);font-size:.78rem;font-weight:700}
+    .dq button{margin-left:auto;border:none;background:var(--gold);color:#0c1e33;font-family:inherit;font-weight:800;font-size:.72rem;padding:.35rem .8rem;border-radius:99px;cursor:pointer}
+    #stage{position:fixed;inset:0;z-index:2500;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:clamp(18px,4vw,40px);color:#fff;text-align:center;background:radial-gradient(circle at 50% 30%,#1a5276 0%,#0c1e33 55%,#060e1a 100%)}
+    #stage[hidden]{display:none}
+    #stage.done{background:radial-gradient(circle at 50% 30%,#1d6b47 0%,#0c2a24 55%,#060e1a 100%)}
+    .st-x{position:absolute;top:16px;right:16px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:16px;cursor:pointer}
+    .st-top{font:700 .8rem 'JetBrains Mono',monospace;letter-spacing:.12em;color:#ffd27a}
+    .st-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;max-width:1000px}
+    .st-cls{font-size:.8rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:6px 16px;border-radius:99px;background:rgba(243,156,18,.2);border:1px solid rgba(243,156,18,.45);color:#ffd27a}
+    #st-name{font-size:clamp(2rem,8vw,5.6rem);font-weight:900;letter-spacing:-.02em;line-height:1.05;text-transform:capitalize;text-shadow:0 8px 40px rgba(0,0,0,.4);animation:fadeUp .35s both}
+    #st-meta{font:600 1rem 'JetBrains Mono',monospace;color:rgba(255,255,255,.65)}
+    .st-next{font-size:.9rem;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:16px;text-transform:capitalize}
+    .st-ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+    .st-ctl button{padding:.9rem 1.4rem;border-radius:14px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;transition:var(--transition)}
+    .st-ctl button:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
+    .st-ctl #st-mark{background:#ffc04d;border-color:#ffc04d;color:#0c1e33}
+    .print-head{display:none}
+    @media(max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.user-chip{display:none}}
+    @media print{
+      body{background:#fff!important;color:#000}body::before,body::after,.topbar,.hero,.kpis,.toolbar,.toast-host{display:none!important}
+      .print-head{display:block;text-align:center;margin-bottom:14px}
+      .insights,#roll-reset,.az,.dq,#stage,.g-card::before,.result-line{display:none!important}
+      .chk span{border:1.5px solid #000;border-radius:3px;width:16px;height:16px;font-size:11px;color:transparent}
+      .chk input:checked+span{background:none;color:#000;border-color:#000}
+      .print-head h1{font-size:18pt}.print-head p{font-size:10pt}
+      main{padding:0;max-width:none}
+      .list,.list.view-grid{display:block!important;columns:2;column-gap:18px}
+      .g-card{break-inside:avoid;box-shadow:none;border:0;border-bottom:1px solid #ccc;border-radius:0;padding:5px 0;animation:none;margin-bottom:0}
+      .g-av{display:none}.g-no{position:static;margin-right:8px}
+    }
+
+    /* ── EYE certification popup ── */
+    .g-card{cursor:pointer}
+    .cf-overlay{position:fixed;inset:0;z-index:2600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,20,38,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s}
+    .cf-overlay.open{opacity:1;visibility:visible;transition:opacity .25s ease}
+    .cf-sheet{position:relative;width:100%;max-width:360px;text-align:center;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:28px;padding:2.2rem 1.6rem 1.6rem;box-shadow:0 30px 90px rgba(10,30,60,.4);transform:translateY(18px) scale(.9);transition:transform .45s cubic-bezier(.34,1.56,.64,1);overflow:hidden}
+    .cf-overlay.open .cf-sheet{transform:none}
+    .cf-sheet::before{content:'';position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--green),var(--gold),var(--blue))}
+    .cf-badge{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#2ecc71,#1d8a4e);box-shadow:0 0 0 8px rgba(39,174,96,.14),0 14px 30px rgba(39,174,96,.4)}
+    .cf-overlay.open .cf-badge{animation:cfPop .6s .1s cubic-bezier(.34,1.56,.64,1) both}
+    .cf-badge svg{width:44px;height:44px}
+    .cf-badge path{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:50;stroke-dashoffset:50}
+    .cf-overlay.open .cf-badge path{animation:cfDraw .5s .45s ease forwards}
+    @keyframes cfPop{from{transform:scale(0) rotate(-40deg)}to{transform:none}}
+    @keyframes cfDraw{to{stroke-dashoffset:0}}
+    .cf-kicker{font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+    .cf-sheet h2{font-size:1.25rem;font-weight:900;margin:.3rem 0 .9rem}
+    .cf-name{font-size:1.02rem;font-weight:800;text-transform:capitalize;overflow-wrap:anywhere}
+    .cf-meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:.6rem 0 1rem}
+    .cf-level{margin:0 0 .6rem;padding:.7rem .9rem;border-radius:16px;background:rgba(243,156,18,.12);border:1px dashed rgba(243,156,18,.55);font-size:.8rem;font-weight:700;color:var(--text2)}
+    .cf-level b{display:block;font-size:.92rem;color:var(--text)}
+    .cf-date{font-size:.7rem;font-weight:700;color:var(--text3);margin-bottom:1rem}
+    .cf-close{width:100%;border:0;border-radius:14px;padding:.75rem;font:800 .85rem inherit;font-family:inherit;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--blue-dk));box-shadow:0 8px 18px var(--blue-glow)}
+    .cf-details{margin:0 0 1rem;border:1px solid var(--border);border-radius:16px;background:var(--surface2);overflow:hidden;text-align:left}
+    .cf-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:.55rem .9rem;font-size:.76rem;border-bottom:1px solid var(--border)}
+    .cf-row:last-child{border-bottom:0}
+    .cf-row span{font-weight:700;color:var(--text3);flex:none}
+    .cf-row b{font-weight:800;text-align:right;overflow-wrap:anywhere}
+    .cf-row b.ok{color:var(--green)}
+    .cf-sub{font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:.8rem}
+    @media(prefers-reduced-motion:reduce){.cf-sheet,.cf-badge,.cf-badge path{animation:none!important;transition:none!important;stroke-dashoffset:0}}
+  </style>
+</head>
+<body>
+
+<!-- ── AUTH GATE ── -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo">🎓</div>
+    <h1>Graduation Portal</h1>
+    <p class="auth-sub">Sign in to view graduands across our schools.</p>
+    <div class="auth-err" id="auth-err" role="alert"></div>
+    <div id="auth-form">
+      <button class="auth-btn auth-btn-google" id="btn-google" type="button">
+        <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.9 7.35 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider">or</div>
+      <button class="auth-btn auth-btn-email" id="btn-open-email" type="button" aria-haspopup="dialog" aria-controls="email-modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6 10-6"/></svg>
+        Continue with Email
+      </button>
+      <p class="auth-foot">Student records are confidential. Only authorized school staff can open this list.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── EMAIL MODAL ── -->
+<div class="em-overlay" id="email-modal" role="dialog" aria-modal="true" aria-labelledby="em-title" aria-hidden="true">
+  <div class="em-sheet" id="em-sheet">
+    <span class="em-grip" aria-hidden="true"></span>
+    <button class="em-close" id="em-close" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="em-head">
+      <div class="em-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6 10-6"/></svg></div>
+      <h2 id="em-title">Sign in with email</h2>
+      <p>Enter your school credentials to continue.</p>
+    </div>
+    <div class="auth-err" id="email-err" role="alert"></div>
+    <form id="email-form" autocomplete="on" onsubmit="event.preventDefault()">
+      <div class="em-field">
+        <label for="login-email">Email</label>
+        <div class="em-input">
+          <svg class="em-lead" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6 10-6"/></svg>
+          <input type="email" id="login-email" autocomplete="username" placeholder="you@example.com" inputmode="email" autocapitalize="none" spellcheck="false">
+        </div>
+      </div>
+      <div class="em-field">
+        <label for="login-password">Password</label>
+        <div class="em-input">
+          <svg class="em-lead" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input type="password" id="login-password" autocomplete="current-password" placeholder="Your password">
+          <button class="em-eye" id="em-eye" type="button" aria-label="Show password" aria-pressed="false">
+            <svg class="eye-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="auth-btn auth-btn-primary" id="btn-email-login" type="button">Sign In</button>
+    </form>
+    <button class="em-back" id="em-back" type="button">← Back to other options</button>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <header class="topbar">
+    <div class="tb-logo">🎓</div>
+    <div class="tb-title">Graduation Portal<small>Group of Schools</small></div>
+    <div class="tb-sp"></div>
+    <span class="user-chip" id="user-chip"></span>
+    <button class="icon-btn" id="btn-theme" type="button" title="Toggle theme" aria-label="Toggle theme">🌓</button>
+    <button class="icon-btn" id="btn-signout" type="button">Sign out</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="ring" id="ring" aria-hidden="true"><b id="ring-n">—</b><small>graduands</small></div>
+      <span class="hero-kicker">🎓 Class of <b id="hero-year">—</b></span><button class="hero-date" id="hero-date" type="button">📅 Set ceremony date</button>
+      <h1>Our <span>Graduands</span></h1>
+      <p>Congratulations to the learners completing their journey with us. Browse, search and print the graduation list.</p>
+      <div class="cohorts" id="cohorts">
+        <select class="sel" id="f-school" aria-label="Filter by school" style="display:none;max-width:100%"></select>
+        <button class="cohort-btn" id="btn-confetti" type="button">🎉 Celebrate</button>
+      </div>
+    </section>
+
+    <section class="kpis" id="kpis">
+      <div class="kpi k1"><b id="k-total">—</b><span>Graduands</span></div>
+      <div class="kpi k2"><b id="k-boys">—</b><span>Boys</span></div>
+      <div class="kpi k3"><b id="k-girls">—</b><span>Girls</span></div>
+      <div class="kpi k4"><b id="k-classes">—</b><span>Classes</span></div>
+    </section>
+
+    <section class="insights" id="insights" style="display:none">
+      <h3><span>Class breakdown · tap a class to filter</span><span class="legend"><i class="b"></i>Boys <i class="g"></i>Girls</span></h3>
+      <div id="ibars"></div>
+    </section>
+
+    <div class="dq" id="dq"></div>
+
+    <section class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search name or assessment no…" autocomplete="off">
+      </div>
+      <select class="sel" id="f-class" aria-label="Filter by class"><option value="">All classes</option></select>
+      <div class="seg" id="f-gender"><button class="on" data-g="" type="button">All</button><button data-g="m" type="button">Boys</button><button data-g="f" type="button">Girls</button></div>
+      <select class="sel" id="f-sort" aria-label="Sort">
+        <option value="az">Name A–Z</option><option value="za">Name Z–A</option><option value="class">By class</option>
+      </select>
+      <div class="seg" id="f-view"><button class="on" data-v="grid" type="button">Cards</button><button data-v="list" type="button">List</button><button data-v="roll" type="button">Roll call</button></div>
+      <button class="icon-btn" id="btn-stage" type="button">🎤 Ceremony</button>
+      <button class="icon-btn" id="btn-copy" type="button">📋 Copy</button>
+      <button class="icon-btn" id="btn-csv" type="button">⬇ CSV</button>
+      <button class="icon-btn" id="btn-print" type="button">🖨 Print</button>
+    </section>
+
+    <div class="result-line"><span id="result-count"></span><span id="roll-line"><b id="roll-txt"></b><button class="icon-btn" id="roll-reset" type="button" style="height:26px;min-width:0;font-size:.66rem">Reset</button></span><span id="result-year"></span></div>
+    <div class="print-head"><h1 id="print-title">Graduation List</h1><p id="print-sub"></p></div>
+    <nav class="az" id="az" aria-label="Jump to letter"></nav>
+    <div id="list" class="list view-grid"></div>
+  </main>
+</div>
+
+<div id="stage" role="dialog" aria-modal="true" aria-label="Ceremony mode" hidden>
+  <button class="st-x" id="st-x" type="button" aria-label="Close">✕</button>
+  <div class="st-top" id="st-count"></div>
+  <div class="st-main"><div class="st-cls" id="st-cls"></div><h2 id="st-name"></h2><p id="st-meta"></p></div>
+  <div class="st-next" id="st-next"></div>
+  <div class="st-ctl"><button id="st-prev" type="button">← Previous</button><button id="st-mark" type="button">✓ Mark present</button><button id="st-nextb" type="button">Next →</button></div>
+</div>
+
+<div class="cf-overlay" id="cf-modal" role="dialog" aria-modal="true" aria-labelledby="cf-title" aria-hidden="true">
+  <div class="cf-sheet">
+    <div class="cf-badge"><svg viewBox="0 0 52 52" aria-hidden="true"><path d="M13 27l9 9 17-19"/></svg></div>
+    <div class="cf-kicker">Certification confirmed</div>
+    <h2 id="cf-title">Successfully Certified!</h2>
+    <div class="cf-photo" id="cf-photo"></div>
+    <div class="cf-name" id="cf-name"></div>
+    <div class="cf-meta" id="cf-meta"></div>
+    <div class="cf-level">certified for<b>Early Years Education (EYE)</b></div>
+    <div class="cf-details" id="cf-details"></div>
+    <div class="cf-sub" id="cf-sub"></div>
+    <button class="cf-close" id="cf-close" type="button">Done</button>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signInWithCredential, GoogleAuthProvider, signOut, setPersistence, indexedDBLocalPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { FIREBASE_CONFIG, PATHS, GOOGLE_CLIENT_ID } from './js/config.js';
+import { GoogleOneTap } from './js/google-one-tap.js';
+
+const $ = id => document.getElementById(id);
+const app = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const fs = getFirestore(app);
+setPersistence(auth, indexedDBLocalPersistence).catch(()=>setPersistence(auth, browserLocalPersistence).catch(()=>{}));
+
+/* ── Google One Tap (silent prompt; held until the session state is known) ── */
+const oneTap = new GoogleOneTap({
+  clientId: GOOGLE_CLIENT_ID,
+  deferAutoPromptUntilSignal: true,
+  debug: false,
+  onSuccess: async (profile) => {
+    try{ await signInWithCredential(auth, GoogleAuthProvider.credential(profile.raw.credential)); }
+    catch(e){ showAuthErr(friendlyErr(e)); }
+  },
+  onError: e => console.warn('[OneTap]', e)
+});
+
+/* ── helpers ── */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg, type=''){
+  const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg;
+  $('toastHost').appendChild(t); setTimeout(()=>t.remove(), 3200);
+}
+const gShort = raw => { const m = String(raw||'').match(/Grade\s*\d+/i); return m ? m[0].replace(/\s+/g,' ').trim() : ''; };
+function sortKey(c){
+  c = String(c||'');
+  const year = (c.match(/(\d{4})/)||['','0'])[1];
+  const cyc = c.match(/-([A-Za-z])(\d+)-/);
+  const letter = cyc ? cyc[1].toUpperCase() : 'A';
+  const num = cyc ? parseInt(cyc[2],10) : 0;
+  const term = (c.match(/Term\s*(\d+)/i)||['','0'])[1];
+  return `${year}_${letter}_${String(num).padStart(2,'0')}_${String(term).padStart(2,'0')}`;
+}
+function identity(rec){
+  const an = String(rec['Assessment No']||'').trim();
+  if(an && !/^-+$/.test(an) && !/^pending/i.test(an)) return 'AN:'+an;
+  const uli = String(rec.ULI||'').trim();
+  if(uli && !/^-+$/.test(uli)) return 'ULI:'+uli;
+  return 'NAME:'+String(rec['Official Student Name']||'').trim().toUpperCase();
+}
+const genderKey = g => { g = String(g||'').trim().toLowerCase(); return (g==='m'||g==='male') ? 'm' : (g==='f'||g==='female') ? 'f' : ''; };
+/* ── student photos: ./images/<student name>.jpg|png ── */
+const PHOTO = {};   // cohortKey|id -> resolved url, or null when no file was found
+const pk = s => curKey + '|' + s.id;   // scope cache per class/school so students in different cohorts never share a photo
+const titleCase = n => n.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+function photoCands(s){
+  const names = [...new Set([s.name, s.name.toLowerCase(), titleCase(s.name)])], out = [];
+  names.forEach(n => ['jpg','png'].forEach(ext => out.push(`images/${encodeURIComponent(n)}.${ext}`)));
+  return out;
+}
+function photoImg(s){
+  const k = pk(s);
+  if(PHOTO[k] === null) return '';
+  const src = PHOTO[k] || photoCands(s)[0];
+  return `<img class="g-ph${PHOTO[k] ? ' ok' : ''}" data-id="${esc(s.id)}" data-k="${esc(curKey)}" data-i="0" src="${src}" alt="" loading="lazy" decoding="async">`;
+}
+document.addEventListener('error', e => {
+  const img = e.target; if(!img || !img.classList || !img.classList.contains('g-ph')) return;
+  if(img.dataset.k !== curKey){ img.remove(); return; }   // stale image from the previous school/class
+  const s = COHORT.find(x => x.id === img.dataset.id); if(!s){ img.remove(); return; }
+  const c = photoCands(s), i = +img.dataset.i + 1;
+  if(i < c.length){ img.dataset.i = i; img.src = c[i]; }
+  else{ PHOTO[pk(s)] = null; img.remove(); document.querySelectorAll('.cf-photo.has').forEach(x => { if(!x.querySelector('img')) x.classList.remove('has'); }); }
+}, true);
+document.addEventListener('load', e => {
+  const img = e.target; if(!img || !img.classList || !img.classList.contains('g-ph')) return;
+  if(img.dataset.k !== curKey) return;   // ignore late loads from the previous school/class
+  PHOTO[curKey + '|' + img.dataset.id] = img.getAttribute('src'); img.classList.add('ok'); const p = img.parentElement; if(p && p.classList.contains('cf-photo')) p.classList.add('has');
+}, true);
+const initials = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+/* ── theme ── */
+const savedTheme = localStorage.getItem('kgp-theme'); if(savedTheme) document.documentElement.dataset.theme = savedTheme;
+$('btn-theme').addEventListener('click', ()=>{
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t; localStorage.setItem('kgp-theme', t);
+});
+
+/* ── auth UI ── */
+function friendlyErr(e){
+  const c = (e && e.code) || '';
+  if(/wrong-password|invalid-credential|invalid-login|user-not-found/.test(c)) return 'Incorrect email or password.';
+  if(c.includes('too-many-requests')) return 'Too many attempts. Try again in a few minutes.';
+  if(c.includes('popup-closed')||c.includes('cancelled-popup')) return '';
+  if(c.includes('network')) return 'Network problem. Check your connection.';
+  if(c.includes('user-disabled')) return 'This account has been disabled.';
+  return (e && e.message) || 'Sign-in failed.';
+}
+function showAuthErr(msg){
+  [['auth-err'],['email-err']].forEach(([id])=>{ const el=$(id); el.textContent=msg; el.style.display = msg ? 'block' : 'none'; });
+}
+let emLast = null;
+function openEmail(){
+  const m = $('email-modal'); emLast = document.activeElement;
+  m.classList.add('open'); m.setAttribute('aria-hidden','false'); document.body.classList.add('em-lock');
+  setTimeout(()=>($('login-email').value ? $('login-password') : $('login-email')).focus(), 120);
+}
+function closeEmail(silent){
+  const m = $('email-modal'); if(!m.classList.contains('open')) return;
+  m.classList.remove('open'); m.setAttribute('aria-hidden','true'); document.body.classList.remove('em-lock');
+  if(!silent && emLast) emLast.focus();
+}
+function emailFail(){ const sh=$('em-sheet'); sh.classList.remove('shake'); void sh.offsetWidth; sh.classList.add('shake'); }
+$('btn-open-email').addEventListener('click', ()=>{ showAuthErr(''); oneTap.cancel(); openEmail(); });
+$('em-close').addEventListener('click', ()=>closeEmail());
+$('em-back').addEventListener('click', ()=>closeEmail());
+$('email-modal').addEventListener('mousedown', e=>{ if(e.target===e.currentTarget) closeEmail(); });
+document.addEventListener('keydown', e=>{
+  const m = $('email-modal'); if(!m.classList.contains('open')) return;
+  if(e.key==='Escape'){ closeEmail(); return; }
+  if(e.key==='Tab'){
+    const f=[...m.querySelectorAll('button,input')].filter(x=>x.offsetParent!==null), a=f[0], z=f[f.length-1];
+    if(e.shiftKey && document.activeElement===a){ e.preventDefault(); z.focus(); }
+    else if(!e.shiftKey && document.activeElement===z){ e.preventDefault(); a.focus(); }
+  }
+});
+$('em-eye').addEventListener('click', ()=>{
+  const pw=$('login-password'), b=$('em-eye'), show = pw.type==='password';
+  pw.type = show ? 'text' : 'password'; b.setAttribute('aria-pressed', show); b.setAttribute('aria-label', show?'Hide password':'Show password'); pw.focus();
+});
+$('login-email').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('login-password').focus(); } });
+$('login-password').addEventListener('keydown', e=>{ if(e.key==='Enter') $('btn-email-login').click(); });
+
+$('btn-email-login').addEventListener('click', async ()=>{
+  const email = $('login-email').value.trim(), pass = $('login-password').value;
+  showAuthErr('');
+  if(!email || !pass){ showAuthErr('Enter your email and password.'); emailFail(); return; }
+  const b = $('btn-email-login'); b.disabled = true; b.textContent = 'Signing in…';
+  try{ await signInWithEmailAndPassword(auth, email, pass); }
+  catch(e){ showAuthErr(friendlyErr(e)); emailFail(); }
+  finally{ b.disabled = false; b.textContent = 'Sign In'; }
+});
+$('btn-google').addEventListener('click', async ()=>{
+  showAuthErr(''); oneTap.cancel();
+  try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch(e){ showAuthErr(friendlyErr(e)); }
+});
+$('btn-signout').addEventListener('click', ()=>{ oneTap.disableAutoSelect(); signOut(auth); });
+
+/* ── data ── */
+let ALL = null;          // graduation lists from the Graduation path (fetched once per session)
+let COHORT = [];         // deduped graduands for selected grade
+let cohortYear = '';
+let cohortSchool = '', cohortDate = '', schoolSel = '';   // school + graduation date come from the saved list
+let grade = '', curKey = '', cohortLabel = '';
+const F = { q:'', cls:'', g:'', sort:'az', view:'grid', noan:false };
+
+const GRAD_PATH = 'graduation';   // Firestore collection written by graduation-import.html
+async function loadRecords(){
+  if(ALL) return ALL;
+  const snap = await getDocs(collection(fs, GRAD_PATH));
+  ALL = snap.docs.map(d => [d.id, d.data() || {}]).filter(([,b]) => b && (b.students || b.graduationDate)).map(([key,b]) => ({
+    key,
+    active: b.active !== false,           // the admin decides which classes graduate
+    label: String(b.label||'').trim(),
+    grade: String(b.grade||'').trim(),
+    school: String(b.school||'').trim(),
+    graduationDate: /^\d{4}-\d{2}-\d{2}$/.test(b.graduationDate||'') ? b.graduationDate : '',
+    year: String(b.year||'').trim(),
+    students: Object.values(b.students || {})
+  }));
+  return ALL;
+}
+function renderCohortButtons(){
+  const schools = [...new Set(ALL.filter(b => b.active).map(b => b.school).filter(Boolean))].sort();
+  if(!schools.includes(schoolSel)) schoolSel = '';
+  const ss = $('f-school'); ss.style.display = schools.length > 1 ? '' : 'none';
+  ss.innerHTML = '<option value="">All schools</option>' + schools.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''); ss.value = schoolSel;
+  const act = ALL.filter(b => b.active && (!schoolSel || b.school === schoolSel)).sort((a,b) => b.year.localeCompare(a.year) || a.school.localeCompare(b.school) || a.grade.localeCompare(b.grade));
+  if(!act.some(b => b.key === curKey)){ const pick = act.find(b => b.students.length) || act[0]; curKey = pick ? pick.key : ''; }
+  document.querySelectorAll('.cohort-btn[data-key]').forEach(x => x.remove());
+  const host = $('cohorts'), anchor = $('btn-confetti');
+  act.forEach(b => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'cohort-btn' + (b.key === curKey ? ' on' : ''); btn.dataset.key = b.key;
+    btn.textContent = b.label || [b.school, b.grade, b.year].filter(Boolean).join(' · ');
+    host.insertBefore(btn, anchor);
+  });
+}
+function buildCohort(){
+  const best = ALL.find(b => b.active && b.key === curKey) || null;
+  grade = best ? best.grade : '';
+  cohortYear = best ? best.year : '';
+  cohortSchool = best ? best.school : ''; cohortDate = best ? best.graduationDate : '';
+  cohortLabel = best ? (best.label || best.grade) : '';
+  const seen = new Set(); COHORT = [];
+  (best ? best.students : []).forEach(r => {
+    const name = String(r.name || '').trim(); if(!name) return;
+    const an = String(r.an || '').trim();
+    const id = an ? 'AN:' + an : 'NAME:' + name.toUpperCase();
+    if(seen.has(id)) return; seen.add(id);
+    COHORT.push({ id, name, gender: genderKey(r.gender), an, cls: String(r.cls || '').trim() });
+  });
+}
+
+/* ── roll call, prefs, insights, extras ── */
+let ROLL = {};
+const rollKey = () => `kgp-roll-${curKey}`;
+function loadRoll(){ try{ ROLL = JSON.parse(localStorage.getItem(rollKey())||'{}'); }catch(e){ ROLL = {}; } }
+function saveRoll(){ try{ localStorage.setItem(rollKey(), JSON.stringify(ROLL)); }catch(e){} }
+function updateRoll(){
+  const on = F.view === 'roll', done = COHORT.filter(s=>ROLL[s.id]).length;
+  $('roll-line').style.display = on ? 'inline-flex' : 'none';
+  $('roll-txt').textContent = `✔ ${done} of ${COHORT.length} present`;
+}
+try{
+  const p = JSON.parse(localStorage.getItem('kgp-prefs')||'{}');
+  if(p.key) curKey = p.key;
+  if(p.school) schoolSel = p.school;
+  if(p.sort){ F.sort = p.sort; $('f-sort').value = p.sort; }
+  if(p.view){ F.view = p.view; $('f-view').querySelectorAll('button').forEach(x=>x.classList.toggle('on', x.dataset.v===F.view)); }
+}catch(e){}
+function savePrefs(){ try{ localStorage.setItem('kgp-prefs', JSON.stringify({key:curKey, school:schoolSel, sort:F.sort, view:F.view})); }catch(e){} }
+const hl = t => {
+  const q = F.q.trim(), i = q ? t.toLowerCase().indexOf(q.toLowerCase()) : -1;
+  return i < 0 ? esc(t) : esc(t.slice(0,i)) + '<mark>' + esc(t.slice(i,i+q.length)) + '</mark>' + esc(t.slice(i+q.length));
+};
+function renderInsights(){
+  const m = {};
+  COHORT.forEach(s=>{ const k = s.cls || '—'; const o = m[k] = m[k] || {t:0,b:0,g:0}; o.t++; if(s.gender==='m') o.b++; else if(s.gender==='f') o.g++; });
+  const keys = Object.keys(m).sort(), mx = Math.max(1, ...keys.map(k=>m[k].t));
+  $('insights').style.display = keys.length > 1 ? '' : 'none';
+  $('ibars').innerHTML = keys.map(k=>`<button type="button" class="ibar ${F.cls===k?'on':''}" data-c="${esc(k)}"><span>${esc(k)}</span><div class="trk" style="width:${m[k].t/mx*100}%"><i class="b" style="width:${m[k].b/m[k].t*100}%"></i><i class="g" style="width:${m[k].g/m[k].t*100}%"></i></div><em>${m[k].t}</em></button>`).join('');
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;z-index:4000;pointer-events:none';
+  c.width = innerWidth; c.height = innerHeight; document.body.appendChild(c);
+  const x = c.getContext('2d'), cols = ['#f39c12','#2980b9','#e67e22','#27ae60','#8e44ad','#ffc04d'];
+  const P = Array.from({length:150}, ()=>({x:Math.random()*c.width, y:-20-Math.random()*c.height*.5, w:6+Math.random()*6, h:8+Math.random()*8, vy:2+Math.random()*4, vx:-1.5+Math.random()*3, r:Math.random()*6, vr:-.2+Math.random()*.4, c:cols[Math.random()*cols.length|0]}));
+  let f = 0;
+  (function t(){
+    x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.w/2,-p.h/2,p.w,p.h); x.restore(); });
+    if(++f < 230) requestAnimationFrame(t); else c.remove();
+  })();
+}
+function firstCelebrate(){ try{ if(!sessionStorage.getItem('kgp-c')){ sessionStorage.setItem('kgp-c','1'); confetti(); } }catch(e){} }
+
+const clsHue = c => { let h = 0; for(const ch of String(c||'x')) h = (h*31 + ch.charCodeAt(0)) % 360; return h; };
+function renderExtras(rows){
+  const B = COHORT.filter(s=>s.gender==='m').length, G = COHORT.filter(s=>s.gender==='f').length;
+  $('ring').style.setProperty('--bp', (B+G ? B/(B+G)*100 : 50) + '%'); $('ring-n').textContent = COHORT.length || '—';
+  const miss = COHORT.filter(s=>!s.an).length, dq = $('dq');
+  dq.style.display = miss ? 'flex' : 'none';
+  dq.innerHTML = `⚠ <span>${miss} graduand${miss===1?' has':'s have'} no assessment number.</span><button type="button" id="dq-btn">${F.noan?'Show all':'Show them'}</button>`;
+  const az = $('az'), ls = [...new Set(rows.map(s=>(s.name[0]||'').toUpperCase()))].filter(Boolean);
+  const on = (F.sort==='az' || F.sort==='za') && rows.length > 12 && ls.length > 1;
+  az.style.display = on ? 'flex' : 'none';
+  az.innerHTML = on ? ls.map(l=>`<button type="button" data-l="${esc(l)}">${esc(l)}</button>`).join('') : '';
+}
+function dateChip(){
+  const d = cohortDate || '';
+  const b = $('hero-date'); if(!d){ b.textContent = '📅 Date not set'; return; }
+  const dt = new Date(d + 'T00:00:00'), days = Math.ceil((dt - new Date().setHours(0,0,0,0)) / 864e5);
+  const when = dt.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+  b.textContent = days > 0 ? `⏳ ${days} day${days===1?'':'s'} to go · ${when}` : days === 0 ? '🎉 Graduation day is today!' : `✅ Held ${when}`;
+}
+let SI = 0, SR = [];
+function stageShow(){
+  const s = SR[SI]; if(!s) return;
+  $('st-count').textContent = `${SI+1} / ${SR.length}`;
+  const n = $('st-name'); n.textContent = s.name.toLowerCase(); n.style.animation = 'none'; void n.offsetWidth; n.style.animation = '';
+  $('st-cls').textContent = [grade, s.cls].filter(Boolean).join(' · ');
+  $('st-meta').textContent = s.an ? 'Assessment No. ' + s.an : '';
+  const nx = SR[SI+1]; $('st-next').textContent = nx ? 'Up next: ' + nx.name.toLowerCase() : 'Final graduand 🎓';
+  $('st-mark').textContent = ROLL[s.id] ? '✔ Present (tap to undo)' : '✓ Mark present';
+  $('stage').classList.toggle('done', !!ROLL[s.id]);
+}
+function stageOpen(){ SR = filtered(); if(!SR.length){ toast('Nothing to show.', 'err'); return; } SI = 0; $('stage').hidden = false; document.body.classList.add('em-lock'); stageShow(); }
+function stageClose(){ $('stage').hidden = true; document.body.classList.remove('em-lock'); render(); }
+function stageGo(d){ SI = Math.max(0, Math.min(SR.length-1, SI+d)); stageShow(); }
+function stageMark(){ const s = SR[SI]; if(!s) return; if(ROLL[s.id]) delete ROLL[s.id]; else ROLL[s.id] = 1; saveRoll(); stageShow(); }
+
+/* ── render ── */
+function filtered(){
+  const q = F.q.trim().toLowerCase();
+  let out = COHORT.filter(s =>
+    (!q || s.name.toLowerCase().includes(q) || s.an.toLowerCase().includes(q)) &&
+    (!F.cls || s.cls === F.cls) && (!F.g || s.gender === F.g) && (!F.noan || !s.an));
+  const byName = (a,b) => a.name.localeCompare(b.name);
+  if(F.sort==='za') out.sort((a,b)=>byName(b,a));
+  else if(F.sort==='class') out.sort((a,b)=>a.cls.localeCompare(b.cls) || byName(a,b));
+  else out.sort(byName);
+  return out;
+}
+function render(){
+  const rows = filtered();
+  $('hero-year').textContent = cohortYear || '—';
+  $('k-total').textContent = COHORT.length;
+  $('k-boys').textContent = COHORT.filter(s=>s.gender==='m').length;
+  $('k-girls').textContent = COHORT.filter(s=>s.gender==='f').length;
+  $('k-classes').textContent = new Set(COHORT.map(s=>s.cls).filter(Boolean)).size || '—';
+  $('result-count').textContent = `${rows.length} of ${COHORT.length} graduand${COHORT.length===1?'':'s'}`;
+  $('result-year').textContent = `${cohortSchool ? cohortSchool + ' · ' : ''}${grade}${cohortYear ? ' · ' + cohortYear : ''}`;
+  $('print-title').textContent = cohortSchool || cohortLabel || 'Graduation List';
+  $('print-sub').textContent = `${[cohortLabel || grade, cohortYear].filter(Boolean).join(' · ')} — Graduation List (${rows.length} graduands)`;
+  renderInsights(); updateRoll(); savePrefs(); renderExtras(rows); dateChip();
+  const list = $('list'); list.className = 'list view-' + (F.view==='roll' ? 'list roll' : F.view);
+  if(!rows.length){
+    list.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="big">🔎</div><h3>${COHORT.length ? 'No graduands match' : 'No graduands found'}</h3><p>${COHORT.length ? 'Try a different name, class or filter.' : 'No graduating class is set up yet. Add and activate one on the import page.'}</p></div>`;
+    return;
+  }
+  list.innerHTML = rows.map((s,i)=>`
+    <article class="g-card" tabindex="0" data-id="${esc(s.id)}" data-l="${esc((s.name[0]||'').toUpperCase())}" style="--ch:${clsHue(s.cls)};animation-delay:${Math.min(i,20)*18}ms">
+      <span class="g-no">#${String(i+1).padStart(2,'0')}</span>
+      <label class="chk" title="Mark present"><input type="checkbox" data-id="${esc(s.id)}" ${ROLL[s.id]?'checked':''} aria-label="Present"><span>✓</span></label>
+      <div class="g-av ${s.gender==='f'?'f':''}">${esc(initials(s.name))}${photoImg(s)}</div>
+      <div class="g-info">
+        <div class="g-name">${hl(s.name.toLowerCase())}</div>
+        <div class="g-meta">
+          ${s.cls ? `<span class="tag">${esc(s.cls)}</span>` : ''}
+          ${s.gender ? `<span class="tag ${s.gender}">${s.gender==='m'?'Boy':'Girl'}</span>` : ''}
+          ${s.an ? `<span class="tag mono">${esc(s.an)}</span>` : ''}
+        </div>
+      </div>
+    </article>`).join('');
+}
+function fillClasses(){
+  const sel = $('f-class'), classes = [...new Set(COHORT.map(s=>s.cls).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All classes</option>' + classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  F.cls = ''; F.noan = false; sel.style.display = classes.length ? '' : 'none';
+}
+function skeleton(){ $('list').className='list view-list'; $('list').innerHTML = Array(6).fill('<div class="skeleton"></div>').join(''); }
+
+async function showCohort(){
+  skeleton();
+  try{
+    await loadRecords(); renderCohortButtons(); buildCohort(); loadRoll(); fillClasses(); render(); firstCelebrate();
+    if(!cfAuto && COHORT.length){ cfAuto = true; setTimeout(()=>cfOpen(null, true), 500); }
+  }catch(e){
+    const denied = /permission/i.test(e.message||'') || (e.code||'').includes('PERMISSION');
+    $('list').className = 'list view-list';
+    $('list').innerHTML = `<div class="state"><div class="big">${denied?'🔒':'⚠️'}</div><h3>${denied?'No access to student records':'Could not load graduands'}</h3><p>${denied?'Your account is not authorized to read student data. Ask the administrator to grant you access.':esc(e.message||'Unknown error')}</p></div>`;
+    ['k-total','k-boys','k-girls','k-classes'].forEach(id=>$(id).textContent='—');
+    $('result-count').textContent = '';
+  }
+}
+
+/* ── controls ── */
+function resetFilters(){
+  F.q = ''; F.cls = ''; F.g = ''; F.noan = false;
+  $('q').value = '';
+  $('f-gender').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.g === ''));
+}
+$('f-school').addEventListener('change', e=>{ schoolSel = e.target.value; resetFilters(); showCohort(); });
+$('cohorts').addEventListener('click', e=>{
+  const b = e.target.closest('.cohort-btn'); if(!b || !b.dataset.key || b.dataset.key===curKey) return;
+  curKey = b.dataset.key; resetFilters();
+  document.querySelectorAll('.cohort-btn').forEach(x=>x.classList.toggle('on', x===b));
+  showCohort();
+});
+let qT; $('q').addEventListener('input', e=>{ clearTimeout(qT); qT = setTimeout(()=>{ F.q = e.target.value; render(); }, 120); });
+$('f-class').addEventListener('change', e=>{ F.cls = e.target.value; render(); });
+$('f-sort').addEventListener('change', e=>{ F.sort = e.target.value; render(); });
+function seg(id, key, attr){
+  $(id).addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    F[key] = b.dataset[attr]; $(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b)); render();
+  });
+}
+seg('f-gender','g','g'); seg('f-view','view','v');
+$('btn-print').addEventListener('click', ()=>window.print());
+$('btn-csv').addEventListener('click', ()=>{
+  const rows = filtered(); if(!rows.length){ toast('Nothing to export.', 'err'); return; }
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const csv = ['No,Name,Gender,Class,Assessment No,Present', ...rows.map((s,i)=>[i+1,q(s.name),s.gender==='m'?'Male':s.gender==='f'?'Female':'',q(s.cls),q(s.an),ROLL[s.id]?'Yes':''].join(','))].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = `graduands-${(grade||'list').replace(/\s+/g,'')}-${cohortYear||'list'}.csv`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000); toast('CSV downloaded.', 'ok');
+});
+
+$('list').addEventListener('change', e=>{
+  const c = e.target.closest('input[data-id]'); if(!c) return;
+  if(c.checked) ROLL[c.dataset.id] = 1; else delete ROLL[c.dataset.id];
+  saveRoll(); updateRoll();
+});
+$('roll-reset').addEventListener('click', ()=>{ if(confirm('Clear all present marks for this list?')){ ROLL = {}; saveRoll(); render(); } });
+$('ibars').addEventListener('click', e=>{
+  const b = e.target.closest('.ibar'); if(!b || b.dataset.c==='—') return;
+  F.cls = F.cls===b.dataset.c ? '' : b.dataset.c; $('f-class').value = F.cls; render();
+});
+$('btn-copy').addEventListener('click', async ()=>{
+  const rows = filtered(); if(!rows.length){ toast('Nothing to copy.', 'err'); return; }
+  const txt = rows.map((s,i)=>`${i+1}. ${s.name.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())}`).join('\n');
+  try{ await navigator.clipboard.writeText(txt); toast(`Copied ${rows.length} names.`, 'ok'); }catch(e){ toast('Copy blocked by the browser.', 'err'); }
+});
+$('btn-confetti').addEventListener('click', confetti);
+$('q').addEventListener('keydown', e=>{ if(e.key==='Escape'){ e.target.value=''; F.q=''; render(); e.target.blur(); } });
+document.addEventListener('keydown', e=>{
+  if(e.key==='/' && $('stage').hidden && $('app').classList.contains('show') && !$('email-modal').classList.contains('open') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); $('q').focus(); }
+});
+
+$('btn-stage').addEventListener('click', stageOpen);
+$('st-x').addEventListener('click', stageClose);
+$('st-prev').addEventListener('click', ()=>stageGo(-1));
+$('st-nextb').addEventListener('click', ()=>stageGo(1));
+$('st-mark').addEventListener('click', stageMark);
+document.addEventListener('keydown', e=>{
+  if($('stage').hidden) return;
+  if(e.key==='ArrowRight' || e.key===' ' || e.key==='PageDown'){ e.preventDefault(); stageGo(1); }
+  else if(e.key==='ArrowLeft' || e.key==='PageUp'){ e.preventDefault(); stageGo(-1); }
+  else if(e.key==='Enter'){ e.preventDefault(); stageMark(); }
+  else if(e.key==='Escape') stageClose();
+});
+let tx = 0;
+$('stage').addEventListener('touchstart', e=>{ tx = e.changedTouches[0].clientX; }, {passive:true});
+$('stage').addEventListener('touchend', e=>{ const d = e.changedTouches[0].clientX - tx; if(Math.abs(d) > 60) stageGo(d < 0 ? 1 : -1); }, {passive:true});
+$('dq').addEventListener('click', e=>{ if(e.target.id==='dq-btn'){ F.noan = !F.noan; render(); } });
+$('az').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const t = [...document.querySelectorAll('.g-card')].find(c=>c.dataset.l===b.dataset.l);
+  if(t) t.scrollIntoView({behavior:'smooth', block:'center'});
+});
+$('hero-date').addEventListener('click', ()=>{ if(!cohortDate) toast('The graduation date is set by an Advanced Admin on the setup page.'); });
+dateChip();
+
+/* ── EYE certification popup ── */
+let cfLast = null, cfAuto = false;
+function cfOpen(s, auto){
+  const m = $('cf-modal'); cfLast = document.activeElement;
+  const d = cohortDate || '';
+  const long = {weekday:'long', day:'numeric', month:'long', year:'numeric'};
+  const today = new Date(), dt = d ? new Date(d + 'T00:00:00') : null;
+  const days = dt ? Math.ceil((dt - new Date().setHours(0,0,0,0)) / 864e5) : null;
+  const yr = cohortYear || '—';
+  const gname = String(grade).replace(/\s*[·\-–]\s*\d{4}\s*$/, '').trim();
+  const rows = [
+    ...(cohortSchool ? [['School', cohortSchool]] : []),
+    ['Grade', gname],
+    ...(s && s.cls && s.cls !== yr ? [['Class', s.cls]] : []),
+    ...(s && s.an ? [['Assessment No', s.an]] : []),
+    ...(dt ? [['Graduation date', dt.toLocaleDateString('en-GB', long)]] : []),
+    ...(s ? [] : [['Graduands certified', String(COHORT.length)]])
+  ];
+  const ph = $('cf-photo'); ph.classList.toggle('has', !!(s && PHOTO[pk(s)])); ph.innerHTML = s ? photoImg(s) : '';
+  $('cf-name').textContent = s ? s.name.toLowerCase() : `Class of ${yr} · ${grade}`;
+  $('cf-meta').innerHTML = s ? [s.gender ? `<span class="tag ${s.gender}">${s.gender==='m'?'Boy':'Girl'}</span>` : '', `<span class="tag">Class of ${esc(yr)}</span>`].join('') : '';
+  $('cf-details').innerHTML = rows.map(r=>`<div class="cf-row"><span>${esc(r[0])}</span><b class="${r[0]==='Status'?'ok':''}">${esc(r[1])}</b></div>`).join('');
+  $('cf-sub').textContent = !dt ? 'The graduation date has not been set yet.' : days > 0 ? `🎓 ${days} day${days===1?'':'s'} to graduation day` : days === 0 ? '🎉 Graduation day is today!' : '✅ Graduation ceremony held';
+  $('cf-title').textContent = s ? 'Successfully Certified!' : 'Graduation Confirmed!';
+  m.classList.add('open'); m.setAttribute('aria-hidden','false'); document.body.classList.add('em-lock');
+  setTimeout(()=>$('cf-close').focus(), 50);
+  if(!auto) confetti();
+}
+function cfClose(){
+  const m = $('cf-modal'); if(!m.classList.contains('open')) return;
+  m.classList.remove('open'); m.setAttribute('aria-hidden','true');
+  if($('stage').hidden) document.body.classList.remove('em-lock');
+  if(cfLast && cfLast.focus) try{ cfLast.focus(); }catch(e){}
+}
+$('list').addEventListener('click', e=>{
+  if(e.target.closest('.chk')) return;
+  const c = e.target.closest('.g-card'); if(!c) return;
+  const s = COHORT.find(x=>x.id===c.dataset.id); if(s) cfOpen(s);
+});
+$('list').addEventListener('keydown', e=>{
+  if(e.key!=='Enter' || e.target.closest('input')) return;
+  const c = e.target.closest('.g-card'); if(!c) return;
+  const s = COHORT.find(x=>x.id===c.dataset.id); if(s){ e.preventDefault(); cfOpen(s); }
+});
+$('cf-close').addEventListener('click', cfClose);
+$('cf-modal').addEventListener('mousedown', e=>{ if(e.target===e.currentTarget) cfClose(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') cfClose(); });
+
+/* ── session ── */
+onAuthStateChanged(auth, user => {
+  if(user){
+    oneTap.notifySignedIn();
+    closeEmail(true);
+    $('auth-gate').style.display = 'none'; $('app').classList.add('show');
+    $('user-chip').textContent = user.displayName || user.email || '';
+    showCohort();
+  }else{
+    ALL = null; COHORT = [];
+    $('app').classList.remove('show'); $('auth-gate').style.display = 'flex';
+    oneTap.notifySignedOut();
+  }
+});
+oneTap.init();
+</script>
+</body>
+</html>
