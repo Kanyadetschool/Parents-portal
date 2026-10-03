@@ -34,7 +34,7 @@
     body.em-lock{overflow:hidden}
     button{font-family:inherit}
     ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px}
-    .chip{font-size:.7rem;font-weight:800;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;text-decoration:none;cursor:pointer}
+    .chip{font-size:.7rem;font-weight:800;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#a31616;text-decoration:none;cursor:pointer}
 
     /* ── Auth gate (same design as login.html) ── */
     #auth-gate{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;overflow-y:auto;background:var(--bg);padding:16px}
@@ -587,6 +587,11 @@
   <header class="topbar">
     <div class="tb-logo">🎓</div>
     <div class="tb-title">Certificate Verification<small>Official check · Group of Schools</small></div>
+     <div class="hero-top">
+        <span>
+          <a class="chip" href="./Graduation-import.html">← Import portal</a>
+        </span>
+      </div>
     <div class="tb-sp"></div>
     <span class="user-chip" id="user-chip"></span>
     <button class="icon-btn" id="btn-theme" type="button" title="Toggle theme" aria-label="Toggle theme">🌓</button>
