@@ -98,7 +98,7 @@
       <div class="hero-top">
         <span class="chip" id="user-chip"></span>
         <span>
-          <a class="chip" href="./graduation.html">← Graduation portal</a>
+          <a class="chip" href="./index.html">← Graduation portal</a>
           <button class="chip" id="g-out" type="button">Sign out</button>
         </span>
       </div>
@@ -156,7 +156,7 @@
 
     <section class="card">
       <h2><i>2</i> Add the names <span class="stat">optional</span></h2>
-      <textarea id="raw" spellcheck="false" placeholder="Paste names here, one per line&#10;&#10;Or with details:&#10;Name, Gender, Class, Assessment No&#10;Jane Wanjiru Otieno, F, 9A, 1234567"></textarea>
+      <textarea id="raw" spellcheck="false" placeholder="Paste names here, one per line&#10;&#10;Or with details:&#10;Name, Gender, Class, Scan Code&#10;Jane Wanjiru Otieno, F, 9A, #7M6A"></textarea>
       <div class="bar">
         <input type="file" id="file" accept=".csv,.txt,.tsv,text/plain,text/csv" hidden>
         <button class="btn ghost" id="pick" type="button">📂 Upload CSV / TXT</button>
@@ -164,13 +164,13 @@
         <span class="grow"></span>
         <button class="btn ghost" id="clear" type="button">Clear</button>
       </div>
-      <p class="hint">Only names are required. Optional columns, in order: <code>gender</code> (M/F), <code>class</code>, <code>assessment no</code>. Paste straight from Excel (tab-separated) or CSV. A header row and list numbers like <code>1.</code> are handled automatically.</p>
+      <p class="hint">Only names are required. Optional columns, in order: <code>gender</code> (M/F), <code>class</code>, <code>scan code</code>. Paste straight from Excel (tab-separated) or CSV. A header row and list numbers like <code>1.</code> are handled automatically.</p>
     </section>
 
     <section class="card" id="prev-card" hidden>
       <h2><i>3</i> Check &amp; import</h2>
       <div class="stats" id="stats"></div>
-      <div class="tbl"><table><thead><tr><th>#</th><th>Name</th><th>Gender</th><th>Class</th><th>Assessment No</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="tbl"><table><thead><tr><th>#</th><th>Name</th><th>Gender</th><th>Class</th><th>Scan Code</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
       <div class="bar">
         <span class="hint" id="target" style="margin:0"></span>
         <span class="grow"></span>
@@ -195,6 +195,7 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, ge
 import { FIREBASE_CONFIG, GOOGLE_CLIENT_ID } from './js/config.js';
 import { GoogleOneTap } from './js/google-one-tap.js';
 
+const VERIFY_PATH = 'graduationVerify';   // one small public record per scan code (certificate check)
 const GRAD_PATH = 'graduation';   // Firestore collection the Graduation Portal reads
 const $ = id => document.getElementById(id);
 const app = initializeApp(FIREBASE_CONFIG), auth = getAuth(app), fs = getFirestore(app);
@@ -252,6 +253,8 @@ function splitLine(line, d){
   }
   out.push(cur.trim()); return out;
 }
+const titleCase = n => String(n||'').toLowerCase().replace(/(^|[\s\-.(])([a-z])/g, (m,p,c) => p + c.toUpperCase());
+const scanNorm = v => { v = String(v||'').trim().toUpperCase().replace(/^-+$/,''); return /^#?[A-Z0-9]{4}$/.test(v) ? '#' + v.replace(/^#/,'') : v; };
 const keyOf = r => (r.an ? 'AN_' + r.an : 'N_' + r.name.toUpperCase()).replace(/[.#$\[\]\/]/g,'_').replace(/\s+/g,' ').slice(0,180);
 function parse(text){
   const lines = text.replace(/\r/g,'').split('\n').map(l=>l.trim()).filter(Boolean);
@@ -265,16 +268,17 @@ function parse(text){
   if(header){
     const h = splitLine(lines[0], d).map(x=>x.toLowerCase());
     const f = re => h.findIndex(x=>re.test(x));
-    idx = {name:f(/name/), gender:f(/gender|sex/), cls:f(/class|stream/), an:f(/assess|^an$|upi|uli|adm/)};
+    idx = {name:f(/name/), gender:f(/gender|sex/), cls:f(/class|stream/), an:f(/scan|code|assess|^an$|upi|uli|adm/)};
     body = lines.slice(1);
   }
   const seen = new Set(), out = [];
   body.forEach(line=>{
     const c = d ? splitLine(line, d) : [line];
     const get = i => i >= 0 && i < c.length ? c[i] : '';
-    const name = get(idx.name).replace(/^\s*\d+\s*[.)\-]\s*/,'').replace(/\s+/g,' ').trim();
+    let name = get(idx.name).replace(/^\s*\d+\s*[.)\-]\s*/,'').replace(/\s+/g,' ').trim();
     if(!name) return;
-    const r = { name, gender: genderKey(get(idx.gender)), cls: get(idx.cls).trim(), an: get(idx.an).trim().replace(/^-+$/,'') };
+    name = titleCase(name);
+    const r = { name, gender: genderKey(get(idx.gender)), cls: get(idx.cls).trim(), an: scanNorm(get(idx.an)) };
     r.key = keyOf(r); r.dup = seen.has(r.key); seen.add(r.key);
     out.push(r);
   });
@@ -292,13 +296,25 @@ function renderPreview(){
   $('stats').innerHTML = `<span class="stat ok">${good.length} to import</span>` +
     (dups ? `<span class="stat warn">${dups} duplicate${dups===1?'':'s'} skipped</span>` : '') +
     (boys||girls ? `<span class="stat">${boys} boys · ${girls} girls</span>` : '');
-  $('rows').innerHTML = ROWS.map((r,i)=>`<tr style="${r.dup?'opacity:.45;text-decoration:line-through':''}"><td class="m">${i+1}</td><td class="n">${esc(r.name.toLowerCase())}</td><td>${esc(r.gender)}</td><td>${esc(r.cls)}</td><td class="m">${esc(r.an)}</td><td><button class="x" data-i="${i}" type="button" title="Remove">✕</button></td></tr>`).join('');
+  $('rows').innerHTML = ROWS.map((r,i)=>`<tr style="${r.dup?'opacity:.45;text-decoration:line-through':''}"><td class="m">${i+1}</td><td class="n">${esc(r.name)}</td><td>${esc(r.gender)}</td><td>${esc(r.cls)}</td><td class="m">${esc(r.an)}</td><td><button class="x" data-i="${i}" type="button" title="Remove">✕</button></td></tr>`).join('');
   $('target').textContent = `Will be saved to ${GRAD_PATH}/${batchKey()}`;
   $('go').disabled = !good.length;
 }
 function reparse(){
   ROWS = parse($('raw').value); renderPreview();
 }
+/* ── remember the form fields between visits (not the pasted list, not the Replace mode) ── */
+const MEM_KEY = 'grad-import-form', MEM_IDS = ['school','grade','gdate','label'];
+(function(){
+  try{
+    const m = JSON.parse(localStorage.getItem(MEM_KEY) || '{}');
+    MEM_IDS.forEach(id => { if(typeof m[id] === 'string' && m[id]) $(id).value = m[id]; });
+    if(typeof m.active === 'boolean') $('active').checked = m.active;
+    if($('gdate').value) $('year').value = $('gdate').value.slice(0,4);
+  }catch(e){}
+  const save = () => { try{ const m = {}; MEM_IDS.forEach(id => m[id] = $(id).value); m.active = $('active').checked; localStorage.setItem(MEM_KEY, JSON.stringify(m)); }catch(e){} };
+  MEM_IDS.concat('active').forEach(id => { $(id).addEventListener('input', save); $(id).addEventListener('change', save); });
+})();
 let pT; $('raw').addEventListener('input', ()=>{ clearTimeout(pT); pT = setTimeout(reparse, 200); });
 ['school','grade','year'].forEach(id=>$(id).addEventListener('input', renderPreview));
 $('gdate').addEventListener('input', ()=>{ $('year').value = $('gdate').value.slice(0,4); renderPreview(); });
@@ -320,7 +336,7 @@ $('file').addEventListener('change', e=>{
 $('clear').addEventListener('click', ()=>{ $('raw').value = ''; ROWS = []; renderPreview(); });
 $('tpl').addEventListener('click', ()=>{
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['Name,Gender,Class,Assessment No\r\nJane Wanjiru Otieno,F,9A,1234567\r\nJohn Kiprop Mutai,M,9B,7654321\r\n'], {type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob(['Name,Gender,Class,Scan Code\r\nJane Wanjiru Otieno,F,9A,#7M6A\r\nJohn Kiprop Mutai,M,9B,#K4C9\r\n'], {type:'text/csv'}));
   a.download = 'graduands-template.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
 });
 
@@ -342,9 +358,20 @@ async function saveBatch(good){
   $('go').disabled = true; $('save-date').disabled = true; btn.textContent = 'Saving…';
   try{
     const ex = await getDoc(bref);
+    const vid = r => r.an.replace(/^#/,'').toUpperCase();
+    const withCode = good.filter(r => r.an);
+    for(const r of withCode){   // a code already used by a different list would make verification ambiguous
+      const v = await getDoc(doc(fs, VERIFY_PATH, vid(r)));
+      if(v.exists() && v.data().b !== batchKey()){ toast(`Scan code ${r.an} is already used by another list. Nothing was saved.`, 'err'); btn.textContent = btnText; $('save-date').disabled = false; $('go').disabled = !ROWS.filter(x=>!x.dup).length; return; }
+    }
     if(mode==='replace' || !ex.exists()) meta.active = $('active').checked;   // existing lists keep their current on/off choice
     const data = good.length ? { ...meta, students } : meta;
     if(mode==='replace') await setDoc(bref, data); else await setDoc(bref, data, { merge: true });
+    if(mode==='replace' && ex.exists()){   // retire codes that are no longer in the list
+      const keep = new Set(withCode.map(vid));
+      for(const o of Object.values(ex.data().students || {})){ const c = String(o.an||'').replace(/^#/,'').toUpperCase(); if(c && !keep.has(c)) await deleteDoc(doc(fs, VERIFY_PATH, c)).catch(()=>{}); }
+    }
+    for(const r of withCode) await setDoc(doc(fs, VERIFY_PATH, vid(r)), { name:r.name, gender:r.gender, cls:r.cls, school, grade, year, graduationDate: gdate, label: label || '', b: batchKey() });
     toast(good.length ? `Saved ${good.length} student${good.length===1?'':'s'} to ${school} · ${grade} · ${gdate}.` : `Saved ${school} · ${grade} · graduation ${gdate}.`, 'ok');
     if(good.length){ $('raw').value = ''; ROWS = []; renderPreview(); }
     loadBatches();
