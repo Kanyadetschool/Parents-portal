@@ -630,6 +630,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="q" type="search" placeholder="Search name or scan code…" autocomplete="off">
       </div>
+      <div class="seg" id="f-copy" role="group" aria-label="Auto-copy" title="What is copied automatically when a search finds one student"><button class="on" data-c="an" type="button">📋 Scan code</button><button data-c="name" type="button">📋 Name</button></div>
       <select class="sel" id="f-class" aria-label="Filter by class"><option value="">All classes</option></select>
       <div class="seg" id="f-gender"><button class="on" data-g="" type="button">All</button><button data-g="m" type="button">Boys</button><button data-g="f" type="button">Girls</button></div>
       <select class="sel" id="f-sort" aria-label="Sort">
@@ -1001,8 +1002,22 @@ function filtered(){
   else out.sort(byName);
   return out;
 }
+/* the moment ANY filter (search, class, gender, no-scan-code) leaves exactly one student, that student's scan code is copied.
+   Once per student: it re-arms as soon as the result is not a single student again. Only on a real user action (clipboard needs one). */
+let autoCp = null, copyMode = 'an';   // copyMode: 'an' = scan code, 'name' = student name (the toggle next to the search box)
+try{ if(localStorage.getItem('kgp-autocopy') === 'name') copyMode = 'name'; }catch(e){}
+function autoCopy(rows){
+  if(rows.length !== 1){ autoCp = null; return; }
+  const s = rows[0], filtering = F.q.trim() || F.cls || F.g || F.noan;
+  if(!filtering || s.id === autoCp) return;
+  const txt = copyMode === 'name' ? titleCase(s.name) : s.an;
+  if(!txt) return;   // e.g. a student with no scan code
+  if(navigator.userActivation && !navigator.userActivation.isActive) return;
+  autoCp = s.id; copyText(txt);
+}
 function render(){
   const rows = filtered();
+  autoCopy(rows);
   $('hero-year').textContent = cohortYear || '—';
   $('k-total').textContent = COHORT.length;
   $('k-boys').textContent = COHORT.filter(s=>s.gender==='m').length;
@@ -1113,7 +1128,16 @@ $('btn-copy').addEventListener('click', async ()=>{
   try{ await navigator.clipboard.writeText(txt); toast(`Copied ${rows.length} names.`, 'ok'); }catch(e){ toast('Copy blocked by the browser.', 'err'); }
 });
 $('btn-confetti').addEventListener('click', confetti);
-$('q').addEventListener('keydown', e=>{ if(e.key==='Escape'){ e.target.value=''; F.q=''; render(); e.target.blur(); } });
+$('q').addEventListener('keydown', e=>{ if(e.key==='Escape'){ e.target.value=''; F.q=''; autoCp = null; render(); e.target.blur(); } });
+/* clicking / tabbing into the search box starts a fresh search: the old text is cleared automatically */
+$('q').addEventListener('focus', e=>{ clearTimeout(qT); autoCp = null; if(e.target.value || F.q){ e.target.value=''; F.q=''; render(); } });
+function syncCopySeg(){ $('f-copy').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.c === copyMode)); }
+$('f-copy').addEventListener('click', e=>{
+  const bt = e.target.closest('button'); if(!bt || bt.dataset.c === copyMode) return;
+  copyMode = bt.dataset.c; try{ localStorage.setItem('kgp-autocopy', copyMode); }catch(_){}
+  syncCopySeg(); autoCp = null; render();   // re-arm: if one student is already showing, the newly chosen item is copied right away
+});
+syncCopySeg();
 document.addEventListener('keydown', e=>{
   if(e.key==='/' && $('stage').hidden && $('app').classList.contains('show') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); $('q').focus(); }
 });

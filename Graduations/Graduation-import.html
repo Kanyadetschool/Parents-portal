@@ -48,6 +48,8 @@
     .btn.red{background:linear-gradient(135deg,#e74c3c,#c0392b);box-shadow:0 8px 18px rgba(231,76,60,.3)}
     .btn.sm{padding:.4rem .7rem;font-size:.7rem;border-radius:11px}
     .hint{font-size:.72rem;font-weight:600;color:var(--text2);line-height:1.55;margin-top:.6rem}
+    .tg{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;font:700 .58rem 'Plus Jakarta Sans',sans-serif;background:var(--surface3);color:var(--text2);vertical-align:middle}
+    .tg.w{background:rgba(243,156,18,.2);color:#b9770e}
     .hint code{font-family:'JetBrains Mono',monospace;background:var(--surface3);padding:1px 6px;border-radius:6px}
     .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
     .grow{flex:1}
@@ -156,7 +158,7 @@
 
     <section class="card">
       <h2><i>2</i> Add the names <span class="stat">optional</span></h2>
-      <textarea id="raw" spellcheck="false" placeholder="Paste names here, one per line&#10;&#10;Or with details:&#10;Name, Gender, Class, Scan Code&#10;Jane Wanjiru Otieno, F, 9A, #7M6A"></textarea>
+      <textarea id="raw" spellcheck="false" placeholder="Paste names here, one per line&#10;&#10;Or with details:&#10;Name, Gender, Class&#10;Jane Wanjiru Otieno, F, 9A&#10;John Kiprop Mutai, M, 9B&#10;&#10;Scan codes are created for you automatically."></textarea>
       <div class="bar">
         <input type="file" id="file" accept=".csv,.txt,.tsv,text/plain,text/csv" hidden>
         <button class="btn ghost" id="pick" type="button">📂 Upload CSV / TXT</button>
@@ -164,7 +166,7 @@
         <span class="grow"></span>
         <button class="btn ghost" id="clear" type="button">Clear</button>
       </div>
-      <p class="hint">Only names are required. Optional columns, in order: <code>gender</code> (M/F), <code>class</code>, <code>scan code</code>. Paste straight from Excel (tab-separated) or CSV. A header row and list numbers like <code>1.</code> are handled automatically.</p>
+      <p class="hint">Only names are required. Optional columns, in order: <code>gender</code> (M/F), <code>class</code>. <b>Scan codes are generated automatically</b>: leave that column blank. Every code is unique across <i>all</i> graduation lists, so no two students ever share one, and a student re-imported to the same list keeps the code they already have. If you do type a code that another student already holds, it is replaced with a fresh one. Paste straight from Excel (tab-separated) or CSV. A header row and list numbers like <code>1.</code> are handled automatically.</p>
     </section>
 
     <section class="card" id="prev-card" hidden>
@@ -256,6 +258,64 @@ function splitLine(line, d){
 const titleCase = n => String(n||'').toLowerCase().replace(/(^|[\s\-.(])([a-z])/g, (m,p,c) => p + c.toUpperCase());
 const scanNorm = v => { v = String(v||'').trim().toUpperCase().replace(/^-+$/,''); return /^#?[A-Z0-9]{4}$/.test(v) ? '#' + v.replace(/^#/,'') : v; };
 const keyOf = r => (r.an ? 'AN_' + r.an : 'N_' + r.name.toUpperCase()).replace(/[.#$\[\]\/]/g,'_').replace(/\s+/g,' ').slice(0,180);
+
+/* ── scan-code engine ──
+   Every student gets a unique 4-character code (#XXXX). The record in /graduationVerify is keyed by the code alone, so a code
+   must be unique across ALL lists. Codes are random (not guessable in order) and use an alphabet without 0/O, 1/I/L.
+   USED = every code already issued (all saved lists + the public verify records). GEN keeps generated codes stable while you edit the paste. */
+const CODE_ALPHA = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';           // 31 symbols → 923,521 possible codes
+const BATCHES = new Map(), USED = new Map(), VER = new Map(), GEN = new Map();
+const vidOf = c => String(c || '').replace(/^#/, '').toUpperCase();
+const sameName = (a, b) => String(a || '').trim().toUpperCase() === String(b || '').trim().toUpperCase();
+function indexCodes(){
+  USED.clear();
+  VER.forEach((o, c) => USED.set(c, o));
+  BATCHES.forEach((b, id) => Object.values(b.students || {}).forEach(o => { const c = vidOf(o.an); if(c) USED.set(c, { b: id, name: o.name }); }));
+}
+function newCode(taken){
+  const gen = new Set([...GEN.values()].map(vidOf));
+  const pick = () => { let x; do{ x = crypto.getRandomValues(new Uint8Array(1))[0]; }while(x >= 248); return CODE_ALPHA[x % 31]; };   // 248 = 31×8 → no modulo bias
+  for(let n = 0; n < 2000; n++){
+    const c = pick() + pick() + pick() + pick();
+    if(!USED.has(c) && !taken.has(c) && !gen.has(c)) return '#' + c;
+  }
+  throw new Error('Could not find a free scan code. Too many codes are already in use.');
+}
+/* decides duplicates + final codes for every row (call again whenever rows or the target list change) */
+function finalize(rows){
+  const B = batchKey(), seen = new Map(), taken = new Set();
+  rows.forEach(r => {
+    r.an = r.raw; r.src = ''; r.was = '';
+    const k0 = keyOf({ name: r.name, an: r.raw }), prev = seen.get(k0);
+    // the same student listed twice is a duplicate; a DIFFERENT student reusing a typed code is not (they get a fresh code below)
+    r.dup = prev !== undefined && (!r.raw || prev === r.name.toUpperCase());
+    if(prev === undefined) seen.set(k0, r.name.toUpperCase());
+  });
+  const mine = new Map();   // students already saved in this list: NAME → code (re-importing keeps their code)
+  Object.values((BATCHES.get(B) || {}).students || {}).forEach(o => { const k = String(o.name || '').toUpperCase(); if(o.an && !mine.has(k)) mine.set(k, o.an); });
+  const clash = (code, name) => {
+    const c = vidOf(code), o = USED.get(c);
+    return taken.has(c) || (!!o && !(o.b === B && sameName(o.name, name)));
+  };
+  rows.forEach(r => {
+    if(!r.dup){
+      const nm = r.name.toUpperCase();
+      if(r.raw && !clash(r.raw, r.name)) r.src = 'typed';
+      else {
+        let c = '';
+        if(!r.raw && mine.has(nm) && !clash(mine.get(nm), r.name)){ c = mine.get(nm); r.src = 'kept'; }
+        if(!c){
+          c = GEN.get(nm);
+          if(!c || clash(c, r.name)){ c = newCode(taken); GEN.set(nm, c); }
+          r.src = r.raw ? 'reissued' : 'auto'; r.was = r.raw;
+        }
+        r.an = c;
+      }
+      taken.add(vidOf(r.an));
+    }
+    r.key = keyOf(r);
+  });
+}
 function parse(text){
   const lines = text.replace(/\r/g,'').split('\n').map(l=>l.trim()).filter(Boolean);
   if(!lines.length) return [];
@@ -271,17 +331,16 @@ function parse(text){
     idx = {name:f(/name/), gender:f(/gender|sex/), cls:f(/class|stream/), an:f(/scan|code|assess|^an$|upi|uli|adm/)};
     body = lines.slice(1);
   }
-  const seen = new Set(), out = [];
+  const out = [];
   body.forEach(line=>{
     const c = d ? splitLine(line, d) : [line];
     const get = i => i >= 0 && i < c.length ? c[i] : '';
     let name = get(idx.name).replace(/^\s*\d+\s*[.)\-]\s*/,'').replace(/\s+/g,' ').trim();
     if(!name) return;
     name = titleCase(name);
-    const r = { name, gender: genderKey(get(idx.gender)), cls: get(idx.cls).trim(), an: scanNorm(get(idx.an)) };
-    r.key = keyOf(r); r.dup = seen.has(r.key); seen.add(r.key);
-    out.push(r);
+    out.push({ name, gender: genderKey(get(idx.gender)), cls: get(idx.cls).trim(), raw: scanNorm(get(idx.an)) });
   });
+  finalize(out);
   return out;
 }
 
@@ -292,17 +351,21 @@ function renderPreview(){
   $('prev-card').hidden = !ROWS.length;
   if(!ROWS.length) return;
   const good = ROWS.filter(r=>!r.dup), dups = ROWS.length - good.length;
+  const autos = good.filter(r=>r.src==='auto').length, reiss = good.filter(r=>r.src==='reissued').length;
   const boys = good.filter(r=>r.gender==='M').length, girls = good.filter(r=>r.gender==='F').length;
   $('stats').innerHTML = `<span class="stat ok">${good.length} to import</span>` +
     (dups ? `<span class="stat warn">${dups} duplicate${dups===1?'':'s'} skipped</span>` : '') +
+    (autos ? `<span class="stat">🔖 ${autos} new scan code${autos===1?'':'s'} generated</span>` : '') +
+    (reiss ? `<span class="stat warn">${reiss} typed code${reiss===1?' was':'s were'} already taken, so replaced</span>` : '') +
     (boys||girls ? `<span class="stat">${boys} boys · ${girls} girls</span>` : '');
-  $('rows').innerHTML = ROWS.map((r,i)=>`<tr style="${r.dup?'opacity:.45;text-decoration:line-through':''}"><td class="m">${i+1}</td><td class="n">${esc(r.name)}</td><td>${esc(r.gender)}</td><td>${esc(r.cls)}</td><td class="m">${esc(r.an)}</td><td><button class="x" data-i="${i}" type="button" title="Remove">✕</button></td></tr>`).join('');
+  $('rows').innerHTML = ROWS.map((r,i)=>`<tr style="${r.dup?'opacity:.45;text-decoration:line-through':''}"><td class="m">${i+1}</td><td class="n">${esc(r.name)}</td><td>${esc(r.gender)}</td><td>${esc(r.cls)}</td><td class="m">${esc(r.an)}${r.dup ? '' : r.src==='auto' ? '<span class="tg">auto</span>' : r.src==='kept' ? '<span class="tg">kept</span>' : r.src==='reissued' ? `<span class="tg w" title="${esc(r.was)} is already used by another student">new · was ${esc(r.was)}</span>` : ''}</td><td><button class="x" data-i="${i}" type="button" title="Remove">✕</button></td></tr>`).join('');
   $('target').textContent = `Will be saved to ${GRAD_PATH}/${batchKey()}`;
   $('go').disabled = !good.length;
 }
 function reparse(){
   ROWS = parse($('raw').value); renderPreview();
 }
+function refresh(){ finalize(ROWS); renderPreview(); }   // school / grade / year changed → which codes are 'kept' can change
 /* ── remember the form fields between visits (not the pasted list, not the Replace mode) ── */
 const MEM_KEY = 'grad-import-form', MEM_IDS = ['school','grade','gdate','label'];
 (function(){
@@ -316,14 +379,12 @@ const MEM_KEY = 'grad-import-form', MEM_IDS = ['school','grade','gdate','label']
   MEM_IDS.concat('active').forEach(id => { $(id).addEventListener('input', save); $(id).addEventListener('change', save); });
 })();
 let pT; $('raw').addEventListener('input', ()=>{ clearTimeout(pT); pT = setTimeout(reparse, 200); });
-['school','grade','year'].forEach(id=>$(id).addEventListener('input', renderPreview));
-$('gdate').addEventListener('input', ()=>{ $('year').value = $('gdate').value.slice(0,4); renderPreview(); });
+['school','grade','year'].forEach(id=>$(id).addEventListener('input', refresh));
+$('gdate').addEventListener('input', ()=>{ $('year').value = $('gdate').value.slice(0,4); refresh(); });
 $('rows').addEventListener('click', e=>{
   const b = e.target.closest('.x'); if(!b) return;
   ROWS.splice(+b.dataset.i, 1);
-  // keep the dup flags correct after removing a row
-  const seen = new Set(); ROWS.forEach(r=>{ r.dup = seen.has(r.key); seen.add(r.key); });
-  renderPreview();
+  refresh();   // re-checks duplicates and codes after removing a row
 });
 $('pick').addEventListener('click', ()=>$('file').click());
 $('file').addEventListener('change', e=>{
@@ -333,14 +394,35 @@ $('file').addEventListener('change', e=>{
   fr.onerror = () => toast('Could not read that file.', 'err');
   fr.readAsText(f); e.target.value = '';
 });
-$('clear').addEventListener('click', ()=>{ $('raw').value = ''; ROWS = []; renderPreview(); });
+$('clear').addEventListener('click', ()=>{ $('raw').value = ''; ROWS = []; GEN.clear(); renderPreview(); });
 $('tpl').addEventListener('click', ()=>{
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['Name,Gender,Class,Scan Code\r\nJane Wanjiru Otieno,F,9A,#7M6A\r\nJohn Kiprop Mutai,M,9B,#K4C9\r\n'], {type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob(['Name,Gender,Class,Scan Code\r\nJane Wanjiru Otieno,F,9A,\r\nJohn Kiprop Mutai,M,9B,\r\n'], {type:'text/csv'}));
   a.download = 'graduands-template.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
 });
 
 /* ── write ── */
+async function ensureUnique(good, ex, mode){
+  const B = batchKey(), taken = new Set(good.map(r => vidOf(r.an)).filter(Boolean)), listed = new Map();
+  if(mode !== 'replace' && ex.exists()) Object.values(ex.data().students || {}).forEach(o => { const c = vidOf(o.an); if(c) listed.set(c, o.name); });
+  const isTaken = async (r, c) => {
+    if(listed.has(c) && !sameName(listed.get(c), r.name)) return true;     // another student already in this list
+    const v = await getDoc(doc(fs, VERIFY_PATH, c));
+    if(!v.exists()) return false;
+    const d = v.data() || {};
+    return d.b !== B || (mode !== 'replace' && !sameName(d.name, r.name));  // held by another list, or by someone else in this one
+  };
+  const rows = good.filter(r => r.an), bad = [];
+  for(let i = 0; i < rows.length; i += 25){
+    const flags = await Promise.all(rows.slice(i, i + 25).map(r => isTaken(r, vidOf(r.an))));
+    flags.forEach((f, j) => { if(f) bad.push(rows[i + j]); });
+  }
+  for(const r of bad){
+    let c; do{ c = newCode(taken); }while(await isTaken(r, vidOf(c)));
+    taken.add(vidOf(c)); r.an = c; r.key = keyOf(r);
+  }
+  return bad.length;
+}
 async function saveBatch(good){
   if(!(await requireAdmin())) return;
   const school = $('school').value.trim().replace(/\s+/g,' '), grade = $('grade').value.trim().replace(/\s+/g,' ');
@@ -350,7 +432,6 @@ async function saveBatch(good){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(gdate)){ toast('Pick the graduation date.', 'err'); return; }
   const mode = good.length ? document.querySelector('input[name=mode]:checked').value : 'add';
   if(mode==='replace' && !confirm(`Replace the whole ${school} · ${grade} · ${year} list with these ${good.length} students?`)) return;
-  const students = {}; good.forEach(r=>{ students[r.key] = { name:r.name, gender:r.gender, cls:r.cls, an:r.an }; });
   const bref = doc(fs, GRAD_PATH, batchKey());
   const meta = { school, grade, year, graduationDate: gdate, updatedAt: Date.now(), updatedBy: auth.currentUser?.email || '' };
   const label = $('label').value.trim(); if(label) meta.label = label;
@@ -358,22 +439,27 @@ async function saveBatch(good){
   $('go').disabled = true; $('save-date').disabled = true; btn.textContent = 'Saving…';
   try{
     const ex = await getDoc(bref);
-    const vid = r => r.an.replace(/^#/,'').toUpperCase();
+    const vid = r => vidOf(r.an);
+    /* final, authoritative uniqueness check against the public verify records: any code held by a different student is re-issued */
+    const reissued = await ensureUnique(good, ex, mode);
     const withCode = good.filter(r => r.an);
-    for(const r of withCode){   // a code already used by a different list would make verification ambiguous
-      const v = await getDoc(doc(fs, VERIFY_PATH, vid(r)));
-      if(v.exists() && v.data().b !== batchKey()){ toast(`Scan code ${r.an} is already used by another list. Nothing was saved.`, 'err'); btn.textContent = btnText; $('save-date').disabled = false; $('go').disabled = !ROWS.filter(x=>!x.dup).length; return; }
-    }
+    const students = {}; good.forEach(r=>{ students[r.key] = { name:r.name, gender:r.gender, cls:r.cls, an:r.an }; });
     if(mode==='replace' || !ex.exists()) meta.active = $('active').checked;   // existing lists keep their current on/off choice
-    const data = good.length ? { ...meta, students } : meta;
-    if(mode==='replace') await setDoc(bref, data); else await setDoc(bref, data, { merge: true });
+    let data = good.length ? { ...meta, students } : meta, whole = false;
+    if(mode!=='replace' && ex.exists() && good.length){   // add to an existing list
+      const m = { ...(ex.data().students || {}) };
+      // a student saved earlier WITHOUT a code is upgraded in place, not listed twice
+      for(const r of good) for(const [k, o] of Object.entries(m)) if(!o.an && sameName(o.name, r.name)) delete m[k];
+      data = { ...ex.data(), ...meta, students: Object.assign(m, students) }; whole = true;
+    }
+    if(mode==='replace' || whole) await setDoc(bref, data); else await setDoc(bref, data, { merge: true });
     if(mode==='replace' && ex.exists()){   // retire codes that are no longer in the list
       const keep = new Set(withCode.map(vid));
       for(const o of Object.values(ex.data().students || {})){ const c = String(o.an||'').replace(/^#/,'').toUpperCase(); if(c && !keep.has(c)) await deleteDoc(doc(fs, VERIFY_PATH, c)).catch(()=>{}); }
     }
     for(const r of withCode) await setDoc(doc(fs, VERIFY_PATH, vid(r)), { name:r.name, gender:r.gender, cls:r.cls, school, grade, year, graduationDate: gdate, label: label || '', b: batchKey() });
-    toast(good.length ? `Saved ${good.length} student${good.length===1?'':'s'} to ${school} · ${grade} · ${gdate}.` : `Saved ${school} · ${grade} · graduation ${gdate}.`, 'ok');
-    if(good.length){ $('raw').value = ''; ROWS = []; renderPreview(); }
+    toast(good.length ? `Saved ${good.length} student${good.length===1?'':'s'} to ${school} · ${grade} · ${gdate}.${reissued ? ' ' + reissued + ' code' + (reissued===1?' was':'s were') + ' already taken and re-issued.' : ''}` : `Saved ${school} · ${grade} · graduation ${gdate}.`, 'ok');
+    if(good.length){ $('raw').value = ''; ROWS = []; GEN.clear(); renderPreview(); }
     loadBatches();
   }catch(e){ toast(friendlyErr(e), 'err'); }
   btn.textContent = btnText; $('save-date').disabled = false; $('go').disabled = !ROWS.filter(r=>!r.dup).length;
@@ -381,10 +467,20 @@ async function saveBatch(good){
 $('go').addEventListener('click', ()=>saveBatch(ROWS.filter(r=>!r.dup)));
 $('save-date').addEventListener('click', ()=>saveBatch([]));
 
+/* codes that only exist as public verify records (e.g. a list that was deleted but whose codes were printed) stay reserved, if the rules allow listing them */
+async function loadVerifyCodes(){
+  try{
+    const snap = await getDocs(collection(fs, VERIFY_PATH));
+    VER.clear(); snap.forEach(d => { const o = d.data() || {}; VER.set(d.id, { b: o.b, name: o.name }); });
+    indexCodes(); finalize(ROWS); renderPreview();
+  }catch(e){ /* listing not permitted: the per-code check at save time still guarantees uniqueness */ }
+}
+
 /* ── saved lists ── */
 async function loadBatches(){
   try{
     const snap = await getDocs(collection(fs, GRAD_PATH));
+    BATCHES.clear(); snap.docs.forEach(d => BATCHES.set(d.id, d.data() || {})); indexCodes(); finalize(ROWS); renderPreview();
     const list = snap.docs.map(d => [d.id, d.data()]).filter(([,b])=>b && (b.students || b.graduationDate)).sort((a,b)=>String(b[1].year).localeCompare(String(a[1].year)) || String(a[1].school||'').localeCompare(String(b[1].school||'')) || String(a[1].grade).localeCompare(String(b[1].grade)));
     $('school-list').innerHTML = [...new Set(list.map(([,b])=>b.school).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('');
     $('batches').innerHTML = list.length ? list.map(([k,b])=>{
@@ -433,6 +529,7 @@ onAuthStateChanged(auth, async user=>{
   gErr(''); $('gate').style.display = 'none'; $('app').classList.add('show');
   $('user-chip').textContent = user.displayName || user.email || '';
   loadBatches();
+  loadVerifyCodes();
 });
 oneTap.init();
 </script>
